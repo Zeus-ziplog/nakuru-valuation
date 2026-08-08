@@ -101,7 +101,7 @@ def scrape_buyrentkenya():
         print(f"Error scraping BuyRentKenya: {e}")
         return []
 
-# ---- Site 2: Jiji ----
+# ---- Site 2: Jiji (FIXED) ----
 def scrape_jiji():
     print("Scraping Jiji (using browser)...")
     listings = []
@@ -109,27 +109,44 @@ def scrape_jiji():
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto("https://jiji.co.ke/nakuru/land-and-plots-for-sale", timeout=30000)
-            page.wait_for_selector('a.b-list-advert-base.qa-advert-list-item', timeout=15000)
-            page.wait_for_timeout(2000)
+            # Try with longer timeout and different wait strategy
+            page.goto("https://jiji.co.ke/nakuru/land-and-plots-for-sale", timeout=60000)
+            # Wait for any content to load
+            page.wait_for_timeout(5000)
+            # Try different selectors
+            try:
+                page.wait_for_selector('a.b-list-advert-base, .advert-list-item, .qa-advert-title, .b-advert', timeout=10000)
+            except:
+                page.wait_for_timeout(3000)
             html = page.content()
             browser.close()
+
         soup = BeautifulSoup(html, 'html.parser')
+        
+        # Try multiple selectors
         items = soup.select('a.b-list-advert-base.qa-advert-list-item')
         if not items:
             items = soup.select('.advert-list-item')
         if not items:
             items = soup.select('[class*="advert"]')
+        if not items:
+            items = soup.select('a[href*="/nakuru/"]')
+        
+        print(f"Found {len(items)} items on Jiji")
+        
         for item in items:
             price_el = item.select_one('div.qa-advert-price, .advert-price, [class*="price"]')
             title_el = item.select_one('div.qa-advert-title, .advert-title, [class*="title"]')
             location_el = item.select_one('span.b-list-advert__region__text, .advert-region, [class*="location"]')
+            
             if not price_el or not title_el:
                 continue
+            
             price = extract_price(price_el.text)
             raw_text = title_el.text.strip()
             location = location_el.text.strip() if location_el else "Nakuru"
             size_ha = extract_size(raw_text)
+            
             if price and size_ha:
                 listings.append({
                     'source': 'jiji',
@@ -183,7 +200,7 @@ def scrape_propertypro():
         print(f"Error scraping PropertyPro: {e}")
         return []
 
-# ---- Site 4: UsernameProperties (FIXED) ----
+# ---- Site 4: UsernameProperties ----
 def scrape_usernameproperties():
     print("Scraping UsernameProperties...")
     url = "https://usernameproperties.com/plots-land/land-and-plots-for-sale-nakuru-2"
@@ -194,7 +211,6 @@ def scrape_usernameproperties():
         soup = BeautifulSoup(response.text, 'html.parser')
         listings = []
         
-        # Find each property container
         items = soup.select('.hr-property-items')
         if not items:
             items = soup.select('[class*="property-items"]')
@@ -202,7 +218,6 @@ def scrape_usernameproperties():
         print(f"Found {len(items)} property containers on UsernameProperties")
         
         for container in items:
-            # Find the title - in the second col-md-6
             title_col = container.select_one('.col-md-6._pty_list_2')
             if not title_col:
                 title_col = container.select_one('.hr-property-info.hr_pty_info')
@@ -215,7 +230,6 @@ def scrape_usernameproperties():
             if not title_el:
                 title_el = title_col.select_one('h2 a')
             
-            # Find the price - in a different col-md-6
             price_col = container.select_one('.col-md-6.actual-cost._pty_cst_1')
             if not price_col:
                 price_col = container.select_one('.hr-property-cost .col-md-6')
@@ -234,7 +248,6 @@ def scrape_usernameproperties():
             price = extract_price(price_el.text)
             raw_text = title_el.text.strip()
             
-            # Get location from description
             location = "Nakuru"
             desc_el = title_col.select_one('.hr-property-hero p')
             size_ha = None
@@ -244,11 +257,9 @@ def scrape_usernameproperties():
                     location = "Nakuru"
                 size_ha = extract_size(desc_text)
             
-            # Try to get size from title
             if not size_ha:
                 size_ha = extract_size(raw_text)
             
-            # Try to get size from price column
             if not size_ha and price_col:
                 size_ha = extract_size(price_col.text)
             
@@ -269,7 +280,7 @@ def scrape_usernameproperties():
         print(f"Error scraping UsernameProperties: {e}")
         return []
 
-# ---- Site 5: AdvancedValuers ----
+# ---- Site 5: AdvancedValuers (FIXED) ----
 def scrape_advancedvaluers():
     print("Scraping AdvancedValuers (using browser)...")
     listings = []
@@ -277,10 +288,14 @@ def scrape_advancedvaluers():
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto("https://advancedvaluers.co.ke/properties/land/nakuru/", timeout=60000)
-            page.wait_for_selector('.mh-grid__1of2, .mh-estate-vertical, .mh-grid', timeout=30000)
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            time.sleep(3)
+            # Longer timeout and wait for network idle
+            page.goto("https://advancedvaluers.co.ke/properties/land/nakuru/", timeout=90000, wait_until="networkidle")
+            # Wait for content
+            page.wait_for_timeout(5000)
+            try:
+                page.wait_for_selector('.mh-grid, article, .mh-estate-vertical', timeout=15000)
+            except:
+                pass
             html = page.content()
             browser.close()
         
@@ -354,10 +369,12 @@ def scrape_amgrealtors():
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto("https://amgrealtors.com/locations/properties-for-sale-in-nakuru", timeout=60000)
-            page.wait_for_selector('.grid .flex.flex-col.h-full, .max-w-md, .price-section', timeout=30000)
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            time.sleep(3)
+            page.goto("https://amgrealtors.com/locations/properties-for-sale-in-nakuru", timeout=60000, wait_until="networkidle")
+            page.wait_for_timeout(3000)
+            try:
+                page.wait_for_selector('.grid .flex.flex-col.h-full, .max-w-md, .price-section', timeout=15000)
+            except:
+                pass
             html = page.content()
             browser.close()
         
@@ -469,7 +486,6 @@ def insert_listings(data, supabase_url, supabase_key):
         skipped = 0
         
         for listing in data:
-            # Check if listing already exists
             existing = supabase.table('listings').select('id').eq('source', listing['source']).eq('price', listing['price']).eq('size_ha', listing['size_ha']).execute()
             
             if not existing.data:
@@ -500,7 +516,6 @@ if __name__ == "__main__":
 
     if not supabase_url or not supabase_key:
         print("❌ Error: SUPABASE_URL or SUPABASE_KEY not found in .env file!")
-        print("Please create a .env file with your Supabase credentials.")
     else:
         print("🔗 Found Supabase credentials. Running scrapers...")
         data = run_all_scrapers()
