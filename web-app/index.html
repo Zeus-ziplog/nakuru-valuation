@@ -3,36 +3,30 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nakuru Land Valuation</title>
+    <title>Nakuru Land Heatmap</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
         #map { height: 100vh; width: 100%; }
         #header {
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         #header h1 { color: white; font-size: 16px; font-weight: 600; }
         #header h1 span { color: #4CAF50; }
-        #header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
         #refreshBtn {
             background: #4CAF50;
             color: white;
@@ -42,21 +36,8 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
         }
-        #refreshBtn:hover { background: #45a049; }
         #refreshBtn:active { transform: scale(0.95); }
-        #refreshBtn:disabled {
-            background: #666;
-            cursor: not-allowed;
-        }
-        #statusText {
-            color: white;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
         #stats {
             position: absolute;
             bottom: 20px;
@@ -86,110 +67,39 @@
             height: 10px;
             border-radius: 4px;
             margin: 4px 0;
-            background: linear-gradient(to right, green, yellow, red);
+            background: linear-gradient(to right, #00ff00, #ffff00, #ff0000);
         }
         .legend-labels { display: flex; justify-content: space-between; font-size: 9px; color: #666; }
         .toast {
-            position: fixed;
-            bottom: 80px;
+            position: absolute;
+            top: 70px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 2000;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 12px 24px;
+            padding: 8px 20px;
             border-radius: 10px;
-            font-size: 14px;
-            display: none;
-            backdrop-filter: blur(10px);
-            max-width: 90%;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
             text-align: center;
+            max-width: 90%;
         }
-        .toast.show { display: block; }
-        .toast.success { border-left: 4px solid #4CAF50; }
-        .toast.error { border-left: 4px solid #f44336; }
-        .toast.info { border-left: 4px solid #2196F3; }
-        .status-badge {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        .status-badge.running { background: #FFC107; animation: pulse 1s infinite; }
-        .status-badge.idle { background: #4CAF50; }
-        .status-badge.error { background: #f44336; }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        /* Token input (only visible if token is missing) */
-        #tokenSetup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 3000;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 500px;
-            width: 90%;
-            display: none;
-        }
-        #tokenSetup h2 { margin-bottom: 10px; color: #1a1a2e; }
-        #tokenSetup p { margin-bottom: 15px; color: #666; font-size: 14px; }
-        #tokenSetup input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-        #tokenSetup input:focus { border-color: #4CAF50; outline: none; }
-        #tokenSetup button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-        #tokenSetup button:hover { background: #45a049; }
-        #tokenSetup .close-btn {
-            background: #f44336;
-            margin-top: 8px;
-        }
-        #tokenSetup .close-btn:hover { background: #d32f2f; }
-        #overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 2999;
-            display: none;
-        }
+        .toast.show { opacity: 1; }
+        .toast.error { background: rgba(244, 67, 54, 0.9); }
+        .toast.success { background: rgba(76, 175, 80, 0.9); }
     </style>
 </head>
 <body>
 
     <div id="header">
         <h1>🏠 Nakuru <span>Valuation</span></h1>
-        <div id="header-right">
-            <span id="statusText">
-                <span class="status-badge idle" id="statusBadge"></span>
-                <span id="statusLabel">Idle</span>
-            </span>
-            <button id="refreshBtn" onclick="triggerScraper()">🔄 Refresh Data</button>
-        </div>
+        <button id="refreshBtn" onclick="loadHeatmap()">🔄 Refresh</button>
     </div>
 
+    <div id="toast" class="toast">Loading...</div>
     <div id="map"></div>
     <div id="stats">Loading <strong id="count">0</strong> plots</div>
 
@@ -199,293 +109,93 @@
         <div class="legend-labels"><span>Low</span><span>Med</span><span>High</span></div>
     </div>
 
-    <div id="toast" class="toast"></div>
-
-    <!-- Token Setup Modal -->
-    <div id="overlay"></div>
-    <div id="tokenSetup">
-        <h2>🔑 GitHub Token Required</h2>
-        <p>To enable the "Refresh Data" button, you need to add your GitHub Personal Access Token.</p>
-        <input type="password" id="tokenInput" placeholder="Paste your GitHub token here..." />
-        <button onclick="saveToken()">Save Token</button>
-        <button class="close-btn" onclick="closeTokenSetup()">Close</button>
-        <p style="font-size:12px;color:#999;margin-top:10px;">
-            Your token is stored only in your browser's localStorage.
-            <br>Learn how to create one: 
-            <a href="https://github.com/settings/tokens" target="_blank" style="color:#4CAF50;">GitHub Settings</a>
-        </p>
-    </div>
-
     <script>
-        // Supabase configuration
-        var SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
+        const SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
 
-        var GITHUB_REPO = 'Zeus-ziplog/nakuru-valuation';
-
-        var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        var map = L.map('map').setView([-0.3031, 36.0800], 10);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const map = L.map('map').setView([-0.3031, 36.0800], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap',
             maxZoom: 18
         }).addTo(map);
 
-        var heatLayer = null;
-        var markerLayer = null;
-        var isRunning = false;
+        let heatLayer = null;
 
-        // Get or prompt for GitHub token
-        function getGitHubToken() {
-            var token = localStorage.getItem('github_token');
-            if (!token || token === '') {
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('tokenSetup').style.display = 'block';
-                return null;
-            }
-            return token;
+        function showToast(msg, type = '') {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'toast show ' + type;
+            clearTimeout(el._timer);
+            el._timer = setTimeout(() => el.className = 'toast', 3000);
         }
 
-        function saveToken() {
-            var token = document.getElementById('tokenInput').value.trim();
-            if (token && token.length > 10) {
-                localStorage.setItem('github_token', token);
-                document.getElementById('overlay').style.display = 'none';
-                document.getElementById('tokenSetup').style.display = 'none';
-                showToast('✅ Token saved! You can now refresh data.', 'success');
-                loadHeatmap();
-            } else {
-                showToast('❌ Please enter a valid GitHub token.', 'error');
-            }
-        }
-
-        function closeTokenSetup() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('tokenSetup').style.display = 'none';
-        }
-
-        // Toast notification
-        function showToast(message, type = 'info') {
-            var toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = 'toast show ' + type;
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(function() {
-                toast.className = 'toast';
-            }, 5000);
-        }
-
-        // Update status
-        function setStatus(status, message) {
-            var badge = document.getElementById('statusBadge');
-            var label = document.getElementById('statusLabel');
-            badge.className = 'status-badge ' + status;
-            label.textContent = message;
-        }
-
-        // Load heatmap from Supabase
         async function loadHeatmap() {
-            var btn = document.getElementById('refreshBtn');
-            var countEl = document.getElementById('count');
-            
-            // Don't disable if running scraper (we handle that separately)
-            if (!isRunning) {
-                btn.disabled = true;
-                btn.innerHTML = '⏳ Loading...';
-            }
+            const btn = document.getElementById('refreshBtn');
+            const countEl = document.getElementById('count');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Loading...';
+            showToast('Fetching data...');
 
             try {
-                var response = await supabaseClient
+                const { data, error } = await supabase
                     .from('listings')
-                    .select('latitude, longitude, price, size_ha, title')
+                    .select('latitude, longitude, price, size_ha')
                     .not('latitude', 'is', null)
                     .limit(1000);
-
-                var data = response.data;
-                var error = response.error;
 
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
+                    showToast('⚠️ No data found. Run scraper first!', 'error');
                     countEl.textContent = '0';
-                    if (!isRunning) {
-                        btn.disabled = false;
-                        btn.innerHTML = '🔄 Refresh Data';
-                    }
+                    btn.disabled = false;
+                    btn.innerHTML = '🔄 Refresh';
                     return;
                 }
 
-                var points = [];
-                var markers = [];
-
-                data.forEach(function(item) {
+                const points = [];
+                data.forEach(item => {
                     if (item.latitude && item.longitude && item.price && item.size_ha > 0) {
-                        var pricePerHa = item.price / item.size_ha;
-                        var intensity = Math.min(pricePerHa / 1000000, 1);
+                        const pricePerHa = item.price / item.size_ha;
+                        const intensity = Math.min(pricePerHa / 1000000, 1);
                         points.push([item.latitude, item.longitude, intensity]);
-                        
-                        markers.push({
-                            lat: item.latitude,
-                            lng: item.longitude,
-                            title: item.title || 'Plot',
-                            price: item.price,
-                            size: item.size_ha,
-                            pricePerHa: pricePerHa
-                        });
                     }
                 });
 
-                if (heatLayer) {
-                    map.removeLayer(heatLayer);
-                }
-                if (markerLayer) {
-                    map.removeLayer(markerLayer);
-                }
+                if (heatLayer) map.removeLayer(heatLayer);
 
                 heatLayer = L.heatLayer(points, {
-                    radius: 30,
-                    blur: 15,
-                    maxZoom: 14,
+                    radius: 35,
+                    blur: 20,
+                    maxZoom: 15,
                     gradient: {
-                        0.1: 'green',
-                        0.3: 'yellowgreen',
-                        0.5: 'yellow',
-                        0.7: 'orange',
-                        0.9: 'red'
+                        0.1: '#00ff00',
+                        0.3: '#aadd00',
+                        0.5: '#ffff00',
+                        0.7: '#ff8800',
+                        0.9: '#ff0000'
                     }
                 }).addTo(map);
 
-                markerLayer = L.layerGroup();
-                markers.forEach(function(m) {
-                    var popupContent = '<b>' + (m.title || 'Plot') + '</b>' +
-                        '<br><b>Price:</b> KSh ' + m.price.toLocaleString() +
-                        '<br><b>Size:</b> ' + m.size.toFixed(2) + ' Ha' +
-                        '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString();
-                    
-                    var circle = L.circleMarker([m.lat, m.lng], {
-                        radius: 6,
-                        color: '#FF0000',
-                        fillColor: '#FF0000',
-                        fillOpacity: 0.6,
-                        weight: 2
-                    }).bindPopup(popupContent);
-                    
-                    markerLayer.addLayer(circle);
-                });
-                markerLayer.addTo(map);
-
                 countEl.textContent = points.length;
+                showToast(`✅ ${points.length} plots loaded`, 'success');
 
                 if (points.length > 0) {
-                    var bounds = L.latLngBounds(points.map(function(p) { return [p[0], p[1]]; }));
+                    const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
 
             } catch (err) {
                 console.error(err);
-                showToast('Error loading data: ' + err.message, 'error');
-            }
-
-            if (!isRunning) {
-                btn.disabled = false;
-                btn.innerHTML = '🔄 Refresh Data';
-            }
-        }
-
-        // Trigger GitHub Actions workflow
-        async function triggerScraper() {
-            if (isRunning) return;
-            
-            var token = localStorage.getItem('github_token');
-            if (!token || token === '') {
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('tokenSetup').style.display = 'block';
-                return;
-            }
-            
-            var btn = document.getElementById('refreshBtn');
-            isRunning = true;
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Starting...';
-            setStatus('running', 'Scraping...');
-            
-            try {
-                showToast('🔄 Starting data refresh... This may take 1-2 minutes.', 'info');
-                
-                var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/actions/workflows/scraper.yml/dispatches', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'token ' + token,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ref: 'main'
-                    })
-                });
-
-                if (!response.ok) {
-                    var errorText = await response.text();
-                    if (response.status === 401 || response.status === 403) {
-                        localStorage.removeItem('github_token');
-                        showToast('❌ Token expired. Please re-enter your GitHub token.', 'error');
-                        document.getElementById('overlay').style.display = 'block';
-                        document.getElementById('tokenSetup').style.display = 'block';
-                        isRunning = false;
-                        btn.disabled = false;
-                        btn.innerHTML = '🔄 Refresh Data';
-                        setStatus('error', 'Token expired');
-                        return;
-                    }
-                    throw new Error('GitHub API error: ' + response.status + ' - ' + errorText);
-                }
-
-                showToast('✅ Scraper started! Data will refresh in 1-2 minutes.', 'success');
-                setStatus('running', 'Processing...');
-                btn.innerHTML = '⏳ Running...';
-
-                // Wait 60 seconds then reload data
-                setTimeout(function() {
-                    loadHeatmap();
-                    setStatus('idle', 'Idle');
-                    btn.disabled = false;
-                    btn.innerHTML = '🔄 Refresh Data';
-                    isRunning = false;
-                    showToast('✅ Data refreshed successfully!', 'success');
-                }, 60000);
-
-            } catch (err) {
-                console.error(err);
                 showToast('❌ Error: ' + err.message, 'error');
-                setStatus('error', 'Error');
-                btn.disabled = false;
-                btn.innerHTML = '🔄 Refresh Data';
-                isRunning = false;
             }
+
+            btn.disabled = false;
+            btn.innerHTML = '🔄 Refresh';
         }
 
-        // Load on page start - check for token
-        (function init() {
-            var token = localStorage.getItem('github_token');
-            if (!token || token === '') {
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('tokenSetup').style.display = 'block';
-            }
-            loadHeatmap();
-        })();
-
-        // Auto-refresh every 5 minutes
-        setInterval(function() {
-            if (!isRunning) {
-                loadHeatmap();
-            }
-        }, 300000);
-
-        // Allow Enter key to save token
-        document.getElementById('tokenInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                saveToken();
-            }
-        });
+        loadHeatmap();
     </script>
 </body>
 </html>
