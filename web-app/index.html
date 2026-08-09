@@ -158,8 +158,8 @@
         var SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
         
-        // GitHub configuration - Token will be fetched from Vercel environment variable
-        var GITHUB_TOKEN = null;
+        // GitHub configuration - Token hardcoded
+        var GITHUB_TOKEN = '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';
         var GITHUB_REPO = 'Zeus-ziplog/nakuru-valuation';
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -172,9 +172,6 @@
         var heatLayer = null;
         var markerLayer = null;
         var isRunning = false;
-
-        // Fetch token from Vercel serverless function
-        // GitHub token (hardcoded) var GITHUB_TOKEN = "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";
 
         // Toast notification
         function showToast(msg, type) {
@@ -305,14 +302,10 @@
         async function triggerScraper() {
             if (isRunning) return;
             
-            // Fetch token if not available
-            if (!GITHUB_TOKEN) {
-                showToast('🔄 Fetching token...', 'info');
-                var tokenFetched = await fetchToken();
-                if (!tokenFetched || !GITHUB_TOKEN) {
-                    showToast('❌ Token not available. Please try again.', 'error');
-                    return;
-                }
+            // Check if token is available
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === '') {
+                showToast('❌ GitHub token not configured. Please contact admin.', 'error');
+                return;
             }
             
             var btn = document.getElementById('refreshBtn');
@@ -337,14 +330,13 @@
 
                 if (!response.ok) {
                     var errorText = await response.text();
-                    if (response.status === 401) {
-                        showToast('❌ Token expired. Refreshing...', 'error');
-                        GITHUB_TOKEN = null;
-                        await fetchToken();
-                        if (GITHUB_TOKEN) {
-                            // Retry
-                            return triggerScraper();
-                        }
+                    if (response.status === 401 || response.status === 403) {
+                        showToast('❌ GitHub token expired or invalid. Please contact admin.', 'error');
+                        setStatus('error', 'Token invalid');
+                        isRunning = false;
+                        btn.disabled = false;
+                        btn.innerHTML = '🔄 Refresh Data';
+                        return;
                     }
                     throw new Error('GitHub API error: ' + response.status);
                 }
@@ -372,9 +364,8 @@
             }
         }
 
-        // Initialize - fetch token first
-        async function init() {
-            await fetchToken();
+        // Initialize
+        function init() {
             loadHeatmap();
         }
 
@@ -389,4 +380,3 @@
     </script>
 </body>
 </html>
-
