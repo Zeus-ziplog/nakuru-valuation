@@ -19,7 +19,7 @@
             right: 0;
             z-index: 1000;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 12px 16px;
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -27,30 +27,30 @@
             gap: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-        #header h1 { color: white; font-size: 16px; font-weight: 600; }
+        #header h1 { color: white; font-size: 18px; font-weight: 600; }
         #header h1 span { color: #4CAF50; }
         #header-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         #refreshBtn {
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 6px 16px;
+            padding: 8px 20px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
         }
-        #refreshBtn:hover { background: #45a049; }
-        #refreshBtn:active { transform: scale(0.95); }
+        #refreshBtn:hover { background: #45a049; transform: scale(1.02); }
         #refreshBtn:disabled {
             background: #666;
             cursor: not-allowed;
+            transform: none;
         }
         #statusText {
             color: white;
@@ -155,19 +155,11 @@
 
     <script>
         // ============================================================
-        // CONFIGURATION - EDIT THESE VALUES
+        // CONFIGURATION
         // ============================================================
-        
-        // Supabase
         var SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
-        
-        // GitHub - YOUR TOKEN HERE
-        var GITHUB_TOKEN = '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';
         var GITHUB_REPO = 'Zeus-ziplog/nakuru-valuation';
-
-        // ============================================================
-        // DO NOT EDIT BELOW THIS LINE
         // ============================================================
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -180,6 +172,7 @@
         var heatLayer = null;
         var markerLayer = null;
         var isRunning = false;
+        var GITHUB_TOKEN = null;
 
         function showToast(msg, type) {
             type = type || '';
@@ -193,6 +186,25 @@
         function setStatus(status, message) {
             document.getElementById('statusBadge').className = 'status-badge ' + status;
             document.getElementById('statusLabel').textContent = message;
+        }
+
+        // Fetch token from Vercel serverless function
+        async function getToken() {
+            try {
+                var response = await fetch('/api/token');
+                if (response.ok) {
+                    var data = await response.json();
+                    GITHUB_TOKEN = data.token;
+                    console.log('✅ Token fetched:', GITHUB_TOKEN ? 'Present' : 'Missing');
+                    return true;
+                } else {
+                    console.error('Failed to fetch token:', response.status);
+                    return false;
+                }
+            } catch (err) {
+                console.error('Error fetching token:', err);
+                return false;
+            }
         }
 
         async function loadHeatmap() {
@@ -210,6 +222,7 @@
                 if (error) throw error;
                 if (!data || data.length === 0) {
                     countEl.textContent = '0';
+                    showToast('No data found. Click Refresh Data to run scraper.', 'info');
                     if (!isRunning) { btn.disabled = false; btn.innerHTML = '🔄 Refresh Data'; }
                     return;
                 }
@@ -251,24 +264,31 @@
                 }
             } catch (err) {
                 console.error(err);
-                showToast('❌ Error: ' + err.message, 'error');
+                showToast('❌ Error loading data', 'error');
             }
             if (!isRunning) { btn.disabled = false; btn.innerHTML = '🔄 Refresh Data'; }
         }
 
         async function triggerScraper() {
             if (isRunning) return;
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === '') {
-                showToast('❌ GitHub token not configured.', 'error');
-                return;
+            
+            // Get token first
+            if (!GITHUB_TOKEN) {
+                showToast('🔄 Connecting...', 'info');
+                var success = await getToken();
+                if (!success || !GITHUB_TOKEN) {
+                    showToast('❌ Service unavailable. Please refresh.', 'error');
+                    setStatus('error', 'Auth failed');
+                    return;
+                }
             }
             
             var btn = document.getElementById('refreshBtn');
             isRunning = true;
             btn.disabled = true;
-            btn.innerHTML = '⏳ Starting...';
-            setStatus('running', 'Scraping...');
-            showToast('🔄 Starting data refresh... 1-2 minutes.', 'info');
+            btn.innerHTML = '⏳ Running...';
+            setStatus('running', 'Updating...');
+            showToast('🔄 Updating data... Please wait.', 'info');
             
             try {
                 var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/actions/workflows/scraper.yml/dispatches', {
@@ -282,18 +302,22 @@
                 });
 
                 if (!response.ok) {
+                    var errorText = await response.text();
+                    console.error('GitHub API error:', response.status, errorText);
+                    
                     if (response.status === 401 || response.status === 403) {
-                        showToast('❌ GitHub token invalid. Please contact admin.', 'error');
-                        setStatus('error', 'Token invalid');
+                        GITHUB_TOKEN = null; // Clear so it fetches again
+                        showToast('❌ Authentication failed. Please refresh.', 'error');
+                        setStatus('error', 'Auth failed');
                         isRunning = false;
                         btn.disabled = false;
                         btn.innerHTML = '🔄 Refresh Data';
                         return;
                     }
-                    throw new Error('GitHub API error: ' + response.status);
+                    throw new Error('API error: ' + response.status);
                 }
 
-                showToast('✅ Scraper started! Refreshing in 1-2 minutes.', 'success');
+                showToast('✅ Update started! Refreshing in 1-2 min.', 'success');
                 setStatus('running', 'Processing...');
                 btn.innerHTML = '⏳ Running...';
 
@@ -303,11 +327,11 @@
                     btn.disabled = false;
                     btn.innerHTML = '🔄 Refresh Data';
                     isRunning = false;
-                    showToast('✅ Data refreshed successfully!', 'success');
+                    showToast('✅ Data updated successfully!', 'success');
                 }, 60000);
 
             } catch (err) {
-                console.error(err);
+                console.error('Error:', err);
                 showToast('❌ Error: ' + err.message, 'error');
                 setStatus('error', 'Error');
                 btn.disabled = false;
@@ -316,8 +340,12 @@
             }
         }
 
-        // Start
-        loadHeatmap();
+        // Initialize
+        async function init() {
+            await getToken();
+            loadHeatmap();
+        }
+        init();
 
         // Auto-refresh every 5 minutes
         setInterval(function() { if (!isRunning) loadHeatmap(); }, 300000);
