@@ -174,23 +174,7 @@
         var isRunning = false;
 
         // Fetch token from Vercel serverless function
-        async function fetchToken() {
-            try {
-                var response = await fetch('/api/token');
-                if (response.ok) {
-                    var data = await response.json();
-                    GITHUB_TOKEN = data.token;
-                    console.log('✅ Token fetched successfully');
-                    return true;
-                } else {
-                    console.error('Failed to fetch token:', response.status);
-                    return false;
-                }
-            } catch (err) {
-                console.error('Error fetching token:', err);
-                return false;
-            }
-        }
+        // GitHub token (hardcoded) var GITHUB_TOKEN = "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";
 
         // Toast notification
         function showToast(msg, type) {
@@ -405,3 +389,4 @@
     </script>
 </body>
 </html>
+
