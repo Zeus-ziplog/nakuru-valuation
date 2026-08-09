@@ -128,72 +128,6 @@
         .toast.error { background: rgba(244, 67, 54, 0.9); }
         .toast.success { background: rgba(76, 175, 80, 0.9); }
         .toast.info { background: rgba(33, 150, 243, 0.9); }
-        
-        #tokenSetup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 3000;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 500px;
-            width: 90%;
-            display: none;
-        }
-        #tokenSetup h2 { margin-bottom: 10px; color: #1a1a2e; }
-        #tokenSetup p { margin-bottom: 15px; color: #666; font-size: 14px; line-height: 1.6; }
-        #tokenSetup input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-        #tokenSetup input:focus { border-color: #4CAF50; outline: none; }
-        #tokenSetup .btn-primary {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-        #tokenSetup .btn-primary:hover { background: #45a049; }
-        #tokenSetup .btn-secondary {
-            background: #666;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-        }
-        #tokenSetup .btn-secondary:hover { background: #555; }
-        #tokenSetup a { color: #4CAF50; text-decoration: none; }
-        #tokenSetup a:hover { text-decoration: underline; }
-        #overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 2999;
-            display: none;
-        }
-        .token-hint {
-            font-size: 12px;
-            color: #999;
-            margin-top: 10px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -219,26 +153,13 @@
         <div class="legend-labels"><span>Low</span><span>Med</span><span>High</span></div>
     </div>
 
-    <!-- Token Setup Modal -->
-    <div id="overlay"></div>
-    <div id="tokenSetup">
-        <h2>🔑 GitHub Token Required</h2>
-        <p>To enable the "Refresh Data" button, enter your GitHub Personal Access Token.</p>
-        <input type="password" id="tokenInput" placeholder="Paste your GitHub token here..." />
-        <button class="btn-primary" onclick="saveToken()">Save Token</button>
-        <button class="btn-secondary" onclick="closeTokenSetup()">Skip (View only)</button>
-        <div class="token-hint">
-            Token stored only in your browser.
-            <br>Create one at: 
-            <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings</a>
-            <br><small>Requires <strong>repo</strong> and <strong>workflow</strong> scopes</small>
-        </div>
-    </div>
-
     <script>
         // Supabase configuration
         var SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
+        
+        // GitHub configuration - TOKEN IS HARDCODED (runs in background, users never see it)
+        var GITHUB_TOKEN = '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';
         var GITHUB_REPO = 'Zeus-ziplog/nakuru-valuation';
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -270,36 +191,6 @@
             var label = document.getElementById('statusLabel');
             badge.className = 'status-badge ' + status;
             label.textContent = message;
-        }
-
-        // Token management
-        function getGitHubToken() {
-            var token = localStorage.getItem('github_token');
-            if (!token || token === '') {
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('tokenSetup').style.display = 'block';
-                return null;
-            }
-            return token;
-        }
-
-        function saveToken() {
-            var token = document.getElementById('tokenInput').value.trim();
-            if (token && token.length > 10) {
-                localStorage.setItem('github_token', token);
-                document.getElementById('overlay').style.display = 'none';
-                document.getElementById('tokenSetup').style.display = 'none';
-                showToast('✅ Token saved successfully!', 'success');
-                loadHeatmap();
-            } else {
-                showToast('❌ Please enter a valid GitHub token.', 'error');
-            }
-        }
-
-        function closeTokenSetup() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('tokenSetup').style.display = 'none';
-            showToast('ℹ️ Token required for refresh. Use "Refresh Data" to set it later.', 'info');
         }
 
         // Load heatmap
@@ -407,16 +298,9 @@
             }
         }
 
-        // Trigger GitHub Actions
+        // Trigger GitHub Actions (runs in background with hardcoded token)
         async function triggerScraper() {
             if (isRunning) return;
-            
-            var token = localStorage.getItem('github_token');
-            if (!token || token === '') {
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('tokenSetup').style.display = 'block';
-                return;
-            }
             
             var btn = document.getElementById('refreshBtn');
             isRunning = true;
@@ -429,7 +313,7 @@
                 var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/actions/workflows/scraper.yml/dispatches', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'token ' + token,
+                        'Authorization': 'token ' + GITHUB_TOKEN,
                         'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json'
                     },
@@ -440,17 +324,6 @@
 
                 if (!response.ok) {
                     var errorText = await response.text();
-                    if (response.status === 401 || response.status === 403) {
-                        localStorage.removeItem('github_token');
-                        showToast('❌ Token expired. Please re-enter your GitHub token.', 'error');
-                        document.getElementById('overlay').style.display = 'block';
-                        document.getElementById('tokenSetup').style.display = 'block';
-                        isRunning = false;
-                        btn.disabled = false;
-                        btn.innerHTML = '🔄 Refresh Data';
-                        setStatus('error', 'Token expired');
-                        return;
-                    }
                     throw new Error('GitHub API error: ' + response.status);
                 }
 
@@ -477,22 +350,8 @@
             }
         }
 
-        // Enter key for token input
-        document.getElementById('tokenInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                saveToken();
-            }
-        });
-
         // Initialize
-        (function init() {
-            var token = localStorage.getItem('github_token');
-            if (!token || token === '') {
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('tokenSetup').style.display = 'block';
-            }
-            loadHeatmap();
-        })();
+        loadHeatmap();
 
         // Auto-refresh every 5 minutes
         setInterval(function() {
