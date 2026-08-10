@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nakuru Land Valuation – Choropleth</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: #1e293b;
+        }
+
+        #sidebar {
+            width: 400px;
+            min-width: 400px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e2e8f0;
+            z-index: 10;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar-header {
+            padding: 20px 24px;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        #sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        #sidebar-header h1 span { color: #22c55e; }
+        #sidebar-header .badge {
+            background: rgba(255,255,255,0.12);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        #sidebar-controls {
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        #sidebar-controls input {
+            flex: 1;
+            padding: 8px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 30px;
+            font-size: 13px;
+            outline: none;
+            background: white;
+            min-width: 120px;
+        }
+        #sidebar-controls input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        #refreshBtn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 7px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+        #refreshBtn:hover { background: #1d4ed8; }
+        #refreshBtn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        #statusText {
+            font-size: 12px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .status-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .status-badge.idle { background: #22c55e; }
+        .status-badge.running { background: #eab308; animation: pulse 1s infinite; }
+        .status-badge.error { background: #ef4444; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        #property-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 0;
+        }
+        #property-list::-webkit-scrollbar { width: 5px; }
+        #property-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .property-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.1s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .property-item:hover { background: #f1f5f9; }
+        .property-item.active { background: #eef2ff; border-left: 3px solid #2563eb; }
+
+        .property-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .property-item .info .title {
+            font-weight: 500;
+            font-size: 14px;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .property-item .info .meta {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .property-item .info .meta span {
+            margin-right: 12px;
+        }
+        .property-item .price {
+            font-weight: 600;
+            font-size: 14px;
+            color: #0f172a;
+            white-space: nowrap;
+            margin-left: 12px;
+        }
+        .property-item .source-tag {
+            font-size: 9px;
+            text-transform: uppercase;
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: #475569;
+            margin-left: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        #map-container {
+            flex: 1;
+            position: relative;
+        }
+        #map { height: 100%; width: 100%; }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            background: rgba(15,23,42,0.9);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+        }
+        .toast.show { opacity: 1; }
+        .toast.error { background: rgba(239,68,68,0.9); }
+        .toast.success { background: rgba(34,197,94,0.9); }
+        .toast.info { background: rgba(37,99,235,0.9); }
+
+        /* Legend – bottom-right */
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            font-size: 12px;
+            min-width: 140px;
+        }
+        .legend .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #0f172a;
+        }
+        .legend .gradient {
+            height: 10px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+        .legend .labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #475569;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar { width: 100%; min-width: 0; height: 45vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
+            #map-container { height: 55vh; }
+            body { flex-direction: column; }
+            .legend { bottom: 10px; right: 10px; padding: 8px 12px; font-size: 10px; min-width: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <h1>Nakuru <span>Valuation</span></h1>
+            <span class="badge" id="count-badge">0 plots</span>
+        </div>
+        <div id="sidebar-controls">
+            <span id="statusText">
+                <span class="status-badge idle" id="statusBadge"></span>
+                <span id="statusLabel">Idle</span>
+            </span>
+            <input type="text" id="searchInput" placeholder="Filter by title, location..." />
+            <button id="refreshBtn" onclick="refreshMap()">Refresh</button>
+        </div>
+        <div id="property-list">
+            <div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">Loading properties...</div>
+        </div>
+    </div>
+
+    <div id="map-container">
+        <div id="map"></div>
+        <div id="legend-container"></div>
+    </div>
+
+    <div id="toast" class="toast">Loading...</div>
+
+    <script>
+        // ============================================================
+        // CONFIGURATION
+        // ============================================================
+        var SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
+
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var map = L.map('map').setView([-0.3031, 36.0800], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 18
+        }).addTo(map);
+
+        var heatLayer = null;
+        var markerLayer = null;
+        var subcountyLayer = null;
+        var wardLayer = null;
+        var isRunning = false;
+        var allProperties = [];
+        var avgPrices = {};
+
+        var propertyList = document.getElementById('property-list');
+        var countBadge = document.getElementById('count-badge');
+        var searchInput = document.getElementById('searchInput');
+        var toastEl = document.getElementById('toast');
+        var refreshBtn = document.getElementById('refreshBtn');
+        var legendContainer = document.getElementById('legend-container');
+
+        // ============================================================
+        // Helpers
+        // ============================================================
+        function showToast(msg, type) {
+            type = type || '';
+            toastEl.textContent = msg;
+            toastEl.className = 'toast show ' + type;
+            clearTimeout(toastEl._timer);
+            toastEl._timer = setTimeout(function() { toastEl.className = 'toast'; }, 4000);
+        }
+
+        function setStatus(status, message) {
+            document.getElementById('statusBadge').className = 'status-badge ' + status;
+            document.getElementById('statusLabel').textContent = message;
+        }
+
+        function getSize(record) {
+            var fields = ['size_ha', 'size', 'area', 'area_ha', 'size_ha_', 'area_ha_'];
+            for (var i = 0; i < fields.length; i++) {
+                if (record[fields[i]] !== undefined && record[fields[i]] !== null) {
+                    var val = parseFloat(record[fields[i]]);
+                    if (!isNaN(val) && val > 0) return val;
+                }
+            }
+            return null;
+        }
+
+        // ============================================================
+        // Render property list
+        // ============================================================
+        function renderList(properties) {
+            var html = '';
+            if (!properties || properties.length === 0) {
+                html = '<div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">No properties found.</div>';
+                propertyList.innerHTML = html;
+                countBadge.textContent = '0 plots';
+                return;
+            }
+
+            properties.forEach(function(p, index) {
+                var priceStr = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
+                var sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
+                var title = p.title || 'Untitled';
+                var location = p.location || 'Nakuru';
+                var source = p.source || '';
+
+                html += `
+                    <div class="property-item" data-index="${index}" onclick="zoomToProperty(${index})">
+                        <div class="info">
+                            <div class="title">${title}</div>
+                            <div class="meta">
+                                <span>${location}</span>
+                                <span>${sizeStr}</span>
+                                ${source ? `<span class="source-tag">${source}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="price">${priceStr}</div>
+                    </div>
+                `;
+            });
+
+            propertyList.innerHTML = html;
+            countBadge.textContent = properties.length + ' plots';
+        }
+
+        // ============================================================
+        // Filter
+        // ============================================================
+        function filterList() {
+            var query = searchInput.value.toLowerCase().trim();
+            if (!query) {
+                renderList(allProperties);
+                return;
+            }
+            var filtered = allProperties.filter(function(p) {
+                var title = (p.title || '').toLowerCase();
+                var location = (p.location || '').toLowerCase();
+                var source = (p.source || '').toLowerCase();
+                return title.includes(query) || location.includes(query) || source.includes(query);
+            });
+            renderList(filtered);
+        }
+
+        // ============================================================
+        // Zoom to property
+        // ============================================================
+        function zoomToProperty(index) {
+            var p = allProperties[index];
+            if (!p || !p.lat || !p.lng) return;
+            map.setView([p.lat, p.lng], 16);
+            if (markerLayer) {
+                markerLayer.eachLayer(function(layer) {
+                    if (layer._latlng && layer._latlng.lat === p.lat && layer._latlng.lng === p.lng) {
+                        layer.openPopup();
+                    }
+                });
+            }
+            var items = propertyList.querySelectorAll('.property-item');
+            items.forEach(function(el, i) {
+                el.classList.toggle('active', i === index);
+            });
+        }
+
+        // ============================================================
+        // Load GeoJSON boundaries
+        // ============================================================
+        async function loadBoundaries() {
+            try {
+                // ---- Sub-counties (bottom layer, transparent fill) ----
+                var subRes = await fetch('/nakuru_subcounties.geojson');
+                if (!subRes.ok) {
+                    console.warn('Sub-county GeoJSON not found at /nakuru_subcounties.geojson');
+                    return;
+                }
+                var subData = await subRes.json();
+
+                if (subcountyLayer) map.removeLayer(subcountyLayer);
+
+                var prices = Object.values(avgPrices).filter(p => p > 0);
+                var maxPrice = Math.max(...prices, 1);
+                var colorScale = chroma.scale(['#e0f2fe', '#0284c7', '#f97316', '#dc2626']).domain([0, maxPrice]);
+
+                var style = function(feature) {
+                    var name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || '';
+                    var price = avgPrices[name] || 0;
+                    return {
+                        fillColor: price > 0 ? colorScale(price).hex() : '#f1f5f9',
+                        fillOpacity: 0.25,          // ← transparent so wards show through
+                        weight: 1,
+                        color: '#1e293b',
+                        dashArray: null
+                    };
+                };
+
+                var onEachFeature = function(feature, layer) {
+                    var name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || 'Unknown';
+                    var price = avgPrices[name] || 0;
+                    var count = avgPrices[name + '_count'] || 0;
+                    layer.bindPopup(`
+                        <div style="font-family: sans-serif; min-width: 180px;">
+                            <strong>${name}</strong><br/>
+                            <span style="color: #555;">
+                                Avg price/ha: <strong>KSh ${price.toLocaleString()}</strong><br/>
+                                Listings: ${count}
+                            </span>
+                            ${price === 0 ? '<br/><em style="color:#999;">No data</em>' : ''}
+                        </div>
+                    `);
+                };
+
+                subcountyLayer = L.geoJSON(subData, {
+                    style: style,
+                    onEachFeature: onEachFeature
+                }).addTo(map);
+
+                // ---- Legend ----
+                var legendHtml = `
+                    <div class="legend">
+                        <div class="title">Avg Price / Ha</div>
+                        <div class="gradient" style="background: linear-gradient(to right, ${colorScale(0).hex()}, ${colorScale(maxPrice).hex()});"></div>
+                        <div class="labels">
+                            <span>KSh 0</span>
+                            <span>KSh ${Math.round(maxPrice).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+                legendContainer.innerHTML = legendHtml;
+
+                // ---- Wards (on top, bold outlines) ----
+                var wardRes = await fetch('/nakuru_ward.geojson');
+                if (wardRes.ok) {
+                    var wardData = await wardRes.json();
+                    if (wardLayer) map.removeLayer(wardLayer);
+                    wardLayer = L.geoJSON(wardData, {
+                        style: {
+                            fill: false,
+                            weight: 2.5,           // ← thicker, more visible
+                            color: '#dc2626',       // ← red for contrast
+                            dashArray: '4, 4',
+                            opacity: 0.8
+                        },
+                        onEachFeature: function(feature, layer) {
+                            var name = feature.properties?.NAME || feature.properties?.name || 'Ward';
+                            layer.bindPopup('<strong>' + name + '</strong><br/>Ward boundary');
+                        }
+                    }).addTo(map);
+                } else {
+                    console.warn('Ward GeoJSON not found at /nakuru_ward.geojson');
+                }
+
+            } catch (err) {
+                console.error('Error loading boundaries:', err);
+            }
+        }
+
+        // ============================================================
+        // Load data from Supabase
+        // ============================================================
+        async function loadData() {
+            if (!isRunning) {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = 'Loading…';
+            }
+
+            try {
+                var { data, error } = await supabase
+                    .from('listings')
+                    .select('*')
+                    .not('latitude', 'is', null)
+                    .limit(1000);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    console.log('First listing record:', data[0]);
+                    console.log('Available fields:', Object.keys(data[0]));
+                }
+
+                if (!data || data.length === 0) {
+                    allProperties = [];
+                    avgPrices = {};
+                    renderList([]);
+                    showToast('No data found. Scraper runs daily.', 'info');
+                    if (!isRunning) {
+                        refreshBtn.disabled = false;
+                        refreshBtn.innerHTML = 'Refresh';
+                    }
+                    return;
+                }
+
+                // ---- Aggregate by sub-county ----
+                var groups = {};
+                data.forEach(function(item) {
+                    var key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
+                    if (!groups[key]) {
+                        groups[key] = { prices: [], sizes: [], count: 0 };
+                    }
+                    var size = getSize(item);
+                    if (item.price && size && size > 0) {
+                        groups[key].prices.push(item.price);
+                        groups[key].sizes.push(size);
+                    }
+                    groups[key].count += 1;
+                });
+
+                var avg = {};
+                Object.keys(groups).forEach(function(key) {
+                    var g = groups[key];
+                    if (g.prices.length === 0) {
+                        avg[key] = 0;
+                    } else {
+                        var perHa = g.prices.map(function(p, i) { return p / g.sizes[i]; });
+                        var sum = perHa.reduce(function(a, b) { return a + b; }, 0);
+                        avg[key] = sum / perHa.length;
+                    }
+                    avg[key + '_count'] = g.count;
+                });
+                avgPrices = avg;
+                console.log('Avg prices per sub-county:', avgPrices);
+
+                // ---- Build marker data and heatmap ----
+                var points = [];
+                var markerData = [];
+
+                data.forEach(function(item) {
+                    var size = getSize(item);
+                    if (item.latitude && item.longitude && item.price) {
+                        var pricePerHa = (size && size > 0) ? item.price / size : 0;
+                        var intensity = Math.min(pricePerHa / 1000000, 1);
+                        if (size && size > 0) {
+                            points.push([item.latitude, item.longitude, intensity]);
+                        }
+                        markerData.push({
+                            lat: item.latitude,
+                            lng: item.longitude,
+                            title: item.title || 'Plot',
+                            price: item.price,
+                            size_ha: size,
+                            location: item.location || 'Nakuru',
+                            source: item.source || '',
+                            pricePerHa: pricePerHa
+                        });
+                    }
+                });
+
+                allProperties = markerData;
+
+                // Update map layers (heatmap + markers)
+                if (heatLayer) map.removeLayer(heatLayer);
+                if (markerLayer) map.removeLayer(markerLayer);
+
+                if (points.length > 0) {
+                    heatLayer = L.heatLayer(points, {
+                        radius: 35,
+                        blur: 20,
+                        maxZoom: 15,
+                        gradient: {
+                            0.1: '#22c55e',
+                            0.3: '#84cc16',
+                            0.5: '#eab308',
+                            0.7: '#f97316',
+                            0.9: '#ef4444'
+                        }
+                    }).addTo(map);
+                }
+
+                markerLayer = L.layerGroup();
+                markerData.forEach(function(m) {
+                    var popupContent = '<b>' + m.title + '</b>' +
+                        '<br><b>Price:</b> KSh ' + m.price.toLocaleString() +
+                        (m.size_ha ? '<br><b>Size:</b> ' + m.size_ha.toFixed(2) + ' Ha' : '') +
+                        (m.pricePerHa > 0 ? '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString() : '') +
+                        (m.location ? '<br><b>Location:</b> ' + m.location : '');
+                    var circle = L.circleMarker([m.lat, m.lng], {
+                        radius: 5,
+                        color: '#2563eb',
+                        fillColor: '#2563eb',
+                        fillOpacity: 0.4,
+                        weight: 1.5
+                    }).bindPopup(popupContent);
+                    markerLayer.addLayer(circle);
+                });
+                markerLayer.addTo(map);
+
+                renderList(allProperties);
+
+                if (points.length > 0) {
+                    var bounds = L.latLngBounds(points.map(function(p) { return [p[0], p[1]]; }));
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+
+                showToast('Loaded ' + data.length + ' plots', 'success');
+
+                // ---- Update choropleth with new avgPrices ----
+                if (subcountyLayer) {
+                    await loadBoundaries();
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast('Error loading data', 'error');
+            }
+
+            if (!isRunning) {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = 'Refresh';
+            }
+        }
+
+        // ============================================================
+        // Refresh
+        // ============================================================
+        async function refreshMap() {
+            if (isRunning) return;
+            isRunning = true;
+            setStatus('running', 'Refreshing…');
+            showToast('Refreshing data…', 'info');
+
+            if (!subcountyLayer) {
+                await loadBoundaries();
+            }
+            await loadData();
+
+            setStatus('idle', 'Idle');
+            isRunning = false;
+        }
+
+        // ============================================================
+        // Events & Init
+        // ============================================================
+        searchInput.addEventListener('input', filterList);
+
+        loadBoundaries().then(function() {
+            loadData();
+        });
+
+        setInterval(function() {
+            if (!isRunning) loadData();
+        }, 300000);
+    </script>
+
+</body>
+</html>

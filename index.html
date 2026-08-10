@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nakuru Land Valuation</title>
+    <title>Nakuru Land Valuation – Choropleth</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -156,11 +157,6 @@
             white-space: nowrap;
             margin-left: 12px;
         }
-        .property-item .price small {
-            font-weight: 400;
-            font-size: 11px;
-            color: #94a3b8;
-        }
         .property-item .source-tag {
             font-size: 9px;
             text-transform: uppercase;
@@ -199,10 +195,41 @@
         .toast.success { background: rgba(34,197,94,0.9); }
         .toast.info { background: rgba(37,99,235,0.9); }
 
+        /* Legend – bottom-right */
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            font-size: 12px;
+            min-width: 140px;
+        }
+        .legend .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #0f172a;
+        }
+        .legend .gradient {
+            height: 10px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+        .legend .labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #475569;
+        }
+
         @media (max-width: 768px) {
             #sidebar { width: 100%; min-width: 0; height: 45vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
             #map-container { height: 55vh; }
             body { flex-direction: column; }
+            .legend { bottom: 10px; right: 10px; padding: 8px 12px; font-size: 10px; min-width: 100px; }
         }
     </style>
 </head>
@@ -228,6 +255,7 @@
 
     <div id="map-container">
         <div id="map"></div>
+        <div id="legend-container"></div>
     </div>
 
     <div id="toast" class="toast">Loading...</div>
@@ -252,12 +280,14 @@
         var wardLayer = null;
         var isRunning = false;
         var allProperties = [];
+        var avgPrices = {};
 
         var propertyList = document.getElementById('property-list');
         var countBadge = document.getElementById('count-badge');
         var searchInput = document.getElementById('searchInput');
         var toastEl = document.getElementById('toast');
         var refreshBtn = document.getElementById('refreshBtn');
+        var legendContainer = document.getElementById('legend-container');
 
         // ============================================================
         // Helpers
@@ -275,9 +305,6 @@
             document.getElementById('statusLabel').textContent = message;
         }
 
-        // ============================================================
-        // Helper to extract size from record
-        // ============================================================
         function getSize(record) {
             var fields = ['size_ha', 'size', 'area', 'area_ha', 'size_ha_', 'area_ha_'];
             for (var i = 0; i < fields.length; i++) {
@@ -366,33 +393,71 @@
         }
 
         // ============================================================
-        // Load GeoJSON boundaries (UPDATED: files now in root)
+        // Load GeoJSON boundaries
         // ============================================================
         async function loadBoundaries() {
             try {
-                // Sub-counties – now at root
+                // ---- Sub-counties (bottom layer, transparent fill) ----
                 var subRes = await fetch('/nakuru_subcounties.geojson');
-                if (subRes.ok) {
-                    var subData = await subRes.json();
-                    if (subcountyLayer) map.removeLayer(subcountyLayer);
-                    subcountyLayer = L.geoJSON(subData, {
-                        style: {
-                            fillColor: '#3b82f6',
-                            fillOpacity: 0.15,
-                            weight: 2,
-                            color: '#2563eb',
-                            dashArray: null
-                        },
-                        onEachFeature: function(feature, layer) {
-                            var name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || 'Sub-county';
-                            layer.bindPopup('<strong>' + name + '</strong><br/>Sub-county boundary');
-                        }
-                    }).addTo(map);
-                } else {
+                if (!subRes.ok) {
                     console.warn('Sub-county GeoJSON not found at /nakuru_subcounties.geojson');
+                    return;
                 }
+                var subData = await subRes.json();
 
-                // Wards – now at root
+                if (subcountyLayer) map.removeLayer(subcountyLayer);
+
+                var prices = Object.values(avgPrices).filter(p => p > 0);
+                var maxPrice = Math.max(...prices, 1);
+                var colorScale = chroma.scale(['#e0f2fe', '#0284c7', '#f97316', '#dc2626']).domain([0, maxPrice]);
+
+                var style = function(feature) {
+                    var name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || '';
+                    var price = avgPrices[name] || 0;
+                    return {
+                        fillColor: price > 0 ? colorScale(price).hex() : '#f1f5f9',
+                        fillOpacity: 0.25,          // ← transparent so wards show through
+                        weight: 1,
+                        color: '#1e293b',
+                        dashArray: null
+                    };
+                };
+
+                var onEachFeature = function(feature, layer) {
+                    var name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || 'Unknown';
+                    var price = avgPrices[name] || 0;
+                    var count = avgPrices[name + '_count'] || 0;
+                    layer.bindPopup(`
+                        <div style="font-family: sans-serif; min-width: 180px;">
+                            <strong>${name}</strong><br/>
+                            <span style="color: #555;">
+                                Avg price/ha: <strong>KSh ${price.toLocaleString()}</strong><br/>
+                                Listings: ${count}
+                            </span>
+                            ${price === 0 ? '<br/><em style="color:#999;">No data</em>' : ''}
+                        </div>
+                    `);
+                };
+
+                subcountyLayer = L.geoJSON(subData, {
+                    style: style,
+                    onEachFeature: onEachFeature
+                }).addTo(map);
+
+                // ---- Legend ----
+                var legendHtml = `
+                    <div class="legend">
+                        <div class="title">Avg Price / Ha</div>
+                        <div class="gradient" style="background: linear-gradient(to right, ${colorScale(0).hex()}, ${colorScale(maxPrice).hex()});"></div>
+                        <div class="labels">
+                            <span>KSh 0</span>
+                            <span>KSh ${Math.round(maxPrice).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+                legendContainer.innerHTML = legendHtml;
+
+                // ---- Wards (on top, bold outlines) ----
                 var wardRes = await fetch('/nakuru_ward.geojson');
                 if (wardRes.ok) {
                     var wardData = await wardRes.json();
@@ -400,10 +465,10 @@
                     wardLayer = L.geoJSON(wardData, {
                         style: {
                             fill: false,
-                            weight: 1,
-                            color: '#94a3b8',
-                            dashArray: '5, 5',
-                            opacity: 0.6
+                            weight: 2.5,           // ← thicker, more visible
+                            color: '#dc2626',       // ← red for contrast
+                            dashArray: '4, 4',
+                            opacity: 0.8
                         },
                         onEachFeature: function(feature, layer) {
                             var name = feature.properties?.NAME || feature.properties?.name || 'Ward';
@@ -413,6 +478,7 @@
                 } else {
                     console.warn('Ward GeoJSON not found at /nakuru_ward.geojson');
                 }
+
             } catch (err) {
                 console.error('Error loading boundaries:', err);
             }
@@ -443,6 +509,7 @@
 
                 if (!data || data.length === 0) {
                     allProperties = [];
+                    avgPrices = {};
                     renderList([]);
                     showToast('No data found. Scraper runs daily.', 'info');
                     if (!isRunning) {
@@ -452,6 +519,37 @@
                     return;
                 }
 
+                // ---- Aggregate by sub-county ----
+                var groups = {};
+                data.forEach(function(item) {
+                    var key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
+                    if (!groups[key]) {
+                        groups[key] = { prices: [], sizes: [], count: 0 };
+                    }
+                    var size = getSize(item);
+                    if (item.price && size && size > 0) {
+                        groups[key].prices.push(item.price);
+                        groups[key].sizes.push(size);
+                    }
+                    groups[key].count += 1;
+                });
+
+                var avg = {};
+                Object.keys(groups).forEach(function(key) {
+                    var g = groups[key];
+                    if (g.prices.length === 0) {
+                        avg[key] = 0;
+                    } else {
+                        var perHa = g.prices.map(function(p, i) { return p / g.sizes[i]; });
+                        var sum = perHa.reduce(function(a, b) { return a + b; }, 0);
+                        avg[key] = sum / perHa.length;
+                    }
+                    avg[key + '_count'] = g.count;
+                });
+                avgPrices = avg;
+                console.log('Avg prices per sub-county:', avgPrices);
+
+                // ---- Build marker data and heatmap ----
                 var points = [];
                 var markerData = [];
 
@@ -478,7 +576,7 @@
 
                 allProperties = markerData;
 
-                // Update map layers
+                // Update map layers (heatmap + markers)
                 if (heatLayer) map.removeLayer(heatLayer);
                 if (markerLayer) map.removeLayer(markerLayer);
 
@@ -524,6 +622,11 @@
 
                 showToast('Loaded ' + data.length + ' plots', 'success');
 
+                // ---- Update choropleth with new avgPrices ----
+                if (subcountyLayer) {
+                    await loadBoundaries();
+                }
+
             } catch (err) {
                 console.error(err);
                 showToast('Error loading data', 'error');
@@ -536,7 +639,7 @@
         }
 
         // ============================================================
-        // Refresh (loads boundaries + data)
+        // Refresh
         // ============================================================
         async function refreshMap() {
             if (isRunning) return;
@@ -544,12 +647,11 @@
             setStatus('running', 'Refreshing…');
             showToast('Refreshing data…', 'info');
 
-            // Load boundaries (if not already loaded)
             if (!subcountyLayer) {
                 await loadBoundaries();
             }
-
             await loadData();
+
             setStatus('idle', 'Idle');
             isRunning = false;
         }
@@ -559,7 +661,6 @@
         // ============================================================
         searchInput.addEventListener('input', filterList);
 
-        // Load boundaries first, then data
         loadBoundaries().then(function() {
             loadData();
         });
