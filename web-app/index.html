@@ -10,55 +10,95 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
-        #map { height: 100vh; width: 100%; }
-        #header {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            z-index: 1000;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ===== SIDEBAR ===== */
+        #sidebar {
+            width: 380px;
+            min-width: 380px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e0e0e0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+            z-index: 10;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar-header {
+            padding: 16px 20px;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 12px 24px;
+            color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            flex-shrink: 0;
         }
-        #header h1 { color: white; font-size: 18px; font-weight: 600; }
-        #header h1 span { color: #4CAF50; }
-        #header-right {
+        #sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        #sidebar-header h1 span { color: #4CAF50; }
+        #sidebar-header .badge {
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        #sidebar-controls {
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 10px;
+            flex-shrink: 0;
         }
+        #sidebar-controls input {
+            flex: 1;
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+        }
+        #sidebar-controls input:focus { border-color: #4CAF50; }
         #refreshBtn {
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 8px 20px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: 0.2s;
+            white-space: nowrap;
         }
-        #refreshBtn:hover { background: #45a049; transform: scale(1.02); }
-        #refreshBtn:disabled { background: #666; cursor: not-allowed; transform: none; }
+        #refreshBtn:hover { background: #43a047; }
+        #refreshBtn:disabled { background: #999; cursor: not-allowed; }
+
         #statusText {
-            color: white;
             font-size: 12px;
+            color: #666;
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
         .status-badge {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-right: 4px;
         }
         .status-badge.idle { background: #4CAF50; }
         .status-badge.running { background: #FFC107; animation: pulse 1s infinite; }
@@ -68,87 +108,160 @@
             50% { opacity: 0.3; }
             100% { opacity: 1; }
         }
-        #stats {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background: rgba(0,0,0,0.75);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
+
+        /* ===== PROPERTY LIST ===== */
+        #property-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        #property-list::-webkit-scrollbar { width: 4px; }
+        #property-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+        .property-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .property-item:hover { background: #f5f7fa; }
+        .property-item.active { background: #e8f0fe; border-left: 3px solid #1a73e8; }
+
+        .property-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .property-item .info .title {
+            font-weight: 500;
+            font-size: 14px;
+            color: #1a1a2e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .property-item .info .meta {
             font-size: 12px;
-            backdrop-filter: blur(10px);
+            color: #666;
+            margin-top: 2px;
         }
-        #stats strong { color: #4CAF50; }
-        .legend {
-            position: absolute;
-            bottom: 80px;
-            right: 16px;
-            z-index: 1000;
-            background: rgba(255,255,255,0.95);
-            padding: 10px 14px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        .property-item .info .meta span {
+            margin-right: 12px;
+        }
+        .property-item .price {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a2e;
+            white-space: nowrap;
+            margin-left: 12px;
+        }
+        .property-item .price small {
+            font-weight: 400;
             font-size: 11px;
+            color: #888;
         }
-        .legend-gradient {
-            height: 10px;
-            border-radius: 4px;
-            margin: 4px 0;
-            background: linear-gradient(to right, #00ff00, #ffff00, #ff0000);
+
+        .property-item .source-tag {
+            font-size: 9px;
+            text-transform: uppercase;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: #555;
+            margin-left: 8px;
         }
-        .legend-labels { display: flex; justify-content: space-between; font-size: 9px; color: #666; }
+
+        /* ===== MAP ===== */
+        #map-container {
+            flex: 1;
+            position: relative;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* ===== TOAST ===== */
         .toast {
-            position: absolute;
-            top: 70px;
+            position: fixed;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 2000;
-            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            background: rgba(0,0,0,0.8);
             color: white;
             padding: 10px 24px;
-            border-radius: 10px;
-            font-size: 13px;
+            border-radius: 30px;
+            font-size: 14px;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
-            text-align: center;
-            max-width: 90%;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
         }
         .toast.show { opacity: 1; }
-        .toast.error { background: rgba(244, 67, 54, 0.9); }
-        .toast.success { background: rgba(76, 175, 80, 0.9); }
-        .toast.info { background: rgba(33, 150, 243, 0.9); }
+        .toast.error { background: rgba(244,67,54,0.9); }
+        .toast.success { background: rgba(76,175,80,0.9); }
+        .toast.info { background: rgba(33,150,243,0.9); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 100%;
+                min-width: 0;
+                height: 45vh;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+            #map-container {
+                height: 55vh;
+            }
+            body { flex-direction: column; }
+        }
+
+        /* ===== QGIS PLACEHOLDER ===== */
+        #qgis-placeholder {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <div id="header">
-        <h1>🏠 Nakuru <span>Valuation</span></h1>
-        <div id="header-right">
+    <!-- ===== SIDEBAR ===== -->
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <h1>🏠 Nakuru <span>Valuation</span></h1>
+            <span class="badge" id="count-badge">0 plots</span>
+        </div>
+        <div id="sidebar-controls">
             <span id="statusText">
                 <span class="status-badge idle" id="statusBadge"></span>
                 <span id="statusLabel">Idle</span>
             </span>
-            <button id="refreshBtn" onclick="refreshMap()">🔄 Refresh Map</button>
+            <input type="text" id="searchInput" placeholder="Filter by title, location..." />
+            <button id="refreshBtn" onclick="refreshMap()">🔄 Refresh</button>
+        </div>
+        <div id="property-list">
+            <!-- Items will be injected here -->
+            <div style="padding:30px 20px;text-align:center;color:#999;font-size:14px;">
+                Loading properties...
+            </div>
         </div>
     </div>
 
-    <div id="toast" class="toast">Loading...</div>
-    <div id="map"></div>
-    <div id="stats">Loading <strong id="count">0</strong> plots</div>
-
-    <div class="legend">
-        <div style="font-weight:600;margin-bottom:3px;">Price/Ha</div>
-        <div class="legend-gradient"></div>
-        <div class="legend-labels"><span>Low</span><span>Med</span><span>High</span></div>
+    <!-- ===== MAP ===== -->
+    <div id="map-container">
+        <div id="map"></div>
     </div>
 
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast">Loading...</div>
+
     <script>
-        // Supabase configuration
+        // ============================================================
+        // CONFIGURATION
+        // ============================================================
         var SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
 
@@ -161,66 +274,175 @@
 
         var heatLayer = null;
         var markerLayer = null;
+        var markers = [];
         var isRunning = false;
+        var allProperties = [];
 
+        // ============================================================
+        // DOM refs
+        // ============================================================
+        var propertyList = document.getElementById('property-list');
+        var countBadge = document.getElementById('count-badge');
+        var searchInput = document.getElementById('searchInput');
+        var toastEl = document.getElementById('toast');
+        var refreshBtn = document.getElementById('refreshBtn');
+
+        // ============================================================
+        // Helper: toast
+        // ============================================================
         function showToast(msg, type) {
             type = type || '';
-            var el = document.getElementById('toast');
-            el.textContent = msg;
-            el.className = 'toast show ' + type;
-            clearTimeout(el._timer);
-            el._timer = setTimeout(function() { el.className = 'toast'; }, 4000);
+            toastEl.textContent = msg;
+            toastEl.className = 'toast show ' + type;
+            clearTimeout(toastEl._timer);
+            toastEl._timer = setTimeout(function() { toastEl.className = 'toast'; }, 4000);
         }
 
+        // ============================================================
+        // Helper: status
+        // ============================================================
         function setStatus(status, message) {
             document.getElementById('statusBadge').className = 'status-badge ' + status;
             document.getElementById('statusLabel').textContent = message;
         }
 
-        async function loadHeatmap() {
-            var btn = document.getElementById('refreshBtn');
-            var countEl = document.getElementById('count');
-            if (!isRunning) { 
-                btn.disabled = true; 
-                btn.innerHTML = '⏳ Loading...'; 
+        // ============================================================
+        // Render property list
+        // ============================================================
+        function renderList(properties) {
+            var html = '';
+            if (!properties || properties.length === 0) {
+                html = '<div style="padding:30px 20px;text-align:center;color:#999;font-size:14px;">No properties found.</div>';
+                propertyList.innerHTML = html;
+                countBadge.textContent = '0 plots';
+                return;
             }
-            
+
+            properties.forEach(function(p, index) {
+                var priceStr = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
+                var sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : 'N/A';
+                var title = p.title || 'Plot';
+                var location = p.location || 'Nakuru';
+                var source = p.source || '';
+
+                html += `
+                    <div class="property-item" data-index="${index}" onclick="zoomToProperty(${index})">
+                        <div class="info">
+                            <div class="title">${title}</div>
+                            <div class="meta">
+                                <span>📍 ${location}</span>
+                                <span>📐 ${sizeStr}</span>
+                                ${source ? `<span class="source-tag">${source}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="price">${priceStr}</div>
+                    </div>
+                `;
+            });
+
+            propertyList.innerHTML = html;
+            countBadge.textContent = properties.length + ' plots';
+        }
+
+        // ============================================================
+        // Filter by search
+        // ============================================================
+        function filterList() {
+            var query = searchInput.value.toLowerCase().trim();
+            if (!query) {
+                renderList(allProperties);
+                return;
+            }
+            var filtered = allProperties.filter(function(p) {
+                var title = (p.title || '').toLowerCase();
+                var location = (p.location || '').toLowerCase();
+                var source = (p.source || '').toLowerCase();
+                return title.includes(query) || location.includes(query) || source.includes(query);
+            });
+            renderList(filtered);
+        }
+
+        // ============================================================
+        // Zoom to property on map
+        // ============================================================
+        function zoomToProperty(index) {
+            var props = allProperties;
+            if (index < 0 || index >= props.length) return;
+            var p = props[index];
+            if (p.lat && p.lng) {
+                map.setView([p.lat, p.lng], 16);
+                // Highlight the marker
+                if (markerLayer) {
+                    markerLayer.eachLayer(function(layer) {
+                        if (layer._latlng && layer._latlng.lat === p.lat && layer._latlng.lng === p.lng) {
+                            layer.openPopup();
+                        }
+                    });
+                }
+                // Highlight list item
+                var items = propertyList.querySelectorAll('.property-item');
+                items.forEach(function(el, i) {
+                    el.classList.toggle('active', i === index);
+                });
+            }
+        }
+
+        // ============================================================
+        // Load data from Supabase
+        // ============================================================
+        async function loadData() {
+            var btn = refreshBtn;
+            if (!isRunning) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Loading...';
+            }
+
             try {
                 var { data, error } = await supabase
                     .from('listings')
-                    .select('latitude, longitude, price, size_ha, title')
+                    .select('latitude, longitude, price, size_ha, title, location, source')
                     .not('latitude', 'is', null)
                     .limit(1000);
 
                 if (error) throw error;
+
                 if (!data || data.length === 0) {
-                    countEl.textContent = '0';
-                    showToast('No data found. Scraper will run daily.', 'info');
-                    if (!isRunning) { 
-                        btn.disabled = false; 
-                        btn.innerHTML = '🔄 Refresh Map'; 
+                    allProperties = [];
+                    renderList([]);
+                    showToast('No data found. Scraper runs daily.', 'info');
+                    if (!isRunning) {
+                        btn.disabled = false;
+                        btn.innerHTML = '🔄 Refresh';
                     }
                     return;
                 }
 
+                // Prepare points for heatmap and markers
                 var points = [];
-                var markers = [];
+                var markerData = [];
 
                 data.forEach(function(item) {
                     if (item.latitude && item.longitude && item.price && item.size_ha > 0) {
                         var pricePerHa = item.price / item.size_ha;
-                        points.push([item.latitude, item.longitude, Math.min(pricePerHa / 1000000, 1)]);
-                        markers.push({
+                        var intensity = Math.min(pricePerHa / 1000000, 1);
+                        points.push([item.latitude, item.longitude, intensity]);
+                        markerData.push({
                             lat: item.latitude,
                             lng: item.longitude,
                             title: item.title || 'Plot',
                             price: item.price,
                             size: item.size_ha,
+                            location: item.location || 'Nakuru',
+                            source: item.source || '',
                             pricePerHa: pricePerHa
                         });
                     }
                 });
 
+                // Store for list and filtering
+                allProperties = markerData;
+
+                // Update map
                 if (heatLayer) map.removeLayer(heatLayer);
                 if (markerLayer) map.removeLayer(markerLayer);
 
@@ -238,74 +460,75 @@
                 }).addTo(map);
 
                 markerLayer = L.layerGroup();
-                markers.forEach(function(m) {
-                    var popup = '<b>' + m.title + '</b>' +
+                markerData.forEach(function(m) {
+                    var popupContent = '<b>' + m.title + '</b>' +
                         '<br><b>Price:</b> KSh ' + m.price.toLocaleString() +
                         '<br><b>Size:</b> ' + m.size.toFixed(2) + ' Ha' +
-                        '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString();
-                    
-                    L.circleMarker([m.lat, m.lng], {
+                        '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString() +
+                        (m.location ? '<br><b>Location:</b> ' + m.location : '');
+                    var circle = L.circleMarker([m.lat, m.lng], {
                         radius: 5,
                         color: '#FF0000',
                         fillColor: '#FF0000',
                         fillOpacity: 0.5,
                         weight: 1.5
-                    }).bindPopup(popup).addTo(markerLayer);
+                    }).bindPopup(popupContent);
+                    markerLayer.addLayer(circle);
                 });
                 markerLayer.addTo(map);
 
-                countEl.textContent = points.length;
-                showToast('✅ ' + points.length + ' plots loaded', 'success');
-                
+                // Render list
+                renderList(allProperties);
+
+                // Fit bounds
                 if (points.length > 0) {
                     var bounds = L.latLngBounds(points.map(function(p) { return [p[0], p[1]]; }));
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
+
+                showToast('✅ ' + data.length + ' plots loaded', 'success');
+
             } catch (err) {
                 console.error(err);
                 showToast('❌ Error loading data', 'error');
             }
-            if (!isRunning) { 
-                btn.disabled = false; 
-                btn.innerHTML = '🔄 Refresh Map'; 
+
+            if (!isRunning) {
+                btn.disabled = false;
+                btn.innerHTML = '🔄 Refresh';
             }
         }
 
-        // Simple refresh: just reload the map data from Supabase
+        // ============================================================
+        // Refresh map (just reload data)
+        // ============================================================
         async function refreshMap() {
             if (isRunning) return;
-            
-            var btn = document.getElementById('refreshBtn');
             isRunning = true;
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Refreshing...';
             setStatus('running', 'Refreshing...');
-            showToast('🔄 Refreshing map data...', 'info');
-            
-            try {
-                await loadHeatmap();
-                setStatus('idle', 'Idle');
-                showToast('✅ Map refreshed!', 'success');
-            } catch (err) {
-                console.error(err);
-                showToast('❌ Error: ' + err.message, 'error');
-                setStatus('error', 'Error');
-            }
-            
-            btn.disabled = false;
-            btn.innerHTML = '🔄 Refresh Map';
+            showToast('🔄 Refreshing data...', 'info');
+            await loadData();
+            setStatus('idle', 'Idle');
             isRunning = false;
         }
 
+        // ============================================================
+        // Search input event
+        // ============================================================
+        searchInput.addEventListener('input', filterList);
+
+        // ============================================================
         // Initialize
-        loadHeatmap();
+        // ============================================================
+        loadData();
 
         // Auto-refresh every 5 minutes
-        setInterval(function() { 
+        setInterval(function() {
             if (!isRunning) {
-                loadHeatmap(); 
+                loadData();
             }
         }, 300000);
     </script>
+
 </body>
 </html>
