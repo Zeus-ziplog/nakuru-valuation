@@ -11,30 +11,31 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f2f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f7fa;
             display: flex;
             height: 100vh;
             overflow: hidden;
+            color: #1e293b;
         }
 
         /* ===== SIDEBAR ===== */
         #sidebar {
-            width: 380px;
-            min-width: 380px;
-            background: #fff;
+            width: 400px;
+            min-width: 400px;
+            background: #ffffff;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #e0e0e0;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.03);
             z-index: 10;
             height: 100vh;
             overflow: hidden;
         }
 
         #sidebar-header {
-            padding: 16px 20px;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px 24px;
+            background: #0f172a;
             color: white;
             display: flex;
             justify-content: space-between;
@@ -42,53 +43,58 @@
             flex-shrink: 0;
         }
         #sidebar-header h1 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
+            letter-spacing: -0.3px;
         }
-        #sidebar-header h1 span { color: #4CAF50; }
+        #sidebar-header h1 span { color: #22c55e; }
         #sidebar-header .badge {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.12);
             padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         #sidebar-controls {
-            padding: 12px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
         #sidebar-controls input {
             flex: 1;
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
+            padding: 8px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 30px;
             font-size: 13px;
             outline: none;
+            background: white;
+            min-width: 120px;
         }
-        #sidebar-controls input:focus { border-color: #4CAF50; }
+        #sidebar-controls input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         #refreshBtn {
-            background: #4CAF50;
+            background: #2563eb;
             color: white;
             border: none;
-            padding: 6px 16px;
-            border-radius: 20px;
+            padding: 7px 18px;
+            border-radius: 30px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.15s;
             white-space: nowrap;
         }
-        #refreshBtn:hover { background: #43a047; }
-        #refreshBtn:disabled { background: #999; cursor: not-allowed; }
+        #refreshBtn:hover { background: #1d4ed8; }
+        #refreshBtn:disabled { background: #94a3b8; cursor: not-allowed; }
 
         #statusText {
             font-size: 12px;
-            color: #666;
+            color: #475569;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -100,35 +106,31 @@
             height: 8px;
             border-radius: 50%;
         }
-        .status-badge.idle { background: #4CAF50; }
-        .status-badge.running { background: #FFC107; animation: pulse 1s infinite; }
-        .status-badge.error { background: #f44336; }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
+        .status-badge.idle { background: #22c55e; }
+        .status-badge.running { background: #eab308; animation: pulse 1s infinite; }
+        .status-badge.error { background: #ef4444; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         /* ===== PROPERTY LIST ===== */
         #property-list {
             flex: 1;
             overflow-y: auto;
-            padding: 8px 0;
+            padding: 4px 0;
         }
-        #property-list::-webkit-scrollbar { width: 4px; }
-        #property-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        #property-list::-webkit-scrollbar { width: 5px; }
+        #property-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         .property-item {
             padding: 12px 20px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f1f5f9;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: background 0.1s;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .property-item:hover { background: #f5f7fa; }
-        .property-item.active { background: #e8f0fe; border-left: 3px solid #1a73e8; }
+        .property-item:hover { background: #f1f5f9; }
+        .property-item.active { background: #eef2ff; border-left: 3px solid #2563eb; }
 
         .property-item .info {
             flex: 1;
@@ -137,14 +139,14 @@
         .property-item .info .title {
             font-weight: 500;
             font-size: 14px;
-            color: #1a1a2e;
+            color: #0f172a;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .property-item .info .meta {
             font-size: 12px;
-            color: #666;
+            color: #64748b;
             margin-top: 2px;
         }
         .property-item .info .meta span {
@@ -153,24 +155,24 @@
         .property-item .price {
             font-weight: 600;
             font-size: 14px;
-            color: #1a1a2e;
+            color: #0f172a;
             white-space: nowrap;
             margin-left: 12px;
         }
         .property-item .price small {
             font-weight: 400;
             font-size: 11px;
-            color: #888;
+            color: #94a3b8;
         }
-
         .property-item .source-tag {
             font-size: 9px;
             text-transform: uppercase;
-            background: #e9ecef;
+            background: #e2e8f0;
             padding: 2px 8px;
             border-radius: 12px;
-            color: #555;
-            margin-left: 8px;
+            color: #475569;
+            margin-left: 6px;
+            letter-spacing: 0.3px;
         }
 
         /* ===== MAP ===== */
@@ -190,7 +192,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
-            background: rgba(0,0,0,0.8);
+            background: rgba(15,23,42,0.9);
             color: white;
             padding: 10px 24px;
             border-radius: 30px;
@@ -199,11 +201,12 @@
             transition: opacity 0.3s;
             pointer-events: none;
             backdrop-filter: blur(8px);
+            font-weight: 400;
         }
         .toast.show { opacity: 1; }
-        .toast.error { background: rgba(244,67,54,0.9); }
-        .toast.success { background: rgba(76,175,80,0.9); }
-        .toast.info { background: rgba(33,150,243,0.9); }
+        .toast.error { background: rgba(239,68,68,0.9); }
+        .toast.success { background: rgba(34,197,94,0.9); }
+        .toast.info { background: rgba(37,99,235,0.9); }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
@@ -212,17 +215,12 @@
                 min-width: 0;
                 height: 45vh;
                 border-right: none;
-                border-bottom: 1px solid #ddd;
+                border-bottom: 1px solid #e2e8f0;
             }
             #map-container {
                 height: 55vh;
             }
             body { flex-direction: column; }
-        }
-
-        /* ===== QGIS PLACEHOLDER ===== */
-        #qgis-placeholder {
-            display: none;
         }
     </style>
 </head>
@@ -231,7 +229,7 @@
     <!-- ===== SIDEBAR ===== -->
     <div id="sidebar">
         <div id="sidebar-header">
-            <h1>🏠 Nakuru <span>Valuation</span></h1>
+            <h1>Nakuru <span>Valuation</span></h1>
             <span class="badge" id="count-badge">0 plots</span>
         </div>
         <div id="sidebar-controls">
@@ -240,11 +238,10 @@
                 <span id="statusLabel">Idle</span>
             </span>
             <input type="text" id="searchInput" placeholder="Filter by title, location..." />
-            <button id="refreshBtn" onclick="refreshMap()">🔄 Refresh</button>
+            <button id="refreshBtn" onclick="refreshMap()">Refresh</button>
         </div>
         <div id="property-list">
-            <!-- Items will be injected here -->
-            <div style="padding:30px 20px;text-align:center;color:#999;font-size:14px;">
+            <div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">
                 Loading properties...
             </div>
         </div>
@@ -268,19 +265,16 @@
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         var map = L.map('map').setView([-0.3031, 36.0800], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
+            attribution: '© OpenStreetMap',
             maxZoom: 18
         }).addTo(map);
 
         var heatLayer = null;
         var markerLayer = null;
-        var markers = [];
         var isRunning = false;
         var allProperties = [];
 
-        // ============================================================
         // DOM refs
-        // ============================================================
         var propertyList = document.getElementById('property-list');
         var countBadge = document.getElementById('count-badge');
         var searchInput = document.getElementById('searchInput');
@@ -288,7 +282,7 @@
         var refreshBtn = document.getElementById('refreshBtn');
 
         // ============================================================
-        // Helper: toast
+        // Helpers
         // ============================================================
         function showToast(msg, type) {
             type = type || '';
@@ -298,9 +292,6 @@
             toastEl._timer = setTimeout(function() { toastEl.className = 'toast'; }, 4000);
         }
 
-        // ============================================================
-        // Helper: status
-        // ============================================================
         function setStatus(status, message) {
             document.getElementById('statusBadge').className = 'status-badge ' + status;
             document.getElementById('statusLabel').textContent = message;
@@ -312,7 +303,7 @@
         function renderList(properties) {
             var html = '';
             if (!properties || properties.length === 0) {
-                html = '<div style="padding:30px 20px;text-align:center;color:#999;font-size:14px;">No properties found.</div>';
+                html = '<div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">No properties found.</div>';
                 propertyList.innerHTML = html;
                 countBadge.textContent = '0 plots';
                 return;
@@ -320,8 +311,8 @@
 
             properties.forEach(function(p, index) {
                 var priceStr = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
-                var sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : 'N/A';
-                var title = p.title || 'Plot';
+                var sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
+                var title = p.title || 'Untitled';
                 var location = p.location || 'Nakuru';
                 var source = p.source || '';
 
@@ -330,8 +321,8 @@
                         <div class="info">
                             <div class="title">${title}</div>
                             <div class="meta">
-                                <span>📍 ${location}</span>
-                                <span>📐 ${sizeStr}</span>
+                                <span>${location}</span>
+                                <span>${sizeStr}</span>
                                 ${source ? `<span class="source-tag">${source}</span>` : ''}
                             </div>
                         </div>
@@ -345,7 +336,7 @@
         }
 
         // ============================================================
-        // Filter by search
+        // Filter
         // ============================================================
         function filterList() {
             var query = searchInput.value.toLowerCase().trim();
@@ -363,38 +354,32 @@
         }
 
         // ============================================================
-        // Zoom to property on map
+        // Zoom to property
         // ============================================================
         function zoomToProperty(index) {
-            var props = allProperties;
-            if (index < 0 || index >= props.length) return;
-            var p = props[index];
-            if (p.lat && p.lng) {
-                map.setView([p.lat, p.lng], 16);
-                // Highlight the marker
-                if (markerLayer) {
-                    markerLayer.eachLayer(function(layer) {
-                        if (layer._latlng && layer._latlng.lat === p.lat && layer._latlng.lng === p.lng) {
-                            layer.openPopup();
-                        }
-                    });
-                }
-                // Highlight list item
-                var items = propertyList.querySelectorAll('.property-item');
-                items.forEach(function(el, i) {
-                    el.classList.toggle('active', i === index);
+            var p = allProperties[index];
+            if (!p || !p.lat || !p.lng) return;
+            map.setView([p.lat, p.lng], 16);
+            if (markerLayer) {
+                markerLayer.eachLayer(function(layer) {
+                    if (layer._latlng && layer._latlng.lat === p.lat && layer._latlng.lng === p.lng) {
+                        layer.openPopup();
+                    }
                 });
             }
+            var items = propertyList.querySelectorAll('.property-item');
+            items.forEach(function(el, i) {
+                el.classList.toggle('active', i === index);
+            });
         }
 
         // ============================================================
         // Load data from Supabase
         // ============================================================
         async function loadData() {
-            var btn = refreshBtn;
             if (!isRunning) {
-                btn.disabled = true;
-                btn.innerHTML = '⏳ Loading...';
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = 'Loading…';
             }
 
             try {
@@ -411,13 +396,12 @@
                     renderList([]);
                     showToast('No data found. Scraper runs daily.', 'info');
                     if (!isRunning) {
-                        btn.disabled = false;
-                        btn.innerHTML = '🔄 Refresh';
+                        refreshBtn.disabled = false;
+                        refreshBtn.innerHTML = 'Refresh';
                     }
                     return;
                 }
 
-                // Prepare points for heatmap and markers
                 var points = [];
                 var markerData = [];
 
@@ -439,7 +423,6 @@
                     }
                 });
 
-                // Store for list and filtering
                 allProperties = markerData;
 
                 // Update map
@@ -451,11 +434,11 @@
                     blur: 20,
                     maxZoom: 15,
                     gradient: {
-                        0.1: '#00ff00',
-                        0.3: '#aadd00',
-                        0.5: '#ffff00',
-                        0.7: '#ff8800',
-                        0.9: '#ff0000'
+                        0.1: '#22c55e',
+                        0.3: '#84cc16',
+                        0.5: '#eab308',
+                        0.7: '#f97316',
+                        0.9: '#ef4444'
                     }
                 }).addTo(map);
 
@@ -468,65 +451,57 @@
                         (m.location ? '<br><b>Location:</b> ' + m.location : '');
                     var circle = L.circleMarker([m.lat, m.lng], {
                         radius: 5,
-                        color: '#FF0000',
-                        fillColor: '#FF0000',
-                        fillOpacity: 0.5,
+                        color: '#2563eb',
+                        fillColor: '#2563eb',
+                        fillOpacity: 0.4,
                         weight: 1.5
                     }).bindPopup(popupContent);
                     markerLayer.addLayer(circle);
                 });
                 markerLayer.addTo(map);
 
-                // Render list
                 renderList(allProperties);
 
-                // Fit bounds
                 if (points.length > 0) {
                     var bounds = L.latLngBounds(points.map(function(p) { return [p[0], p[1]]; }));
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
 
-                showToast('✅ ' + data.length + ' plots loaded', 'success');
+                showToast('Loaded ' + data.length + ' plots', 'success');
 
             } catch (err) {
                 console.error(err);
-                showToast('❌ Error loading data', 'error');
+                showToast('Error loading data', 'error');
             }
 
             if (!isRunning) {
-                btn.disabled = false;
-                btn.innerHTML = '🔄 Refresh';
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = 'Refresh';
             }
         }
 
         // ============================================================
-        // Refresh map (just reload data)
+        // Refresh
         // ============================================================
         async function refreshMap() {
             if (isRunning) return;
             isRunning = true;
-            setStatus('running', 'Refreshing...');
-            showToast('🔄 Refreshing data...', 'info');
+            setStatus('running', 'Refreshing…');
+            showToast('Refreshing data…', 'info');
             await loadData();
             setStatus('idle', 'Idle');
             isRunning = false;
         }
 
         // ============================================================
-        // Search input event
+        // Events & Init
         // ============================================================
         searchInput.addEventListener('input', filterList);
 
-        // ============================================================
-        // Initialize
-        // ============================================================
         loadData();
 
-        // Auto-refresh every 5 minutes
         setInterval(function() {
-            if (!isRunning) {
-                loadData();
-            }
+            if (!isRunning) loadData();
         }, 300000);
     </script>
 
