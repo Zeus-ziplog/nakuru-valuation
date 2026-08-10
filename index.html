@@ -11,7 +11,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             display: flex;
             height: 100vh;
@@ -26,7 +26,6 @@
             display: flex;
             flex-direction: column;
             border-right: 1px solid #e2e8f0;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.03);
             z-index: 10;
             height: 100vh;
             overflow: hidden;
@@ -177,10 +176,7 @@
             flex: 1;
             position: relative;
         }
-        #map {
-            height: 100%;
-            width: 100%;
-        }
+        #map { height: 100%; width: 100%; }
 
         .toast {
             position: fixed;
@@ -197,7 +193,6 @@
             transition: opacity 0.3s;
             pointer-events: none;
             backdrop-filter: blur(8px);
-            font-weight: 400;
         }
         .toast.show { opacity: 1; }
         .toast.error { background: rgba(239,68,68,0.9); }
@@ -205,16 +200,8 @@
         .toast.info { background: rgba(37,99,235,0.9); }
 
         @media (max-width: 768px) {
-            #sidebar {
-                width: 100%;
-                min-width: 0;
-                height: 45vh;
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-            }
-            #map-container {
-                height: 55vh;
-            }
+            #sidebar { width: 100%; min-width: 0; height: 45vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
+            #map-container { height: 55vh; }
             body { flex-direction: column; }
         }
     </style>
@@ -235,9 +222,7 @@
             <button id="refreshBtn" onclick="refreshMap()">Refresh</button>
         </div>
         <div id="property-list">
-            <div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">
-                Loading properties...
-            </div>
+            <div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">Loading properties...</div>
         </div>
     </div>
 
@@ -263,6 +248,8 @@
 
         var heatLayer = null;
         var markerLayer = null;
+        var subcountyLayer = null;
+        var wardLayer = null;
         var isRunning = false;
         var allProperties = [];
 
@@ -272,6 +259,9 @@
         var toastEl = document.getElementById('toast');
         var refreshBtn = document.getElementById('refreshBtn');
 
+        // ============================================================
+        // Helpers
+        // ============================================================
         function showToast(msg, type) {
             type = type || '';
             toastEl.textContent = msg;
@@ -285,14 +275,23 @@
             document.getElementById('statusLabel').textContent = message;
         }
 
-        // Helper to format size
-        function formatSize(size) {
-            if (size === null || size === undefined || size === '') return 'N/A';
-            var num = parseFloat(size);
-            if (isNaN(num) || num <= 0) return 'N/A';
-            return num.toFixed(2) + ' Ha';
+        // ============================================================
+        // Helper to extract size from record
+        // ============================================================
+        function getSize(record) {
+            var fields = ['size_ha', 'size', 'area', 'area_ha', 'size_ha_', 'area_ha_'];
+            for (var i = 0; i < fields.length; i++) {
+                if (record[fields[i]] !== undefined && record[fields[i]] !== null) {
+                    var val = parseFloat(record[fields[i]]);
+                    if (!isNaN(val) && val > 0) return val;
+                }
+            }
+            return null;
         }
 
+        // ============================================================
+        // Render property list
+        // ============================================================
         function renderList(properties) {
             var html = '';
             if (!properties || properties.length === 0) {
@@ -304,8 +303,7 @@
 
             properties.forEach(function(p, index) {
                 var priceStr = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
-                // Use the helper to format size
-                var sizeStr = formatSize(p.size_ha);
+                var sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
                 var title = p.title || 'Untitled';
                 var location = p.location || 'Nakuru';
                 var source = p.source || '';
@@ -329,6 +327,9 @@
             countBadge.textContent = properties.length + ' plots';
         }
 
+        // ============================================================
+        // Filter
+        // ============================================================
         function filterList() {
             var query = searchInput.value.toLowerCase().trim();
             if (!query) {
@@ -344,6 +345,9 @@
             renderList(filtered);
         }
 
+        // ============================================================
+        // Zoom to property
+        // ============================================================
         function zoomToProperty(index) {
             var p = allProperties[index];
             if (!p || !p.lat || !p.lng) return;
@@ -361,6 +365,62 @@
             });
         }
 
+        // ============================================================
+        // Load GeoJSON boundaries
+        // ============================================================
+        async function loadBoundaries() {
+            try {
+                // Sub-counties
+                var subRes = await fetch('/data/nakuru_subcounties.geojson');
+                if (subRes.ok) {
+                    var subData = await subRes.json();
+                    if (subcountyLayer) map.removeLayer(subcountyLayer);
+                    subcountyLayer = L.geoJSON(subData, {
+                        style: {
+                            fillColor: '#3b82f6',
+                            fillOpacity: 0.15,
+                            weight: 2,
+                            color: '#2563eb',
+                            dashArray: null
+                        },
+                        onEachFeature: function(feature, layer) {
+                            var name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || 'Sub-county';
+                            layer.bindPopup('<strong>' + name + '</strong><br/>Sub-county boundary');
+                        }
+                    }).addTo(map);
+                } else {
+                    console.warn('Sub-county GeoJSON not found at /data/nakuru_subcounties.geojson');
+                }
+
+                // Wards
+                var wardRes = await fetch('/data/nakuru_ward.geojson');
+                if (wardRes.ok) {
+                    var wardData = await wardRes.json();
+                    if (wardLayer) map.removeLayer(wardLayer);
+                    wardLayer = L.geoJSON(wardData, {
+                        style: {
+                            fill: false,
+                            weight: 1,
+                            color: '#94a3b8',
+                            dashArray: '5, 5',
+                            opacity: 0.6
+                        },
+                        onEachFeature: function(feature, layer) {
+                            var name = feature.properties?.NAME || feature.properties?.name || 'Ward';
+                            layer.bindPopup('<strong>' + name + '</strong><br/>Ward boundary');
+                        }
+                    }).addTo(map);
+                } else {
+                    console.warn('Ward GeoJSON not found at /data/nakuru_ward.geojson');
+                }
+            } catch (err) {
+                console.error('Error loading boundaries:', err);
+            }
+        }
+
+        // ============================================================
+        // Load data from Supabase
+        // ============================================================
         async function loadData() {
             if (!isRunning) {
                 refreshBtn.disabled = true;
@@ -370,11 +430,16 @@
             try {
                 var { data, error } = await supabase
                     .from('listings')
-                    .select('latitude, longitude, price, size_ha, title, location, source')
+                    .select('*')
                     .not('latitude', 'is', null)
                     .limit(1000);
 
                 if (error) throw error;
+
+                if (data && data.length > 0) {
+                    console.log('First listing record:', data[0]);
+                    console.log('Available fields:', Object.keys(data[0]));
+                }
 
                 if (!data || data.length === 0) {
                     allProperties = [];
@@ -387,66 +452,57 @@
                     return;
                 }
 
-                // Debug: log first few items
-                console.log('Sample data from Supabase:', data.slice(0, 3));
-
                 var points = [];
                 var markerData = [];
 
                 data.forEach(function(item) {
-                    // Parse size_ha as number
-                    var size = item.size_ha !== null && item.size_ha !== undefined ? parseFloat(item.size_ha) : null;
-                    // Also parse price
-                    var price = item.price !== null && item.price !== undefined ? parseFloat(item.price) : null;
-
-                    var lat = parseFloat(item.latitude);
-                    var lng = parseFloat(item.longitude);
-
-                    if (isNaN(lat) || isNaN(lng)) return;
-
-                    // For heatmap, we need price and size
-                    if (price && size > 0) {
-                        var pricePerHa = price / size;
+                    var size = getSize(item);
+                    if (item.latitude && item.longitude && item.price) {
+                        var pricePerHa = (size && size > 0) ? item.price / size : 0;
                         var intensity = Math.min(pricePerHa / 1000000, 1);
-                        points.push([lat, lng, intensity]);
+                        if (size && size > 0) {
+                            points.push([item.latitude, item.longitude, intensity]);
+                        }
+                        markerData.push({
+                            lat: item.latitude,
+                            lng: item.longitude,
+                            title: item.title || 'Plot',
+                            price: item.price,
+                            size_ha: size,
+                            location: item.location || 'Nakuru',
+                            source: item.source || '',
+                            pricePerHa: pricePerHa
+                        });
                     }
-
-                    markerData.push({
-                        lat: lat,
-                        lng: lng,
-                        title: item.title || 'Plot',
-                        price: price,
-                        size: size,  // store as number or null
-                        location: item.location || 'Nakuru',
-                        source: item.source || '',
-                        pricePerHa: (price && size > 0) ? price / size : null
-                    });
                 });
 
                 allProperties = markerData;
 
-                // Update map
+                // Update map layers
                 if (heatLayer) map.removeLayer(heatLayer);
                 if (markerLayer) map.removeLayer(markerLayer);
 
-                heatLayer = L.heatLayer(points, {
-                    radius: 35,
-                    blur: 20,
-                    maxZoom: 15,
-                    gradient: {
-                        0.1: '#22c55e',
-                        0.3: '#84cc16',
-                        0.5: '#eab308',
-                        0.7: '#f97316',
-                        0.9: '#ef4444'
-                    }
-                }).addTo(map);
+                if (points.length > 0) {
+                    heatLayer = L.heatLayer(points, {
+                        radius: 35,
+                        blur: 20,
+                        maxZoom: 15,
+                        gradient: {
+                            0.1: '#22c55e',
+                            0.3: '#84cc16',
+                            0.5: '#eab308',
+                            0.7: '#f97316',
+                            0.9: '#ef4444'
+                        }
+                    }).addTo(map);
+                }
 
                 markerLayer = L.layerGroup();
                 markerData.forEach(function(m) {
                     var popupContent = '<b>' + m.title + '</b>' +
-                        '<br><b>Price:</b> ' + (m.price ? 'KSh ' + m.price.toLocaleString() : 'N/A') +
-                        '<br><b>Size:</b> ' + formatSize(m.size) +
+                        '<br><b>Price:</b> KSh ' + m.price.toLocaleString() +
+                        (m.size_ha ? '<br><b>Size:</b> ' + m.size_ha.toFixed(2) + ' Ha' : '') +
+                        (m.pricePerHa > 0 ? '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString() : '') +
                         (m.location ? '<br><b>Location:</b> ' + m.location : '');
                     var circle = L.circleMarker([m.lat, m.lng], {
                         radius: 5,
@@ -479,19 +535,34 @@
             }
         }
 
+        // ============================================================
+        // Refresh (loads boundaries + data)
+        // ============================================================
         async function refreshMap() {
             if (isRunning) return;
             isRunning = true;
             setStatus('running', 'Refreshing…');
             showToast('Refreshing data…', 'info');
+
+            // Load boundaries (if not already loaded)
+            if (!subcountyLayer) {
+                await loadBoundaries();
+            }
+
             await loadData();
             setStatus('idle', 'Idle');
             isRunning = false;
         }
 
+        // ============================================================
+        // Events & Init
+        // ============================================================
         searchInput.addEventListener('input', filterList);
 
-        loadData();
+        // Load boundaries first, then data
+        loadBoundaries().then(function() {
+            loadData();
+        });
 
         setInterval(function() {
             if (!isRunning) loadData();
