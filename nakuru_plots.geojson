@@ -1158,6 +1158,24 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
+          36.08,
+          -0.3031
+        ]
+      },
+      "properties": {
+        "id": 68,
+        "title": "Land for sale Nakuru Greenlands",
+        "price": 499000.0,
+        "size_ha": 0.0506,
+        "location": "",
+        "source": "amgrealtors"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
           36.028548,
           -0.0628353
         ]
@@ -1277,6 +1295,42 @@
         "size_ha": 0.0506,
         "location": "Nakuru",
         "source": "usernameproperties"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.08,
+          -0.3031
+        ]
+      },
+      "properties": {
+        "id": 69,
+        "title": "Land for sale Nakuru Breeze",
+        "price": 550000.0,
+        "size_ha": 0.0506,
+        "location": "",
+        "source": "amgrealtors"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.08,
+          -0.3031
+        ]
+      },
+      "properties": {
+        "id": 70,
+        "title": "Land for sale Nakuru Vantage Gardens",
+        "price": 449000.0,
+        "size_ha": 0.0506,
+        "location": "",
+        "source": "amgrealtors"
       }
     }
   ]
