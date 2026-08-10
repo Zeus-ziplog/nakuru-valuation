@@ -19,7 +19,6 @@
             color: #1e293b;
         }
 
-        /* ===== SIDEBAR ===== */
         #sidebar {
             width: 400px;
             min-width: 400px;
@@ -111,7 +110,6 @@
         .status-badge.error { background: #ef4444; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        /* ===== PROPERTY LIST ===== */
         #property-list {
             flex: 1;
             overflow-y: auto;
@@ -175,7 +173,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* ===== MAP ===== */
         #map-container {
             flex: 1;
             position: relative;
@@ -185,7 +182,6 @@
             width: 100%;
         }
 
-        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -208,7 +204,6 @@
         .toast.success { background: rgba(34,197,94,0.9); }
         .toast.info { background: rgba(37,99,235,0.9); }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             #sidebar {
                 width: 100%;
@@ -226,7 +221,6 @@
 </head>
 <body>
 
-    <!-- ===== SIDEBAR ===== -->
     <div id="sidebar">
         <div id="sidebar-header">
             <h1>Nakuru <span>Valuation</span></h1>
@@ -247,12 +241,10 @@
         </div>
     </div>
 
-    <!-- ===== MAP ===== -->
     <div id="map-container">
         <div id="map"></div>
     </div>
 
-    <!-- ===== TOAST ===== -->
     <div id="toast" class="toast">Loading...</div>
 
     <script>
@@ -274,16 +266,12 @@
         var isRunning = false;
         var allProperties = [];
 
-        // DOM refs
         var propertyList = document.getElementById('property-list');
         var countBadge = document.getElementById('count-badge');
         var searchInput = document.getElementById('searchInput');
         var toastEl = document.getElementById('toast');
         var refreshBtn = document.getElementById('refreshBtn');
 
-        // ============================================================
-        // Helpers
-        // ============================================================
         function showToast(msg, type) {
             type = type || '';
             toastEl.textContent = msg;
@@ -297,9 +285,14 @@
             document.getElementById('statusLabel').textContent = message;
         }
 
-        // ============================================================
-        // Render property list
-        // ============================================================
+        // Helper to format size
+        function formatSize(size) {
+            if (size === null || size === undefined || size === '') return 'N/A';
+            var num = parseFloat(size);
+            if (isNaN(num) || num <= 0) return 'N/A';
+            return num.toFixed(2) + ' Ha';
+        }
+
         function renderList(properties) {
             var html = '';
             if (!properties || properties.length === 0) {
@@ -311,7 +304,8 @@
 
             properties.forEach(function(p, index) {
                 var priceStr = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
-                var sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
+                // Use the helper to format size
+                var sizeStr = formatSize(p.size_ha);
                 var title = p.title || 'Untitled';
                 var location = p.location || 'Nakuru';
                 var source = p.source || '';
@@ -335,9 +329,6 @@
             countBadge.textContent = properties.length + ' plots';
         }
 
-        // ============================================================
-        // Filter
-        // ============================================================
         function filterList() {
             var query = searchInput.value.toLowerCase().trim();
             if (!query) {
@@ -353,9 +344,6 @@
             renderList(filtered);
         }
 
-        // ============================================================
-        // Zoom to property
-        // ============================================================
         function zoomToProperty(index) {
             var p = allProperties[index];
             if (!p || !p.lat || !p.lng) return;
@@ -373,9 +361,6 @@
             });
         }
 
-        // ============================================================
-        // Load data from Supabase
-        // ============================================================
         async function loadData() {
             if (!isRunning) {
                 refreshBtn.disabled = true;
@@ -402,25 +387,40 @@
                     return;
                 }
 
+                // Debug: log first few items
+                console.log('Sample data from Supabase:', data.slice(0, 3));
+
                 var points = [];
                 var markerData = [];
 
                 data.forEach(function(item) {
-                    if (item.latitude && item.longitude && item.price && item.size_ha > 0) {
-                        var pricePerHa = item.price / item.size_ha;
+                    // Parse size_ha as number
+                    var size = item.size_ha !== null && item.size_ha !== undefined ? parseFloat(item.size_ha) : null;
+                    // Also parse price
+                    var price = item.price !== null && item.price !== undefined ? parseFloat(item.price) : null;
+
+                    var lat = parseFloat(item.latitude);
+                    var lng = parseFloat(item.longitude);
+
+                    if (isNaN(lat) || isNaN(lng)) return;
+
+                    // For heatmap, we need price and size
+                    if (price && size > 0) {
+                        var pricePerHa = price / size;
                         var intensity = Math.min(pricePerHa / 1000000, 1);
-                        points.push([item.latitude, item.longitude, intensity]);
-                        markerData.push({
-                            lat: item.latitude,
-                            lng: item.longitude,
-                            title: item.title || 'Plot',
-                            price: item.price,
-                            size: item.size_ha,
-                            location: item.location || 'Nakuru',
-                            source: item.source || '',
-                            pricePerHa: pricePerHa
-                        });
+                        points.push([lat, lng, intensity]);
                     }
+
+                    markerData.push({
+                        lat: lat,
+                        lng: lng,
+                        title: item.title || 'Plot',
+                        price: price,
+                        size: size,  // store as number or null
+                        location: item.location || 'Nakuru',
+                        source: item.source || '',
+                        pricePerHa: (price && size > 0) ? price / size : null
+                    });
                 });
 
                 allProperties = markerData;
@@ -445,9 +445,8 @@
                 markerLayer = L.layerGroup();
                 markerData.forEach(function(m) {
                     var popupContent = '<b>' + m.title + '</b>' +
-                        '<br><b>Price:</b> KSh ' + m.price.toLocaleString() +
-                        '<br><b>Size:</b> ' + m.size.toFixed(2) + ' Ha' +
-                        '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString() +
+                        '<br><b>Price:</b> ' + (m.price ? 'KSh ' + m.price.toLocaleString() : 'N/A') +
+                        '<br><b>Size:</b> ' + formatSize(m.size) +
                         (m.location ? '<br><b>Location:</b> ' + m.location : '');
                     var circle = L.circleMarker([m.lat, m.lng], {
                         radius: 5,
@@ -480,9 +479,6 @@
             }
         }
 
-        // ============================================================
-        // Refresh
-        // ============================================================
         async function refreshMap() {
             if (isRunning) return;
             isRunning = true;
@@ -493,9 +489,6 @@
             isRunning = false;
         }
 
-        // ============================================================
-        // Events & Init
-        // ============================================================
         searchInput.addEventListener('input', filterList);
 
         loadData();
