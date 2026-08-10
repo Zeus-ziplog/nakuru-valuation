@@ -154,13 +154,8 @@
     </div>
 
     <script>
-        // ============================================================
-        // CONFIGURATION
-        // ============================================================
         var SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
-        var GITHUB_REPO = 'Zeus-ziplog/nakuru-valuation';
-        // ============================================================
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         var map = L.map('map').setView([-0.3031, 36.0800], 10);
@@ -172,7 +167,6 @@
         var heatLayer = null;
         var markerLayer = null;
         var isRunning = false;
-        var GITHUB_TOKEN = null;
 
         function showToast(msg, type) {
             type = type || '';
@@ -188,29 +182,13 @@
             document.getElementById('statusLabel').textContent = message;
         }
 
-        // Fetch token from Vercel serverless function
-        async function getToken() {
-            try {
-                var response = await fetch('/api/token');
-                if (response.ok) {
-                    var data = await response.json();
-                    GITHUB_TOKEN = data.token;
-                    console.log('✅ Token fetched:', GITHUB_TOKEN ? 'Present' : 'Missing');
-                    return true;
-                } else {
-                    console.error('Failed to fetch token:', response.status);
-                    return false;
-                }
-            } catch (err) {
-                console.error('Error fetching token:', err);
-                return false;
-            }
-        }
-
         async function loadHeatmap() {
             var btn = document.getElementById('refreshBtn');
             var countEl = document.getElementById('count');
-            if (!isRunning) { btn.disabled = true; btn.innerHTML = '⏳ Loading...'; }
+            if (!isRunning) { 
+                btn.disabled = true; 
+                btn.innerHTML = '⏳ Loading...'; 
+            }
             
             try {
                 var { data, error } = await supabase
@@ -222,20 +200,28 @@
                 if (error) throw error;
                 if (!data || data.length === 0) {
                     countEl.textContent = '0';
-                    showToast('No data found. Click Refresh Data to run scraper.', 'info');
-                    if (!isRunning) { btn.disabled = false; btn.innerHTML = '🔄 Refresh Data'; }
+                    showToast('No data found. Click Refresh Data to scrape.', 'info');
+                    if (!isRunning) { 
+                        btn.disabled = false; 
+                        btn.innerHTML = '🔄 Refresh Data'; 
+                    }
                     return;
                 }
 
-                var points = [], markers = [];
+                var points = [];
+                var markers = [];
+
                 data.forEach(function(item) {
                     if (item.latitude && item.longitude && item.price && item.size_ha > 0) {
                         var pricePerHa = item.price / item.size_ha;
                         points.push([item.latitude, item.longitude, Math.min(pricePerHa / 1000000, 1)]);
                         markers.push({
-                            lat: item.latitude, lng: item.longitude,
+                            lat: item.latitude,
+                            lng: item.longitude,
                             title: item.title || 'Plot',
-                            price: item.price, size: item.size_ha, pricePerHa: pricePerHa
+                            price: item.price,
+                            size: item.size_ha,
+                            pricePerHa: pricePerHa
                         });
                     }
                 });
@@ -244,94 +230,91 @@
                 if (markerLayer) map.removeLayer(markerLayer);
 
                 heatLayer = L.heatLayer(points, {
-                    radius: 35, blur: 20, maxZoom: 15,
-                    gradient: { 0.1: '#00ff00', 0.3: '#aadd00', 0.5: '#ffff00', 0.7: '#ff8800', 0.9: '#ff0000' }
+                    radius: 35,
+                    blur: 20,
+                    maxZoom: 15,
+                    gradient: {
+                        0.1: '#00ff00',
+                        0.3: '#aadd00',
+                        0.5: '#ffff00',
+                        0.7: '#ff8800',
+                        0.9: '#ff0000'
+                    }
                 }).addTo(map);
 
                 markerLayer = L.layerGroup();
                 markers.forEach(function(m) {
-                    var popup = '<b>' + m.title + '</b><br>Price: KSh ' + m.price.toLocaleString() +
-                        '<br>Size: ' + m.size.toFixed(2) + ' Ha<br>Price/Ha: KSh ' + Math.round(m.pricePerHa).toLocaleString();
-                    L.circleMarker([m.lat, m.lng], { radius: 5, color: '#FF0000', fillColor: '#FF0000', fillOpacity: 0.5, weight: 1.5 })
-                        .bindPopup(popup).addTo(markerLayer);
+                    var popup = '<b>' + m.title + '</b>' +
+                        '<br><b>Price:</b> KSh ' + m.price.toLocaleString() +
+                        '<br><b>Size:</b> ' + m.size.toFixed(2) + ' Ha' +
+                        '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString();
+                    
+                    L.circleMarker([m.lat, m.lng], {
+                        radius: 5,
+                        color: '#FF0000',
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.5,
+                        weight: 1.5
+                    }).bindPopup(popup).addTo(markerLayer);
                 });
                 markerLayer.addTo(map);
 
                 countEl.textContent = points.length;
                 showToast('✅ ' + points.length + ' plots loaded', 'success');
+                
                 if (points.length > 0) {
-                    map.fitBounds(L.latLngBounds(points.map(function(p) { return [p[0], p[1]]; })), { padding: [50, 50] });
+                    var bounds = L.latLngBounds(points.map(function(p) { return [p[0], p[1]]; }));
+                    map.fitBounds(bounds, { padding: [50, 50] });
                 }
             } catch (err) {
                 console.error(err);
-                showToast('❌ Error loading data', 'error');
+                showToast('❌ Error loading data: ' + err.message, 'error');
             }
-            if (!isRunning) { btn.disabled = false; btn.innerHTML = '🔄 Refresh Data'; }
+            if (!isRunning) { 
+                btn.disabled = false; 
+                btn.innerHTML = '🔄 Refresh Data'; 
+            }
         }
 
         async function triggerScraper() {
             if (isRunning) return;
             
-            // Get token first
-            if (!GITHUB_TOKEN) {
-                showToast('🔄 Connecting...', 'info');
-                var success = await getToken();
-                if (!success || !GITHUB_TOKEN) {
-                    showToast('❌ Service unavailable. Please refresh.', 'error');
-                    setStatus('error', 'Auth failed');
-                    return;
-                }
-            }
-            
             var btn = document.getElementById('refreshBtn');
             isRunning = true;
             btn.disabled = true;
-            btn.innerHTML = '⏳ Running...';
-            setStatus('running', 'Updating...');
-            showToast('🔄 Updating data... Please wait.', 'info');
+            btn.innerHTML = '⏳ Scraping...';
+            setStatus('running', 'Scraping...');
+            showToast('🔄 Running scraper... This may take 1-2 minutes.', 'info');
             
             try {
-                var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/actions/workflows/scraper.yml/dispatches', {
+                var response = await fetch('/api/refresh', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'token ' + GITHUB_TOKEN,
-                        'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ ref: 'main' })
+                    }
                 });
-
-                if (!response.ok) {
-                    var errorText = await response.text();
-                    console.error('GitHub API error:', response.status, errorText);
-                    
-                    if (response.status === 401 || response.status === 403) {
-                        GITHUB_TOKEN = null; // Clear so it fetches again
-                        showToast('❌ Authentication failed. Please refresh.', 'error');
-                        setStatus('error', 'Auth failed');
-                        isRunning = false;
+                
+                var data = await response.json();
+                
+                if (data.success) {
+                    showToast('✅ Scraper completed! Refreshing map...', 'success');
+                    setTimeout(function() {
+                        loadHeatmap();
+                        setStatus('idle', 'Idle');
                         btn.disabled = false;
                         btn.innerHTML = '🔄 Refresh Data';
-                        return;
-                    }
-                    throw new Error('API error: ' + response.status);
-                }
-
-                showToast('✅ Update started! Refreshing in 1-2 min.', 'success');
-                setStatus('running', 'Processing...');
-                btn.innerHTML = '⏳ Running...';
-
-                setTimeout(function() {
-                    loadHeatmap();
-                    setStatus('idle', 'Idle');
+                        isRunning = false;
+                        showToast('✅ Data refreshed successfully!', 'success');
+                    }, 2000);
+                } else {
+                    showToast('❌ Error: ' + (data.error || 'Unknown error'), 'error');
+                    setStatus('error', 'Error');
                     btn.disabled = false;
                     btn.innerHTML = '🔄 Refresh Data';
                     isRunning = false;
-                    showToast('✅ Data updated successfully!', 'success');
-                }, 60000);
-
+                }
             } catch (err) {
-                console.error('Error:', err);
+                console.error(err);
                 showToast('❌ Error: ' + err.message, 'error');
                 setStatus('error', 'Error');
                 btn.disabled = false;
@@ -340,15 +323,13 @@
             }
         }
 
-        // Initialize
-        async function init() {
-            await getToken();
-            loadHeatmap();
-        }
-        init();
+        loadHeatmap();
 
-        // Auto-refresh every 5 minutes
-        setInterval(function() { if (!isRunning) loadHeatmap(); }, 300000);
+        setInterval(function() { 
+            if (!isRunning) {
+                loadHeatmap(); 
+            }
+        }, 300000);
     </script>
 </body>
 </html>
