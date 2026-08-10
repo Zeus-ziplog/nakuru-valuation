@@ -8,6 +8,8 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,9 +39,12 @@ jobs:
           python export_geojson.py
 
       - name: Commit and push GeoJSON update
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${PAT_TOKEN}@github.com/${{ github.repository }}
           git add nakuru_plots.geojson
           git diff --quiet && git diff --staged --quiet || git commit -m "Update GeoJSON after scraper run [skip ci]"
           git push
