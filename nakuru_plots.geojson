@@ -1,0 +1,1283 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 1,
+        "title": null,
+        "price": 490000.0,
+        "size_ha": 4.0,
+        "location": null,
+        "source": "buyrentkenya"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.581838,
+          -0.9792274
+        ]
+      },
+      "properties": {
+        "id": 2,
+        "title": null,
+        "price": 2500000.0,
+        "size_ha": 0.05,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0656369,
+          -0.2854819
+        ]
+      },
+      "properties": {
+        "id": 3,
+        "title": null,
+        "price": 80000000.0,
+        "size_ha": 0.4047,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 4,
+        "title": null,
+        "price": 60000000.0,
+        "size_ha": 1.2141,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1633675,
+          -0.2986237
+        ]
+      },
+      "properties": {
+        "id": 5,
+        "title": null,
+        "price": 12500000.0,
+        "size_ha": 3.2376,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.7226702,
+          -0.154714
+        ]
+      },
+      "properties": {
+        "id": 6,
+        "title": null,
+        "price": 45000000.0,
+        "size_ha": 0.8094,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.2098304,
+          -0.4890675
+        ]
+      },
+      "properties": {
+        "id": 7,
+        "title": null,
+        "price": 6400000.0,
+        "size_ha": 1.6188,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4257017,
+          -0.7879608
+        ]
+      },
+      "properties": {
+        "id": 8,
+        "title": null,
+        "price": 700000000.0,
+        "size_ha": 10.1175,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0584119,
+          -0.2783492
+        ]
+      },
+      "properties": {
+        "id": 9,
+        "title": null,
+        "price": 42000000.0,
+        "size_ha": 8.094,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 10,
+        "title": null,
+        "price": 6900000.0,
+        "size_ha": 2.63055,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 11,
+        "title": null,
+        "price": 850000.0,
+        "size_ha": 10.1175,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 12,
+        "title": null,
+        "price": 770000.0,
+        "size_ha": 4.047,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 13,
+        "title": null,
+        "price": 2000000.0,
+        "size_ha": 51.3969,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 14,
+        "title": null,
+        "price": 1500000.0,
+        "size_ha": 28.329,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 15,
+        "title": null,
+        "price": 9000000.0,
+        "size_ha": 40.47,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 16,
+        "title": null,
+        "price": 490000.0,
+        "size_ha": 4.0,
+        "location": null,
+        "source": "buyrentkenya"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.2098304,
+          -0.4890675
+        ]
+      },
+      "properties": {
+        "id": 17,
+        "title": null,
+        "price": 6400000.0,
+        "size_ha": 1.6188,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.581838,
+          -0.9792274
+        ]
+      },
+      "properties": {
+        "id": 18,
+        "title": null,
+        "price": 2500000.0,
+        "size_ha": 0.05,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0656369,
+          -0.2854819
+        ]
+      },
+      "properties": {
+        "id": 19,
+        "title": null,
+        "price": 80000000.0,
+        "size_ha": 0.4047,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 20,
+        "title": null,
+        "price": 60000000.0,
+        "size_ha": 1.2141,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1633675,
+          -0.2986237
+        ]
+      },
+      "properties": {
+        "id": 21,
+        "title": null,
+        "price": 12500000.0,
+        "size_ha": 3.2376,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.7226702,
+          -0.154714
+        ]
+      },
+      "properties": {
+        "id": 22,
+        "title": null,
+        "price": 45000000.0,
+        "size_ha": 0.8094,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4257017,
+          -0.7879608
+        ]
+      },
+      "properties": {
+        "id": 23,
+        "title": null,
+        "price": 700000000.0,
+        "size_ha": 10.1175,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0584119,
+          -0.2783492
+        ]
+      },
+      "properties": {
+        "id": 24,
+        "title": null,
+        "price": 42000000.0,
+        "size_ha": 8.094,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 25,
+        "title": null,
+        "price": 6900000.0,
+        "size_ha": 2.63055,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 26,
+        "title": null,
+        "price": 850000.0,
+        "size_ha": 10.1175,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 27,
+        "title": null,
+        "price": 770000.0,
+        "size_ha": 4.047,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 28,
+        "title": null,
+        "price": 2000000.0,
+        "size_ha": 51.3969,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 29,
+        "title": null,
+        "price": 1500000.0,
+        "size_ha": 28.329,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 30,
+        "title": null,
+        "price": 9000000.0,
+        "size_ha": 40.47,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.7111659,
+          -0.3048962
+        ]
+      },
+      "properties": {
+        "id": 31,
+        "title": null,
+        "price": 1500000.0,
+        "size_ha": 9.7128,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0584119,
+          -0.2783492
+        ]
+      },
+      "properties": {
+        "id": 32,
+        "title": null,
+        "price": 42000000.0,
+        "size_ha": 8.094,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.2225756,
+          -0.3843433
+        ]
+      },
+      "properties": {
+        "id": 33,
+        "title": null,
+        "price": 1800000.0,
+        "size_ha": 1.6188,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 34,
+        "title": null,
+        "price": 490000.0,
+        "size_ha": 4.0,
+        "location": null,
+        "source": "buyrentkenya"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.2361646,
+          -0.5414303
+        ]
+      },
+      "properties": {
+        "id": 35,
+        "title": null,
+        "price": 15000000.0,
+        "size_ha": 2.0235,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0656369,
+          -0.2854819
+        ]
+      },
+      "properties": {
+        "id": 36,
+        "title": null,
+        "price": 80000000.0,
+        "size_ha": 0.4047,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.028548,
+          -0.0628353
+        ]
+      },
+      "properties": {
+        "id": 37,
+        "title": null,
+        "price": 4000000.0,
+        "size_ha": 1.6188,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.9626823,
+          -0.1670583
+        ]
+      },
+      "properties": {
+        "id": 38,
+        "title": null,
+        "price": 11000000.0,
+        "size_ha": 0.2023,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.9626823,
+          -0.1670583
+        ]
+      },
+      "properties": {
+        "id": 39,
+        "title": null,
+        "price": 5000000.0,
+        "size_ha": 2.0235,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 40,
+        "title": null,
+        "price": 6000000.0,
+        "size_ha": 0.2023,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 41,
+        "title": null,
+        "price": 60000000.0,
+        "size_ha": 1.2141,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.028548,
+          -0.0628353
+        ]
+      },
+      "properties": {
+        "id": 42,
+        "title": null,
+        "price": 6000000.0,
+        "size_ha": 0.9308099999999999,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.2361646,
+          -0.5414303
+        ]
+      },
+      "properties": {
+        "id": 43,
+        "title": null,
+        "price": 3500000.0,
+        "size_ha": 1.2141,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.8620545,
+          -0.1736647
+        ]
+      },
+      "properties": {
+        "id": 44,
+        "title": null,
+        "price": 850000.0,
+        "size_ha": 3.2376,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.028548,
+          -0.0628353
+        ]
+      },
+      "properties": {
+        "id": 45,
+        "title": null,
+        "price": 5000000.0,
+        "size_ha": 0.8094,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.7226702,
+          -0.154714
+        ]
+      },
+      "properties": {
+        "id": 46,
+        "title": null,
+        "price": 45000000.0,
+        "size_ha": 0.2023,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.028548,
+          -0.0628353
+        ]
+      },
+      "properties": {
+        "id": 47,
+        "title": null,
+        "price": 3000000.0,
+        "size_ha": 1.2141,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.028548,
+          -0.0628353
+        ]
+      },
+      "properties": {
+        "id": 48,
+        "title": null,
+        "price": 14000000.0,
+        "size_ha": 20.235,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.2361646,
+          -0.5414303
+        ]
+      },
+      "properties": {
+        "id": 49,
+        "title": null,
+        "price": 2000000.0,
+        "size_ha": 202.35,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.9803891,
+          -0.0311793
+        ]
+      },
+      "properties": {
+        "id": 50,
+        "title": null,
+        "price": 3200000.0,
+        "size_ha": 2.8329,
+        "location": null,
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4411719,
+          -0.7483605
+        ]
+      },
+      "properties": {
+        "id": 51,
+        "title": null,
+        "price": 7000000008.0,
+        "size_ha": 10.1175,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.9204429,
+          -0.3847274
+        ]
+      },
+      "properties": {
+        "id": 52,
+        "title": null,
+        "price": 18000001.0,
+        "size_ha": 0.2023,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0584119,
+          -0.2783492
+        ]
+      },
+      "properties": {
+        "id": 53,
+        "title": null,
+        "price": 420000009.0,
+        "size_ha": 8.094,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 54,
+        "title": null,
+        "price": 69000008.0,
+        "size_ha": 2.63055,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 55,
+        "title": null,
+        "price": 8500006.0,
+        "size_ha": 10.1175,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 56,
+        "title": null,
+        "price": 7700005.0,
+        "size_ha": 4.047,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 57,
+        "title": null,
+        "price": 20000004.0,
+        "size_ha": 51.3969,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 58,
+        "title": null,
+        "price": 15000003.0,
+        "size_ha": 28.329,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1437369,
+          -0.4172695
+        ]
+      },
+      "properties": {
+        "id": 59,
+        "title": null,
+        "price": 90000001.0,
+        "size_ha": 40.47,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.7111659,
+          -0.3048962
+        ]
+      },
+      "properties": {
+        "id": 60,
+        "title": null,
+        "price": 15000005.0,
+        "size_ha": 9.7128,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0584119,
+          -0.2783492
+        ]
+      },
+      "properties": {
+        "id": 61,
+        "title": null,
+        "price": 12000006.0,
+        "size_ha": 0.0506,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0584119,
+          -0.2783492
+        ]
+      },
+      "properties": {
+        "id": 62,
+        "title": null,
+        "price": 420000003.0,
+        "size_ha": 8.094,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.2225756,
+          -0.3843433
+        ]
+      },
+      "properties": {
+        "id": 63,
+        "title": null,
+        "price": 18000008.0,
+        "size_ha": 0.1012,
+        "location": null,
+        "source": "propertypro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0712048,
+          -0.2802724
+        ]
+      },
+      "properties": {
+        "id": 66,
+        "title": "5 ACRES FARM LAND | NGATA, NAKURU",
+        "price": 6500000.0,
+        "size_ha": 2.0235,
+        "location": "Nakuru",
+        "source": "advancedvaluers"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.028548,
+          -0.0628353
+        ]
+      },
+      "properties": {
+        "id": 64,
+        "title": "2 Acres for Sale at Mercy Njeri",
+        "price": 14000000.0,
+        "size_ha": 0.8094,
+        "location": "Rongai, Menengai West",
+        "source": "jiji"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0712048,
+          -0.2802724
+        ]
+      },
+      "properties": {
+        "id": 67,
+        "title": "1 ACRE PRIME LAND FOR SALE | MIMWAITA \u2013 SOBEA",
+        "price": 6000000.0,
+        "size_ha": 0.4047,
+        "location": "Nakuru",
+        "source": "advancedvaluers"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0712048,
+          -0.2802724
+        ]
+      },
+      "properties": {
+        "id": 71,
+        "title": "Nakuru Grove Gardens Phase 2",
+        "price": 450000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru",
+        "source": "usernameproperties"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0712048,
+          -0.2802724
+        ]
+      },
+      "properties": {
+        "id": 72,
+        "title": "Nakuru Opal Estate Annex",
+        "price": 750000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru",
+        "source": "usernameproperties"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0712048,
+          -0.2802724
+        ]
+      },
+      "properties": {
+        "id": 73,
+        "title": "Nakuru Grove Gardens",
+        "price": 350000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru",
+        "source": "usernameproperties"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0712048,
+          -0.2802724
+        ]
+      },
+      "properties": {
+        "id": 74,
+        "title": "Havanna Estate Nakuru Phase 6 Annex",
+        "price": 950000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru",
+        "source": "usernameproperties"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0712048,
+          -0.2802724
+        ]
+      },
+      "properties": {
+        "id": 75,
+        "title": "Nakuru Harmony Gardens",
+        "price": 650000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru",
+        "source": "usernameproperties"
+      }
+    }
+  ]
+}
