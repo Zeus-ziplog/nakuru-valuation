@@ -417,7 +417,7 @@
                     const price = avgPrices[name] || 0;
                     return {
                         fillColor: price > 0 ? colorScale(price).hex() : '#f1f5f9',
-                        fillOpacity: 0.15,
+                        fillOpacity: 0.0,   // Completely transparent – so wards are visible
                         weight: 2,
                         color: '#0f172a'
                     };
@@ -440,7 +440,6 @@
                 };
 
                 subcountyLayer = L.geoJSON(subData, { style, onEachFeature }).addTo(map);
-                // Explicitly set low z-index
                 subcountyLayer.setZIndex(0);
 
                 // ---- Legend ----
@@ -465,26 +464,51 @@
                     wardLayer = L.geoJSON(wardData, {
                         style: {
                             fill: false,
-                            weight: 3,
-                            color: '#00ff00',      // BRIGHT GREEN – impossible to miss
-                            dashArray: null,       // Solid line first
+                            weight: 5,
+                            color: '#00ff00',
+                            dashArray: null,
                             opacity: 1.0
                         },
                         onEachFeature: function(feature, layer) {
                             const name = feature.properties?.NAME || feature.properties?.name || 'Ward';
                             layer.bindPopup('<strong>' + name + '</strong><br/>Ward boundary');
-                            // Log first geometry to verify
                             if (wardData.features.indexOf(feature) === 0) {
                                 console.log('First ward geometry:', feature.geometry);
                             }
                         }
                     }).addTo(map);
-                    // Brute force: high z-index and bring to front
                     wardLayer.setZIndex(1000);
                     wardLayer.bringToFront();
+
+                    // ---- Zoom to ward bounds (so you see them) ----
+                    const wardBounds = wardLayer.getBounds();
+                    console.log('Ward bounds:', wardBounds);
+                    if (wardBounds.isValid()) {
+                        map.fitBounds(wardBounds, { padding: [50, 50] });
+                    } else {
+                        console.warn('Ward bounds are invalid – no geometry?');
+                    }
+
+                    // ---- Test: add a red circle at the center of each ward ----
+                    wardData.features.forEach(function(feature, i) {
+                        if (feature.geometry) {
+                            // For MultiPolygon, get first polygon first coordinate
+                            try {
+                                const coords = feature.geometry.coordinates[0][0][0];
+                                if (coords && coords.length === 2) {
+                                    L.circleMarker([coords[1], coords[0]], {
+                                        radius: 6,
+                                        color: '#ff0000',
+                                        fillColor: '#ff0000',
+                                        fillOpacity: 0.8
+                                    }).addTo(map)
+                                      .bindPopup('Test marker for ' + (feature.properties?.NAME || 'Ward'));
+                                }
+                            } catch(e) {}
+                        }
+                    });
+
                     console.log('✅ Wards added with high z-index');
-                    // Log bounds to see if layer has any data
-                    console.log('Ward bounds:', wardLayer.getBounds());
                 } else {
                     console.warn('Ward GeoJSON not found at /nakuru_ward.geojson');
                 }
@@ -632,7 +656,7 @@
 
                 showToast('Loaded ' + data.length + ' plots', 'success');
 
-                // ---- After data loaded, render boundaries (choropleth) ----
+                // ---- After data loaded, render boundaries ----
                 await loadBoundaries();
 
             } catch (err) {
