@@ -403,6 +403,7 @@
                     return;
                 }
                 const subData = await subRes.json();
+                console.log('Sub-county features:', subData.features.length);
 
                 if (subcountyLayer) map.removeLayer(subcountyLayer);
 
@@ -416,7 +417,7 @@
                     const price = avgPrices[name] || 0;
                     return {
                         fillColor: price > 0 ? colorScale(price).hex() : '#f1f5f9',
-                        fillOpacity: 0.2,        // Much more transparent
+                        fillOpacity: 0.15,
                         weight: 2,
                         color: '#0f172a'
                     };
@@ -439,6 +440,8 @@
                 };
 
                 subcountyLayer = L.geoJSON(subData, { style, onEachFeature }).addTo(map);
+                // Explicitly set low z-index
+                subcountyLayer.setZIndex(0);
 
                 // ---- Legend ----
                 const legendHtml = `
@@ -457,22 +460,31 @@
                 const wardRes = await fetch('/nakuru_ward.geojson');
                 if (wardRes.ok) {
                     const wardData = await wardRes.json();
+                    console.log('Ward features:', wardData.features.length);
                     if (wardLayer) map.removeLayer(wardLayer);
                     wardLayer = L.geoJSON(wardData, {
                         style: {
                             fill: false,
-                            weight: 2.5,
-                            color: '#dc2626',
-                            dashArray: '4, 4',
+                            weight: 3,
+                            color: '#00ff00',      // BRIGHT GREEN – impossible to miss
+                            dashArray: null,       // Solid line first
                             opacity: 1.0
                         },
                         onEachFeature: function(feature, layer) {
                             const name = feature.properties?.NAME || feature.properties?.name || 'Ward';
                             layer.bindPopup('<strong>' + name + '</strong><br/>Ward boundary');
+                            // Log first geometry to verify
+                            if (wardData.features.indexOf(feature) === 0) {
+                                console.log('First ward geometry:', feature.geometry);
+                            }
                         }
                     }).addTo(map);
-                    console.log('✅ Wards loaded from /nakuru_ward.geojson');
-                    console.log('Number of ward features:', wardData.features.length);
+                    // Brute force: high z-index and bring to front
+                    wardLayer.setZIndex(1000);
+                    wardLayer.bringToFront();
+                    console.log('✅ Wards added with high z-index');
+                    // Log bounds to see if layer has any data
+                    console.log('Ward bounds:', wardLayer.getBounds());
                 } else {
                     console.warn('Ward GeoJSON not found at /nakuru_ward.geojson');
                 }
