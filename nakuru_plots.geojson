@@ -1332,6 +1332,78 @@
         "location": "",
         "source": "amgrealtors"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1455815,
+          -0.3424494
+        ]
+      },
+      "properties": {
+        "id": 85,
+        "title": "Land for Lease",
+        "price": 700000.0,
+        "size_ha": 4.047,
+        "location": "Nakuru East,\n                                                                                Nakuru",
+        "source": "pigiame"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.1455815,
+          -0.3424494
+        ]
+      },
+      "properties": {
+        "id": 86,
+        "title": "Prime Plot in Pema Estate, Nakuru, 50*100 Plot for Sale",
+        "price": 2250000.0,
+        "size_ha": 0.08094000000000001,
+        "location": "Nakuru East,\n                                                                                Nakuru",
+        "source": "pigiame"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.4387834,
+          -0.7224425
+        ]
+      },
+      "properties": {
+        "id": 87,
+        "title": "Stone House with Spacious Garden and Single-Story Design",
+        "price": 4500000.0,
+        "size_ha": 0.8094,
+        "location": "Naivasha,\n                                                                                Nakuru",
+        "source": "pigiame"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.0584119,
+          -0.2783492
+        ]
+      },
+      "properties": {
+        "id": 88,
+        "title": "10 Acres for Lease in Nakuru West",
+        "price": 80000.0,
+        "size_ha": 4.047,
+        "location": "Nakuru Town,\n                                                                                Nakuru",
+        "source": "pigiame"
+      }
     }
   ]
 }
