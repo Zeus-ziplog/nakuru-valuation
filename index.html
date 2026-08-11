@@ -398,7 +398,7 @@
         async function loadBoundaries() {
             try {
                 // ---- Sub-counties (bottom layer, transparent fill) ----
-                var subRes = await fetch('/data/nakuru_subcounties.geojson');
+                var subRes = await fetch('/nakuru_subcounties.geojson');
                 if (!subRes.ok) {
                     console.warn('Sub-county GeoJSON not found at /nakuru_subcounties.geojson');
                     return;
@@ -672,4 +672,5 @@
 
 </body>
 </html>
+
 
