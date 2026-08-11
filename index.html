@@ -397,9 +397,9 @@
         async function loadBoundaries() {
             try {
                 // ---- Sub-counties ----
-                const subRes = await fetch('./nakuru_subcounties.geojson');
+                const subRes = await fetch('/nakuru_subcounties.geojson');
                 if (!subRes.ok) {
-                    console.warn('Sub-county GeoJSON not found at ./nakuru_subcounties.geojson');
+                    console.warn('Sub-county GeoJSON not found at /nakuru_subcounties.geojson');
                     return;
                 }
                 const subData = await subRes.json();
@@ -416,7 +416,7 @@
                     const price = avgPrices[name] || 0;
                     return {
                         fillColor: price > 0 ? colorScale(price).hex() : '#f1f5f9',
-                        fillOpacity: 0.75,
+                        fillOpacity: 0.2,        // Much more transparent
                         weight: 2,
                         color: '#0f172a'
                     };
@@ -454,26 +454,27 @@
                 legendContainer.innerHTML = legendHtml;
 
                 // ---- Wards (outline on top) ----
-                const wardRes = await fetch('./nakuru_ward.geojson');
+                const wardRes = await fetch('/nakuru_ward.geojson');
                 if (wardRes.ok) {
                     const wardData = await wardRes.json();
                     if (wardLayer) map.removeLayer(wardLayer);
                     wardLayer = L.geoJSON(wardData, {
                         style: {
                             fill: false,
-                            weight: 1.5,
+                            weight: 2.5,
                             color: '#dc2626',
                             dashArray: '4, 4',
-                            opacity: 0.8
+                            opacity: 1.0
                         },
                         onEachFeature: function(feature, layer) {
                             const name = feature.properties?.NAME || feature.properties?.name || 'Ward';
                             layer.bindPopup('<strong>' + name + '</strong><br/>Ward boundary');
                         }
                     }).addTo(map);
-                    console.log('✅ Wards loaded from ./nakuru_ward.geojson');
+                    console.log('✅ Wards loaded from /nakuru_ward.geojson');
+                    console.log('Number of ward features:', wardData.features.length);
                 } else {
-                    console.warn('Ward GeoJSON not found at ./nakuru_ward.geojson');
+                    console.warn('Ward GeoJSON not found at /nakuru_ward.geojson');
                 }
 
             } catch (err) {
