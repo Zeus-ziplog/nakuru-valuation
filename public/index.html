@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nakuru Land Information Dashboard</title>
+    <title>Nakuru Info</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Leaflet -->
@@ -71,81 +71,58 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* ===== Header & Nav ===== */
+        /* ===== HEADER – clean, with Kenya flag stripe ===== */
         .top-header {
             background: var(--bg-header);
             color: white;
             flex-shrink: 0;
             z-index: 30;
-        }
-        .top-header .ministry {
-            padding: 8px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .top-header .ministry i {
-            margin-right: 8px;
-            color: #facc15;
-        }
-        .top-header .ministry .sub {
-            font-weight: 300;
-            font-size: 12px;
-            color: #94a3b8;
-        }
-        .top-header .nav-bar {
-            display: flex;
-            align-items: center;
             padding: 0 20px;
-            height: 44px;
-            gap: 8px;
-            overflow-x: auto;
-            background: rgba(0,0,0,0.2);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 4px solid transparent;
+            background-image: linear-gradient(var(--bg-header), var(--bg-header)),
+                              linear-gradient(to right, #000000 0%, #000000 20%, #ff0000 20%, #ff0000 40%, #006600 40%, #006600 60%, #ffffff 60%, #ffffff 80%, #000000 80%, #000000 100%);
+            background-origin: padding-box, border-box;
+            background-clip: padding-box, border-box;
         }
-        .top-header .nav-bar a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            padding: 6px 14px;
-            border-radius: 6px;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-        .top-header .nav-bar a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-        .top-header .nav-bar a.active {
-            color: white;
-            background: rgba(255,255,255,0.15);
-        }
-        .top-header .nav-bar .right-controls {
-            margin-left: auto;
+        .top-header .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        .top-header .nav-bar .right-controls button {
+        .top-header .logo i {
+            font-size: 24px;
+            color: #22c55e;
+        }
+        .top-header .logo span {
+            color: #22c55e;
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-controls button {
             background: rgba(255,255,255,0.1);
             border: none;
             color: white;
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
+            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.2s;
         }
-        .top-header .nav-bar .right-controls button:hover {
+        .header-controls button:hover {
             background: rgba(255,255,255,0.2);
         }
 
@@ -529,9 +506,8 @@
             .health-charts { grid-template-columns: 1fr; }
             .chart-container { height: 130px; }
             .sidebar-toggle { display: flex; }
-            .top-header .ministry { font-size: 12px; padding: 4px 12px; }
-            .top-header .nav-bar { height: 38px; padding: 0 10px; }
-            .top-header .nav-bar a { font-size: 11px; padding: 4px 10px; }
+            .top-header { padding: 0 12px; height: 48px; }
+            .top-header .logo { font-size: 18px; }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
@@ -539,30 +515,21 @@
             .health-stats { grid-template-columns: 1fr 1fr; }
             .health-charts { grid-template-columns: 1fr; }
             .chart-container { height: 110px; }
-            .top-header .ministry { font-size: 10px; flex-direction: column; align-items: flex-start; }
-            .top-header .nav-bar a { font-size: 10px; padding: 3px 8px; }
+            .top-header { padding: 0 10px; height: 44px; }
+            .top-header .logo { font-size: 16px; gap: 6px; }
+            .top-header .logo i { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
-<!-- ===== TOP HEADER ===== -->
+<!-- ===== HEADER – clean, Kenya flag stripe ===== -->
 <div class="top-header">
-    <div class="ministry">
-        <span><i class="fas fa-landmark"></i> Ministry of Lands, Public Works, Housing and Urban Development</span>
-        <span class="sub">State Department for Lands and Physical Planning</span>
+    <div class="logo">
+        <i class="fas fa-map-pin"></i> Nakuru <span>Info</span>
     </div>
-    <div class="nav-bar">
-        <a href="#" class="active">Home</a>
-        <a href="#">About Us</a>
-        <a href="#">Services</a>
-        <a href="#">Resources</a>
-        <a href="#">Forms</a>
-        <a href="#">Media Center</a>
-        <a href="#">Contact Us</a>
-        <div class="right-controls">
-            <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
-        </div>
+    <div class="header-controls">
+        <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
     </div>
 </div>
 
