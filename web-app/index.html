@@ -144,21 +144,6 @@
         }
         .header-controls button:hover { background: rgba(255,255,255,0.25); }
 
-        /* Auth button */
-        #authBtn {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 20px;
-            padding: 4px 14px;
-            font-size: 12px;
-            font-weight: 500;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-        #authBtn:hover { background: rgba(255,255,255,0.25); }
-
         /* ===== App Layout ===== */
         .app {
             display: flex;
@@ -774,7 +759,6 @@
         </div>
         <div class="header-controls">
             <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
-            <button id="authBtn" onclick="toggleAuth()">Login</button>
         </div>
     </div>
 </div>
@@ -850,47 +834,6 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(map);
 
     // ============================================================
-    // AUTHENTICATION
-    // ============================================================
-    let currentUser = null;
-
-    async function toggleAuth() {
-        if (currentUser) {
-            await supabaseClient.auth.signOut();
-            currentUser = null;
-            document.getElementById('authBtn').textContent = 'Login';
-            showToast('Logged out', 'info');
-            refreshMap();
-        } else {
-            const { user, error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.origin }
-            });
-            if (error) showToast('Login failed: ' + error.message, 'error');
-        }
-    }
-
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (session && session.user) {
-            currentUser = session.user;
-            document.getElementById('authBtn').textContent = 'Logout (' + currentUser.email + ')';
-            showToast('Logged in as ' + currentUser.email, 'success');
-            refreshMap();
-        } else {
-            currentUser = null;
-            document.getElementById('authBtn').textContent = 'Login';
-        }
-    });
-
-    // Check existing session
-    supabaseClient.auth.getSession().then(({ data, error }) => {
-        if (data && data.session && data.session.user) {
-            currentUser = data.session.user;
-            document.getElementById('authBtn').textContent = 'Logout (' + currentUser.email + ')';
-        }
-    });
-
-    // ============================================================
     // HELPERS
     // ============================================================
     function showToast(msg, type) {
@@ -949,15 +892,11 @@
     }
 
     // ============================================================
-    // ADD POINT
+    // ADD POINT – anonymous
     // ============================================================
     let addPointMode = false;
 
     function toggleAddPoint() {
-        if (!currentUser) {
-            showToast('Please login first', 'error');
-            return;
-        }
         addPointMode = !addPointMode;
         const btn = document.getElementById('addPointBtn');
         btn.classList.toggle('adding', addPointMode);
@@ -1025,11 +964,6 @@
             return;
         }
 
-        if (!currentUser) {
-            showToast('You must be logged in.', 'error');
-            return;
-        }
-
         const properties = {
             title,
             price,
@@ -1043,7 +977,7 @@
         const { data, error } = await supabaseClient
             .from('user_contributions')
             .insert({
-                user_id: currentUser.id,
+                user_id: null, // anonymous
                 type: type,
                 geometry: geometry,
                 properties: properties
@@ -1059,13 +993,13 @@
     }
 
     // ============================================================
-    // COMMENTS
+    // COMMENTS – anonymous
     // ============================================================
     async function loadComments(targetType, targetId, container) {
         if (!container) return;
         const { data, error } = await supabaseClient
             .from('comments')
-            .select('*, users(email)')
+            .select('*')
             .eq('target_type', targetType)
             .eq('target_id', targetId)
             .order('created_at', { ascending: true });
@@ -1075,7 +1009,7 @@
         }
         let html = data.map(c => `
             <div style="border-bottom:1px solid var(--border);padding:4px 0;font-size:12px;">
-                <strong>${c.users?.email || 'Anonymous'}</strong>: ${c.comment_text}
+                <strong>Anonymous</strong>: ${c.comment_text}
                 <span style="color:var(--text-muted);font-size:10px;display:block;">${new Date(c.created_at).toLocaleString()}</span>
             </div>
         `).join('');
@@ -1099,14 +1033,10 @@
         if (!input) return;
         const text = input.value.trim();
         if (!text) return;
-        if (!currentUser) {
-            showToast('Please login to comment', 'error');
-            return;
-        }
         const { error } = await supabaseClient
             .from('comments')
             .insert({
-                user_id: currentUser.id,
+                user_id: null, // anonymous
                 target_type: targetType,
                 target_id: targetId,
                 comment_text: text
@@ -1115,7 +1045,6 @@
             showToast('Error posting comment: ' + error.message, 'error');
         } else {
             showToast('Comment added', 'success');
-            // Refresh the container by re-triggering loadComments (we'll just reload map)
             refreshMap();
         }
     }
@@ -1161,37 +1090,25 @@
         if (item.location) html += `<b>Location:</b> ${item.location}<br/>`;
         if (item.source) html += `<b>Source:</b> ${item.source}`;
         html += `<hr style="margin:4px 0;border-color:var(--border);"/>`;
-        // For listings, target_type = 'listing' and target_id = item.id
         const id = item.id || item.listing_id || 0;
         html += `<div id="comments_listing_${id}">Loading comments...</div>`;
         return html;
     }
 
-    // After popup opens, load comments
     map.on('popupopen', function(e) {
         const popup = e.popup;
         const container = popup._contentNode;
         if (!container) return;
-        // Find comment divs
         const commentDivs = container.querySelectorAll('[id^="comments_"]');
         commentDivs.forEach(div => {
             const idParts = div.id.split('_');
-            const targetType = idParts[1]; // 'health' or 'listing'
+            const targetType = idParts[1];
             const targetId = parseInt(idParts[2]);
             if (!targetId) return;
-            let tableName = targetType === 'health' ? 'health_facilities' : 'listings';
-            if (targetType === 'listing') {
-                // if it's a user contribution, we need to know the actual target type
-                // we can detect if it's a listing or contribution by checking the popup content
-                // For simplicity, we assume listing. We'll refine later.
-                // Actually, we need to know if it's a listing or user_contribution.
-                // For now, we'll just use 'listing' as default.
-                // But user contributions have target_type 'user_contribution'.
-                // We'll check if the popup data has source === 'user_contribution'
-                const popupData = e.target._popup._source; // not reliable, we'll use a different approach.
-                // We'll just use the targetType as given.
-            }
-            loadComments(targetType === 'health' ? 'health_facility' : 'listing', targetId, div);
+            let realType = targetType === 'health' ? 'health_facility' : 'listing';
+            // user contributions are handled separately
+            if (targetType === 'user') realType = 'user_contribution';
+            loadComments(realType, targetId, div);
         });
     });
 
@@ -1518,7 +1435,6 @@
                 const marker = L.marker([lat, lng], { icon: hospitalIcon }).bindPopup(popup);
                 marker._lat = lat;
                 marker._lng = lng;
-                // Store metadata for comments
                 marker._targetType = 'health_facility';
                 marker._targetId = f.id;
                 activeLayers.health.markers.addLayer(marker);
@@ -1950,7 +1866,6 @@
         const group = L.layerGroup();
         contributions.forEach(c => {
             const geom = c.geometry; // PostGIS point
-            // Parse geometry (PostGIS format: 'POINT(lng lat)')
             const coords = geom.match(/POINT\(([^ ]+) ([^)]+)\)/);
             if (!coords) return;
             const lng = parseFloat(coords[1]);
@@ -1964,7 +1879,7 @@
                 ${props.description ? `Description: ${props.description}<br/>` : ''}
                 <em style="color:var(--text-muted);font-size:11px;">Added by user</em>
                 <hr style="margin:4px 0;border-color:var(--border);"/>
-                <div id="comments_user_contribution_${c.id}">Loading comments...</div>
+                <div id="comments_user_${c.id}">Loading comments...</div>
             `;
             const starIcon = L.divIcon({
                 className: 'custom-div-icon',
