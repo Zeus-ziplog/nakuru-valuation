@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nakuru Info</title>
+    <title>Nakuru Land Information Dashboard</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Leaflet -->
@@ -20,23 +20,24 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
     <style>
-        /* ===== CSS Variables (Light/Dark) ===== */
+        /* ===== CSS Variables ===== */
         :root {
-            --bg: #f5f7fa;
+            --bg: #f1f5f9;
             --bg-sidebar: #ffffff;
             --bg-header: #0f172a;
             --text-primary: #1e293b;
             --text-secondary: #475569;
             --text-muted: #94a3b8;
             --card-bg: #ffffff;
-            --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
             --border: #e2e8f0;
             --input-bg: #ffffff;
             --input-border: #d1d5db;
             --hover-bg: #f1f5f9;
             --active-bg: #eef2ff;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
+            --accent: #1e40af;
+            --accent-hover: #1e3a5f;
+            --accent-light: #3b82f6;
         }
         [data-theme="dark"] {
             --bg: #0f172a;
@@ -54,9 +55,10 @@
             --active-bg: #1e3a5f;
             --accent: #3b82f6;
             --accent-hover: #60a5fa;
+            --accent-light: #60a5fa;
         }
 
-        /* ===== Reset & Base ===== */
+        /* ===== Reset ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -69,56 +71,85 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* ===== Header ===== */
-        header {
+        /* ===== Header & Nav ===== */
+        .top-header {
             background: var(--bg-header);
             color: white;
-            padding: 0 20px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             flex-shrink: 0;
-            position: relative;
-            z-index: 20;
-            border-bottom: 4px solid transparent;
-            background-image: linear-gradient(var(--bg-header), var(--bg-header)),
-                              linear-gradient(to right, #000000 0%, #000000 25%, #ff0000 25%, #ff0000 50%, #006600 50%, #006600 75%, #ffffff 75%, #ffffff 100%);
-            background-origin: padding-box, border-box;
-            background-clip: padding-box, border-box;
+            z-index: 30;
         }
-        header .logo {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+        .top-header .ministry {
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-header .ministry i {
+            margin-right: 8px;
+            color: #facc15;
+        }
+        .top-header .ministry .sub {
+            font-weight: 300;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .top-header .nav-bar {
             display: flex;
             align-items: center;
+            padding: 0 20px;
+            height: 44px;
             gap: 8px;
+            overflow-x: auto;
+            background: rgba(0,0,0,0.2);
         }
-        header .logo span { color: #22c55e; }
-        header .logo i { font-size: 22px; color: #22c55e; }
-        .header-controls {
+        .top-header .nav-bar a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .top-header .nav-bar a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .top-header .nav-bar a.active {
+            color: white;
+            background: rgba(255,255,255,0.15);
+        }
+        .top-header .nav-bar .right-controls {
+            margin-left: auto;
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        .header-controls button {
+        .top-header .nav-bar .right-controls button {
             background: rgba(255,255,255,0.1);
             border: none;
             color: white;
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 16px;
-            transition: 0.2s;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: 0.2s;
         }
-        .header-controls button:hover { background: rgba(255,255,255,0.2); }
+        .top-header .nav-bar .right-controls button:hover {
+            background: rgba(255,255,255,0.2);
+        }
 
-        /* ===== Main Layout ===== */
+        /* ===== App Layout ===== */
         .app {
             display: flex;
             flex: 1;
@@ -191,48 +222,48 @@
         }
         .tab-btn i { font-size: 14px; }
 
-        /* ===== Sidebar Controls (shared) ===== */
+        /* ===== Sidebar Controls ===== */
         #sidebar-controls {
-            padding: 12px 16px;
+            padding: 8px 12px;
             background: var(--bg);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
             flex-wrap: wrap;
         }
         #sidebar-controls input {
             flex: 1;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border: 1px solid var(--input-border);
-            border-radius: 30px;
-            font-size: 13px;
+            border-radius: 20px;
+            font-size: 12px;
             outline: none;
             background: var(--input-bg);
             color: var(--text-primary);
-            min-width: 100px;
+            min-width: 80px;
         }
-        #sidebar-controls input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        #sidebar-controls input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
         #sidebar-controls select {
-            padding: 6px 12px;
+            padding: 5px 10px;
             border: 1px solid var(--input-border);
-            border-radius: 30px;
-            font-size: 13px;
+            border-radius: 20px;
+            font-size: 12px;
             background: var(--input-bg);
             color: var(--text-primary);
             outline: none;
             cursor: pointer;
-            min-width: 120px;
+            min-width: 100px;
         }
         #sidebar-controls select:focus { border-color: var(--accent); }
         #refreshBtn {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 13px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             transition: 0.15s;
@@ -241,17 +272,17 @@
         #refreshBtn:hover { background: var(--accent-hover); }
         #refreshBtn:disabled { background: var(--text-muted); cursor: not-allowed; }
         #statusText {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             white-space: nowrap;
         }
         .status-badge {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
         }
         .status-badge.idle { background: #22c55e; }
@@ -262,8 +293,8 @@
         /* ===== Export Bar ===== */
         .export-bar {
             display: flex;
-            gap: 6px;
-            padding: 6px 12px;
+            gap: 4px;
+            padding: 4px 10px;
             background: var(--bg);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
@@ -272,19 +303,19 @@
         .export-btn {
             background: var(--card-bg);
             border: 1px solid var(--input-border);
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 11px;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 10px;
             font-weight: 500;
             color: var(--text-primary);
             cursor: pointer;
             transition: 0.15s;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
         .export-btn:hover { background: var(--hover-bg); border-color: var(--accent); }
-        .export-btn i { font-size: 13px; }
+        .export-btn i { font-size: 11px; }
 
         /* ===== Health Dashboard ===== */
         #health-dashboard {
@@ -293,33 +324,35 @@
             flex: 1;
             overflow: hidden;
             padding: 8px 12px 0 12px;
-            gap: 8px;
+            gap: 6px;
         }
         .health-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 6px;
+            flex-shrink: 0;
         }
         .stat-card {
             background: var(--card-bg);
-            border-radius: 8px;
-            padding: 10px 12px;
+            border-radius: 6px;
+            padding: 8px 10px;
             box-shadow: var(--card-shadow);
             text-align: center;
             border: 1px solid var(--border);
         }
         .stat-card .number {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--text-primary);
         }
         .stat-card .label {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-secondary);
             margin-top: 2px;
+            font-weight: 500;
         }
         .stat-card .sub {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--text-muted);
         }
         .stat-card.public .number { color: #2563eb; }
@@ -330,15 +363,15 @@
         .health-charts {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
         }
         .chart-container {
             background: var(--card-bg);
-            border-radius: 8px;
-            padding: 8px;
+            border-radius: 6px;
+            padding: 6px;
             box-shadow: var(--card-shadow);
-            height: 130px;
+            height: 120px;
             position: relative;
             border: 1px solid var(--border);
         }
@@ -349,7 +382,7 @@
 
         .health-filter-bar {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex-wrap: wrap;
             align-items: center;
             padding: 4px 0;
@@ -358,9 +391,9 @@
         .health-filter-bar button {
             background: var(--bg);
             border: 1px solid var(--input-border);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 16px;
+            font-size: 10px;
             font-weight: 500;
             color: var(--text-secondary);
             cursor: pointer;
@@ -375,17 +408,17 @@
         }
         .health-filter-bar .reset-btn:hover { background: #dc2626; }
 
-        /* ===== Property List (shared) ===== */
+        /* ===== Property List (scrollable) ===== */
         #property-list, #default-list {
             flex: 1;
             overflow-y: auto;
-            padding: 4px 0;
+            padding: 2px 0;
             margin: 0 -6px;
         }
-        #property-list::-webkit-scrollbar, #default-list::-webkit-scrollbar { width: 5px; }
+        #property-list::-webkit-scrollbar, #default-list::-webkit-scrollbar { width: 4px; }
         #property-list::-webkit-scrollbar-thumb, #default-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         .property-item {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-bottom: 1px solid var(--border);
             cursor: pointer;
             transition: background 0.1s;
@@ -393,39 +426,39 @@
             justify-content: space-between;
             align-items: center;
             background: var(--card-bg);
-            margin: 0 6px 2px 6px;
-            border-radius: 6px;
+            margin: 0 4px 2px 4px;
+            border-radius: 4px;
         }
         .property-item:hover { background: var(--hover-bg); }
         .property-item.active { background: var(--active-bg); border-left: 3px solid var(--accent); }
         .property-item .info { flex: 1; min-width: 0; }
         .property-item .info .title {
             font-weight: 500;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-primary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .property-item .info .meta {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-secondary);
-            margin-top: 2px;
+            margin-top: 1px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
         .property-item .price {
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-primary);
             white-space: nowrap;
-            margin-left: 12px;
+            margin-left: 8px;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
-        .property-item .price small { font-weight: 400; font-size: 10px; color: var(--text-muted); }
+        .property-item .price small { font-weight: 400; font-size: 9px; color: var(--text-muted); }
 
         /* ===== Map Container ===== */
         #map-container {
@@ -442,18 +475,18 @@
             right: 20px;
             z-index: 1000;
             background: var(--card-bg);
-            padding: 10px 14px;
-            border-radius: 8px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-            font-size: 12px;
-            min-width: 120px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            font-size: 11px;
+            min-width: 100px;
             border: 1px solid var(--border);
             color: var(--text-primary);
         }
-        .legend .title { font-weight: 600; margin-bottom: 4px; }
-        .legend .gradient { height: 8px; border-radius: 4px; margin: 4px 0; }
-        .legend .labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-secondary); }
-        .legend .legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+        .legend .title { font-weight: 600; margin-bottom: 3px; font-size: 11px; }
+        .legend .gradient { height: 6px; border-radius: 3px; margin: 3px 0; }
+        .legend .labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-secondary); }
+        .legend .legend-item { display: flex; align-items: center; gap: 4px; margin: 2px 0; }
 
         /* ===== Toast ===== */
         .toast {
@@ -464,9 +497,9 @@
             z-index: 9999;
             background: rgba(15,23,42,0.9);
             color: white;
-            padding: 10px 24px;
+            padding: 8px 20px;
             border-radius: 30px;
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
@@ -494,44 +527,66 @@
             .app { flex-direction: column; }
             .health-stats { grid-template-columns: 1fr 1fr; }
             .health-charts { grid-template-columns: 1fr; }
-            .chart-container { height: 140px; }
+            .chart-container { height: 130px; }
             .sidebar-toggle { display: flex; }
+            .top-header .ministry { font-size: 12px; padding: 4px 12px; }
+            .top-header .nav-bar { height: 38px; padding: 0 10px; }
+            .top-header .nav-bar a { font-size: 11px; padding: 4px 10px; }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
             #map-container { height: 50vh; }
             .health-stats { grid-template-columns: 1fr 1fr; }
             .health-charts { grid-template-columns: 1fr; }
-            .chart-container { height: 120px; }
-            header .logo { font-size: 16px; }
-            .tab-btn { font-size: 11px; padding: 8px 4px; min-width: 60px; }
+            .chart-container { height: 110px; }
+            .top-header .ministry { font-size: 10px; flex-direction: column; align-items: flex-start; }
+            .top-header .nav-bar a { font-size: 10px; padding: 3px 8px; }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">
-        <i class="fas fa-map-pin"></i> Nakuru <span>Info</span>
+<!-- ===== TOP HEADER ===== -->
+<div class="top-header">
+    <div class="ministry">
+        <span><i class="fas fa-landmark"></i> Ministry of Lands, Public Works, Housing and Urban Development</span>
+        <span class="sub">State Department for Lands and Physical Planning</span>
     </div>
-    <div class="header-controls">
-        <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
+    <div class="nav-bar">
+        <a href="#" class="active">Home</a>
+        <a href="#">About Us</a>
+        <a href="#">Services</a>
+        <a href="#">Resources</a>
+        <a href="#">Forms</a>
+        <a href="#">Media Center</a>
+        <a href="#">Contact Us</a>
+        <div class="right-controls">
+            <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
+        </div>
     </div>
-</header>
+</div>
 
+<!-- ===== APP ===== -->
 <div class="app">
+
+    <!-- SIDEBAR -->
     <div id="sidebar">
+        <!-- Tabs -->
         <div class="tab-bar" id="tabBar">
             <button class="tab-btn active" data-tab="land"><i class="fas fa-map-marked-alt"></i> Land</button>
             <button class="tab-btn" data-tab="health"><i class="fas fa-hospital"></i> Health</button>
             <button class="tab-btn" data-tab="schools"><i class="fas fa-school"></i> Schools</button>
             <button class="tab-btn" data-tab="water"><i class="fas fa-water"></i> Water</button>
         </div>
+
+        <!-- Controls -->
         <div id="sidebar-controls">
             <span id="statusText"><span class="status-badge idle" id="statusBadge"></span><span id="statusLabel">Idle</span></span>
             <input type="text" id="searchInput" placeholder="Filter..." />
             <button id="refreshBtn" onclick="refreshMap()"><i class="fas fa-sync-alt"></i></button>
         </div>
+
+        <!-- Export Bar -->
         <div class="export-bar" id="exportBar">
             <button class="export-btn" onclick="exportPNG()"><i class="fas fa-image"></i> PNG</button>
             <button class="export-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
@@ -548,7 +603,7 @@
                 <div class="chart-container"><canvas id="barChart"></canvas></div>
             </div>
             <div class="health-filter-bar" id="healthFilterBar">
-                <span style="font-size:11px; font-weight:500; color:var(--text-secondary);">Filter:</span>
+                <span style="font-size:10px; font-weight:500; color:var(--text-secondary);">Filter:</span>
                 <button class="reset-btn" onclick="resetHealthFilter()">Reset</button>
             </div>
             <div id="property-list"></div>
@@ -556,18 +611,21 @@
 
         <!-- Default list (Land / others) -->
         <div id="default-list" style="flex:1; overflow-y:auto; padding:4px 6px;">
-            <div style="padding:30px 20px;text-align:center;color:var(--text-muted);font-size:14px;">Loading data...</div>
+            <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">Loading data...</div>
         </div>
     </div>
 
+    <!-- MAP -->
     <div id="map-container">
         <div id="map"></div>
         <div id="legend-container"></div>
     </div>
 </div>
 
+<!-- ===== TOAST ===== -->
 <div id="toast" class="toast">Loading...</div>
 
+<!-- ===== SIDEBAR TOGGLE (mobile) ===== -->
 <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 
 <script>
@@ -588,7 +646,7 @@
         const isDark = html.getAttribute('data-theme') === 'dark';
         html.setAttribute('data-theme', isDark ? 'light' : 'dark');
         darkToggle.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-        // Redraw charts with new colours if needed (Chart.js auto-adjusts with CSS vars)
+        setTimeout(() => map.invalidateSize(), 100);
     });
 
     // ---- Sidebar toggle (mobile) ----
@@ -616,7 +674,6 @@
     const propertyList = document.getElementById('property-list');
     const defaultList = document.getElementById('default-list');
     const healthDashboard = document.getElementById('health-dashboard');
-    const countBadge = document.getElementById('count-badge');
     const searchInput = document.getElementById('searchInput');
     const toastEl = document.getElementById('toast');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -664,7 +721,6 @@
         return sorted[mid];
     }
 
-    // Ownership
     function getOwnershipCategory(operator) {
         if (!operator) return 'unknown';
         const op = operator.toLowerCase();
@@ -732,7 +788,7 @@
     function renderLandList(data) {
         let html = '';
         if (!data || data.length === 0) {
-            html = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:14px;">No data found.</div>';
+            html = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No data found.</div>';
         } else {
             data.forEach((p, index) => {
                 const title = p.title || 'Untitled';
@@ -760,17 +816,18 @@
     function renderHealthList(data) {
         let html = '';
         if (!data || data.length === 0) {
-            html = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:14px;">No facilities found.</div>';
+            html = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No facilities found.</div>';
         } else {
             data.forEach((p, index) => {
                 const title = p.name || 'Unnamed';
                 const type = p.facility_type || '—';
                 const ward = p.ward || '—';
                 const owner = p.operator || '—';
+                const beds = p.bed_capacity ? `${p.bed_capacity} beds` : '';
                 html += `
                     <div class="property-item" data-index="${index}" onclick="zoomToProperty(${index}, 'health')">
                         <div class="info"><div class="title">${title}</div><div class="meta"><span>${type}</span><span>${ward}</span><span>${owner}</span></div></div>
-                        <div class="price">${p.bed_capacity ? '🛏 '+p.bed_capacity : ''}</div>
+                        <div class="price">${beds}</div>
                     </div>
                 `;
             });
@@ -1168,7 +1225,7 @@
     function renderGenericList(data, tab) {
         let html = '';
         if (!data || data.length === 0) {
-            html = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:14px;">No data found.</div>';
+            html = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No data found.</div>';
         } else {
             data.forEach((p, index) => {
                 const title = p.name || 'Untitled';
