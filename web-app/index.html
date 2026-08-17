@@ -99,7 +99,6 @@
             align-items: center;
             gap: 12px;
         }
-        /* Vertical flag bar – thin (5px) */
         .flag-bar-vertical {
             display: flex;
             flex-direction: column;
@@ -109,11 +108,7 @@
             overflow: hidden;
             flex-shrink: 0;
         }
-        .flag-bar-vertical .stripe {
-            flex: 1;
-            width: 100%;
-        }
-        /* Kenyan flag order: black, white, red, white, green */
+        .flag-bar-vertical .stripe { flex: 1; width: 100%; }
         .flag-bar-vertical .stripe:nth-child(1) { background: #000000; }
         .flag-bar-vertical .stripe:nth-child(2) { background: #ffffff; }
         .flag-bar-vertical .stripe:nth-child(3) { background: #ff0000; }
@@ -127,9 +122,7 @@
             letter-spacing: 0.5px;
             color: white;
         }
-        .top-header .logo span {
-            color: #22c55e;
-        }
+        .top-header .logo span { color: #22c55e; }
         .header-controls {
             display: flex;
             align-items: center;
@@ -149,9 +142,7 @@
             align-items: center;
             justify-content: center;
         }
-        .header-controls button:hover {
-            background: rgba(255,255,255,0.25);
-        }
+        .header-controls button:hover { background: rgba(255,255,255,0.25); }
 
         /* ===== App Layout ===== */
         .app {
@@ -462,27 +453,29 @@
         }
         #map { height: 100%; width: 100%; }
 
-        /* ===== Toggle button – bottom-left on map ===== */
+        /* ===== Toggle button – fixed bottom-left on mobile ===== */
         .map-toggle-btn {
-            position: absolute;
-            bottom: 20px;
+            position: fixed;
+            bottom: 24px;
             left: 20px;
-            z-index: 1000;
+            z-index: 9999;
             background: var(--accent);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            width: 56px;
+            height: 56px;
+            font-size: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
             cursor: pointer;
             transition: 0.2s;
             display: none; /* hidden on desktop */
             align-items: center;
             justify-content: center;
+            touch-action: manipulation;
         }
         .map-toggle-btn:hover { transform: scale(1.05); }
+        .map-toggle-btn:active { transform: scale(0.95); }
 
         /* ===== Legend ===== */
         .legend {
@@ -534,6 +527,11 @@
             #sidebar { width: 400px; min-width: 400px; }
         }
         @media (max-width: 768px) {
+            .app {
+                flex-direction: column;
+                height: 100vh;
+                overflow: hidden;
+            }
             #sidebar {
                 width: 100%;
                 min-width: 0;
@@ -541,17 +539,60 @@
                 border-right: none;
                 border-bottom: 1px solid var(--border);
                 position: relative;
+                overflow: hidden;
+                flex-shrink: 0;
             }
-            #map-container { height: 45vh; }
-            .app { flex-direction: column; }
-            .health-stats { grid-template-columns: 1fr 1fr; }
-            .health-charts { grid-template-columns: 1fr; }
-            .chart-container { height: 130px; }
+            #map-container {
+                height: 45vh;
+                flex: 1;
+                position: relative;
+            }
             .top-header .logo { font-size: 22px; }
-            .map-toggle-btn { display: flex; }  /* show toggle on mobile */
-            #health-dashboard { padding-bottom: 12px; }
-            #property-list, #default-list {
-                max-height: none;
+            .flag-bar-vertical { height: 24px; width: 4px; }
+
+            /* Show toggle button on mobile */
+            .map-toggle-btn { display: flex; }
+
+            /* Compact health dashboard */
+            .health-stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+            }
+            .stat-card {
+                padding: 4px 6px;
+            }
+            .stat-card .number { font-size: 16px; }
+            .stat-card .label { font-size: 9px; }
+            .health-charts {
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+            }
+            .chart-container {
+                height: 80px !important;
+            }
+            .health-filter-bar {
+                gap: 2px;
+                flex-wrap: wrap;
+            }
+            .health-filter-bar button {
+                font-size: 9px;
+                padding: 2px 8px;
+            }
+            #health-dashboard {
+                padding: 4px 8px 8px 8px;
+                flex: 1;
+                overflow-y: auto;
+            }
+            #property-list {
+                flex: 1;
+                min-height: 80px;
+                overflow-y: auto;
+                padding: 2px 4px;
+            }
+            #default-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 4px 6px;
             }
         }
         @media (max-width: 480px) {
@@ -559,9 +600,28 @@
             #map-container { height: 50vh; }
             .health-stats { grid-template-columns: 1fr 1fr; }
             .health-charts { grid-template-columns: 1fr; }
-            .chart-container { height: 110px; }
+            .chart-container { height: 90px !important; }
             .top-header .logo { font-size: 18px; }
-            .flag-bar-vertical { height: 24px; width: 4px; }
+            .flag-bar-vertical { height: 20px; width: 3px; }
+            .map-toggle-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+                bottom: 16px;
+                left: 16px;
+            }
+        }
+        @media (max-width: 380px) {
+            .top-header .logo { font-size: 16px; }
+            .stat-card .number { font-size: 14px; }
+            .chart-container { height: 70px !important; }
+            .map-toggle-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+                bottom: 12px;
+                left: 12px;
+            }
         }
     </style>
 </head>
@@ -572,20 +632,18 @@
     <div class="header-row">
         <div class="logo-area">
             <div class="logo">Nakuru <span>Info</span></div>
-            <!-- Vertical flag bar (thin) -->
             <div class="flag-bar-vertical">
-                <div class="stripe"></div> <!-- black -->
-                <div class="stripe"></div> <!-- white -->
-                <div class="stripe"></div> <!-- red -->
-                <div class="stripe"></div> <!-- white -->
-                <div class="stripe"></div> <!-- green -->
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
             </div>
         </div>
         <div class="header-controls">
             <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
         </div>
     </div>
-    <!-- Horizontal flag bar is applied via the border-bottom gradient -->
 </div>
 
 <!-- ===== APP ===== -->
@@ -593,7 +651,6 @@
 
     <!-- SIDEBAR -->
     <div id="sidebar">
-        <!-- Tabs -->
         <div class="tab-bar" id="tabBar">
             <button class="tab-btn active" data-tab="land"><i class="fas fa-map-marked-alt"></i> Land</button>
             <button class="tab-btn" data-tab="health"><i class="fas fa-hospital"></i> Health</button>
@@ -601,14 +658,12 @@
             <button class="tab-btn" data-tab="water"><i class="fas fa-water"></i> Water</button>
         </div>
 
-        <!-- Controls -->
         <div id="sidebar-controls">
             <span id="statusText"><span class="status-badge idle" id="statusBadge"></span><span id="statusLabel">Idle</span></span>
             <input type="text" id="searchInput" placeholder="Filter..." />
             <button id="refreshBtn" onclick="refreshMap()"><i class="fas fa-sync-alt"></i></button>
         </div>
 
-        <!-- Export Bar -->
         <div class="export-bar" id="exportBar">
             <button class="export-btn" onclick="exportPNG()"><i class="fas fa-image"></i> PNG</button>
             <button class="export-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
@@ -617,7 +672,6 @@
             <button class="export-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
         </div>
 
-        <!-- Health Dashboard -->
         <div id="health-dashboard">
             <div class="health-stats" id="healthStats"></div>
             <div class="health-charts">
@@ -631,7 +685,6 @@
             <div id="property-list"></div>
         </div>
 
-        <!-- Default list -->
         <div id="default-list">
             <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">Loading data...</div>
         </div>
@@ -641,7 +694,6 @@
     <div id="map-container">
         <div id="map"></div>
         <div id="legend-container"></div>
-        <!-- Toggle button on map (bottom-left) -->
         <button class="map-toggle-btn" id="sidebarToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     </div>
 </div>
@@ -1060,7 +1112,6 @@
             if (lat && lng) {
                 const color = getMarkerColor(f.operator);
                 const popup = buildHealthPopup(f);
-                // Hospital pin icon with white cross (coloured pin)
                 const hospitalIcon = L.divIcon({
                     className: 'custom-div-icon',
                     html: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1228,7 +1279,6 @@
             else { legendContainer.style.display = 'none'; }
         }
 
-        // Remove all layers except base
         for (const key in activeLayers) {
             for (const layerKey in activeLayers[key]) {
                 const layer = activeLayers[key][layerKey];
@@ -1246,7 +1296,7 @@
             const data = allData.land || [];
             renderLandList(data);
         } else if (tab === 'health') {
-            // already handled above
+            // already handled
         } else {
             const data = allData[tab] || [];
             renderGenericList(data, tab);
