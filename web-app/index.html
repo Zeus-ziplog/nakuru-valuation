@@ -495,7 +495,6 @@
         const data = allData[tab] || [];
         const p = data[index];
         if (!p) return;
-        // We store lat/lng in standard fields: either 'lat'/'lng' or 'latitude'/'longitude'
         const lat = p.lat || p.latitude;
         const lng = p.lng || p.longitude;
         if (!lat || !lng) return;
@@ -531,7 +530,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (Sub-county + Wards) – only for Land
+    // LOAD BOUNDARIES (Sub-county + Wards) – bold magenta wards
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -593,7 +592,7 @@
                 legendContainer.innerHTML = legendHtml;
             }
 
-            // Wards
+            // ---- WARDS (bold, magenta, thick) ----
             const wardRes = await fetch('/nakuru_ward.geojson');
             if (!wardRes.ok) {
                 console.warn('Ward GeoJSON not found (404)');
@@ -601,13 +600,15 @@
                 const wardData = await wardRes.json();
                 console.log('Ward features:', wardData.features.length);
                 if (activeLayers.land.wards) map.removeLayer(activeLayers.land.wards);
+
                 activeLayers.land.wards = L.geoJSON(wardData, {
                     style: {
-                        fill: false,
-                        weight: 4,
-                        color: '#ff0000',
-                        dashArray: null,
-                        opacity: 1.0
+                        fill: true,
+                        fillColor: 'transparent',
+                        weight: 6,
+                        color: '#ff00ff',
+                        opacity: 1.0,
+                        dashArray: null
                     },
                     onEachFeature: (feature, layer) => {
                         const name = feature.properties?.NAME || feature.properties?.name || 'Ward';
@@ -615,9 +616,14 @@
                         layer.bindTooltip(name, { permanent: false, direction: 'center' });
                     }
                 });
+
                 activeLayers.land.wards.setZIndex(1000);
                 activeLayers.land.wards.bringToFront();
-                if (currentTab === 'land') activeLayers.land.wards.addTo(map);
+
+                if (currentTab === 'land') {
+                    activeLayers.land.wards.addTo(map);
+                    console.log('Ward layer added to map?', map.hasLayer(activeLayers.land.wards));
+                }
 
                 const bounds = activeLayers.land.wards.getBounds();
                 if (bounds.isValid()) {
@@ -644,11 +650,9 @@
     // ============================================================
     function switchTab(tab) {
         currentTab = tab;
-        // Update active button
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
-        // Remove all layers except base map
         for (const key in activeLayers) {
             for (const layerKey in activeLayers[key]) {
                 const layer = activeLayers[key][layerKey];
@@ -657,7 +661,6 @@
                 }
             }
         }
-        // Show layers for this tab
         const layers = activeLayers[tab];
         for (const layerKey in layers) {
             const layer = layers[layerKey];
@@ -665,20 +668,16 @@
                 layer.addTo(map);
             }
         }
-        // Render list
         const data = allData[tab] || [];
         renderList(data, tab);
-        // Search
         searchInput.value = '';
-        // Legend: show only for land
         if (tab === 'land' && legendContainer.innerHTML) {
             legendContainer.style.display = 'block';
         } else {
             legendContainer.style.display = 'none';
         }
-        // If we don't have data for this tab yet, load it
         if (!allData[tab] || allData[tab].length === 0) {
-            refreshMap(); // this will load data for current tab
+            refreshMap();
         }
     }
 
@@ -726,12 +725,9 @@
 
         try {
             const tab = currentTab;
-            // Load data for this tab
             const rawData = await loadTabData(tab);
             if (tab === 'land') {
-                // Process land data: compute averages, heatmap, markers
                 allData.land = rawData;
-                // Compute avgPrices for land (sub-county aggregation)
                 const groups = {};
                 rawData.forEach(item => {
                     const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
@@ -757,7 +753,6 @@
                 avgPrices = avg;
                 console.log('Avg prices:', avgPrices);
 
-                // Build heatmap & markers for land
                 const points = [];
                 const markerData = [];
                 rawData.forEach(item => {
@@ -781,11 +776,9 @@
                     }
                 });
 
-                // Remove old land layers
                 if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
                 if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
 
-                // Heatmap
                 if (points.length > 0) {
                     activeLayers.land.heat = L.heatLayer(points, {
                         radius: 35,
@@ -801,7 +794,6 @@
                     });
                 }
 
-                // Markers
                 activeLayers.land.markers = L.layerGroup();
                 markerData.forEach(m => {
                     const popupContent = buildLandPopup(m);
@@ -815,13 +807,9 @@
                     activeLayers.land.markers.addLayer(circle);
                 });
 
-                // Store processed marker data for list
                 allData.land = markerData;
-
-                // Load boundaries (sub-county + wards)
                 await loadBoundaries();
 
-                // Fit bounds
                 if (points.length > 0) {
                     const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
                     map.fitBounds(bounds, { padding: [50, 50] });
@@ -829,18 +817,14 @@
                 showToast('Loaded ' + rawData.length + ' plots', 'success');
 
             } else if (tab === 'health') {
-                // Process health data
                 allData.health = rawData;
-                // Remove old markers
                 if (activeLayers.health.markers) map.removeLayer(activeLayers.health.markers);
 
-                // Build markers
                 activeLayers.health.markers = L.layerGroup();
                 rawData.forEach(item => {
                     const lat = item.latitude;
                     const lng = item.longitude;
                     if (lat && lng) {
-                        // create a marker with popup
                         const popupContent = buildHealthPopup(item);
                         const marker = L.circleMarker([lat, lng], {
                             radius: 6,
@@ -849,21 +833,17 @@
                             fillOpacity: 0.6,
                             weight: 2
                         }).bindPopup(popupContent);
-                        // Store extra data for zooming
                         marker._lat = lat;
                         marker._lng = lng;
                         activeLayers.health.markers.addLayer(marker);
                     }
                 });
-                // Store data for list (we'll use rawData)
-                // But we need to ensure each item has lat/lng for zoom
                 allData.health = rawData.map(item => ({
                     ...item,
                     lat: item.latitude,
                     lng: item.longitude
                 }));
 
-                // Fit bounds
                 const points = rawData.filter(p => p.latitude && p.longitude)
                     .map(p => [p.latitude, p.longitude]);
                 if (points.length > 0) {
@@ -872,9 +852,7 @@
                 }
                 showToast('Loaded ' + rawData.length + ' health facilities', 'success');
             } else {
-                // schools/water – placeholder
                 allData[tab] = rawData;
-                // Simple markers (if any)
                 const groupName = tab;
                 if (activeLayers[groupName].markers) map.removeLayer(activeLayers[groupName].markers);
                 activeLayers[groupName].markers = L.layerGroup();
@@ -889,12 +867,10 @@
                         activeLayers[groupName].markers.addLayer(marker);
                     }
                 });
-                // store data
                 allData[tab] = rawData.map(item => ({ ...item, lat: item.latitude, lng: item.longitude }));
                 showToast('Loaded ' + rawData.length + ' records', 'success');
             }
 
-            // After processing, switch to current tab to show layers and list
             switchTab(currentTab);
 
         } catch (err) {
@@ -988,10 +964,8 @@
 
     searchInput.addEventListener('input', filterList);
 
-    // Load default tab (land)
     refreshMap();
 
-    // Auto-refresh every 5 minutes
     setInterval(() => { if (!isRunning) refreshMap(); }, 300000);
 </script>
 </body>
