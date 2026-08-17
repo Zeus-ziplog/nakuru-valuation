@@ -71,34 +71,28 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* ===== HEADER – clean, with Kenya flag stripe ===== */
+        /* ===== HEADER – clean, with Kenya flag bar after title ===== */
         .top-header {
             background: var(--bg-header);
             color: white;
             flex-shrink: 0;
             z-index: 30;
-            padding: 0 20px;
-            height: 56px;
+            padding: 10px 20px 0 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-header .header-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 4px solid transparent;
-            background-image: linear-gradient(var(--bg-header), var(--bg-header)),
-                              linear-gradient(to right, #000000 0%, #000000 20%, #ff0000 20%, #ff0000 40%, #006600 40%, #006600 60%, #ffffff 60%, #ffffff 80%, #000000 80%, #000000 100%);
-            background-origin: padding-box, border-box;
-            background-clip: padding-box, border-box;
+            padding-bottom: 6px;
         }
         .top-header .logo {
-            font-size: 22px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 28px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .top-header .logo i {
-            font-size: 24px;
-            color: #22c55e;
+            letter-spacing: 0.5px;
+            color: white;
         }
         .top-header .logo span {
             color: #22c55e;
@@ -124,6 +118,13 @@
         }
         .header-controls button:hover {
             background: rgba(255,255,255,0.2);
+        }
+        /* Kenya flag coloured bar */
+        .flag-bar {
+            height: 4px;
+            width: 100%;
+            background: linear-gradient(to right, #000000 0%, #000000 25%, #ff0000 25%, #ff0000 50%, #006600 50%, #006600 75%, #ffffff 75%, #ffffff 100%);
+            flex-shrink: 0;
         }
 
         /* ===== App Layout ===== */
@@ -487,6 +488,11 @@
         .toast.success { background: rgba(34,197,94,0.9); }
         .toast.info { background: rgba(37,99,235,0.9); }
 
+        /* ===== Missing element fix ===== */
+        #count-badge {
+            display: none;
+        }
+
         /* ===== Responsive ===== */
         @media (max-width: 1024px) {
             #sidebar { width: 400px; min-width: 400px; }
@@ -506,8 +512,7 @@
             .health-charts { grid-template-columns: 1fr; }
             .chart-container { height: 130px; }
             .sidebar-toggle { display: flex; }
-            .top-header { padding: 0 12px; height: 48px; }
-            .top-header .logo { font-size: 18px; }
+            .top-header .logo { font-size: 22px; }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
@@ -515,22 +520,21 @@
             .health-stats { grid-template-columns: 1fr 1fr; }
             .health-charts { grid-template-columns: 1fr; }
             .chart-container { height: 110px; }
-            .top-header { padding: 0 10px; height: 44px; }
-            .top-header .logo { font-size: 16px; gap: 6px; }
-            .top-header .logo i { font-size: 18px; }
+            .top-header .logo { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
-<!-- ===== HEADER – clean, Kenya flag stripe ===== -->
+<!-- ===== HEADER – clean, with flag bar ===== -->
 <div class="top-header">
-    <div class="logo">
-        <i class="fas fa-map-pin"></i> Nakuru <span>Info</span>
+    <div class="header-row">
+        <div class="logo">Nakuru <span>Info</span></div>
+        <div class="header-controls">
+            <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
+        </div>
     </div>
-    <div class="header-controls">
-        <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
-    </div>
+    <div class="flag-bar"></div>
 </div>
 
 <!-- ===== APP ===== -->
@@ -595,6 +599,9 @@
 <!-- ===== SIDEBAR TOGGLE (mobile) ===== -->
 <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 
+<!-- ===== Hidden count-badge (to fix JS error) ===== -->
+<span id="count-badge" style="display:none;"></span>
+
 <script>
     // ============================================================
     // CONFIGURATION
@@ -646,6 +653,7 @@
     const refreshBtn = document.getElementById('refreshBtn');
     const legendContainer = document.getElementById('legend-container');
     const statSelect = document.getElementById('statSelect');
+    const countBadge = document.getElementById('count-badge');
 
     // Health specific
     let healthFilter = null;
@@ -775,6 +783,7 @@
             });
         }
         defaultList.innerHTML = html;
+        if (countBadge) countBadge.textContent = data.length + ' plots';
     }
 
     // ============================================================
@@ -800,6 +809,7 @@
             });
         }
         propertyList.innerHTML = html;
+        if (countBadge) countBadge.textContent = data.length + ' facilities';
     }
 
     // ============================================================
@@ -980,7 +990,7 @@
         updateHealthMarkers(data);
         renderHealthList(data);
         const total = healthMarkers.length;
-        document.getElementById('count-badge').textContent = data.length + ' facilities' + (healthFilter ? ' (' + filterLabel + ')' : '');
+        if (countBadge) countBadge.textContent = data.length + ' facilities' + (healthFilter ? ' (' + filterLabel + ')' : '');
     }
 
     function resetHealthFilter() {
@@ -1178,7 +1188,6 @@
         if (tab === 'land') {
             const data = allData.land || [];
             renderLandList(data);
-            document.getElementById('count-badge').textContent = data.length + ' plots';
         } else if (tab === 'health') {
             // already handled above
         } else {
@@ -1206,7 +1215,7 @@
             });
         }
         defaultList.innerHTML = html;
-        document.getElementById('count-badge').textContent = data.length + ' records';
+        if (countBadge) countBadge.textContent = data.length + ' records';
     }
 
     // ============================================================
@@ -1350,7 +1359,6 @@
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
                 renderLandList(markerData);
-                document.getElementById('count-badge').textContent = markerData.length + ' plots';
                 showToast('Loaded ' + rawData.length + ' plots', 'success');
 
             } else if (tab === 'health') {
