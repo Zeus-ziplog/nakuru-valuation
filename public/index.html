@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nakuru Land Information Dashboard</title>
-    <!-- Font Awesome for icons -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-    <!-- Export libraries -->
+    <!-- Export -->
     <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -28,7 +28,6 @@
             overflow: hidden;
             color: #1e293b;
         }
-        /* ===== Sidebar ===== */
         #sidebar {
             width: 420px;
             min-width: 420px;
@@ -62,7 +61,6 @@
             font-size: 13px;
             font-weight: 500;
         }
-        /* ===== Tabs ===== */
         .tab-bar {
             display: flex;
             background: #f1f5f9;
@@ -95,7 +93,6 @@
             background: white;
         }
         .tab-btn i { font-size: 14px; }
-        /* ===== Sidebar Controls ===== */
         #sidebar-controls {
             padding: 12px 16px;
             background: #f8fafc;
@@ -160,8 +157,6 @@
         .status-badge.running { background: #eab308; animation: pulse 1s infinite; }
         .status-badge.error { background: #ef4444; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        /* ===== Export Buttons ===== */
         .export-bar {
             display: flex;
             gap: 6px;
@@ -187,8 +182,6 @@
         }
         .export-btn:hover { background: #e9edf4; border-color: #2563eb; }
         .export-btn i { font-size: 13px; }
-
-        /* ===== Property List ===== */
         #property-list {
             flex: 1;
             overflow-y: auto;
@@ -242,15 +235,11 @@
             margin-left: 6px;
             letter-spacing: 0.3px;
         }
-
-        /* ===== Map Container ===== */
         #map-container {
             flex: 1;
             position: relative;
         }
         #map { height: 100%; width: 100%; }
-
-        /* ===== Toast ===== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -271,8 +260,6 @@
         .toast.error { background: rgba(239,68,68,0.9); }
         .toast.success { background: rgba(34,197,94,0.9); }
         .toast.info { background: rgba(37,99,235,0.9); }
-
-        /* ===== Legend ===== */
         .legend {
             position: absolute;
             bottom: 30px;
@@ -288,15 +275,12 @@
         .legend .title { font-weight: 600; margin-bottom: 4px; color: #0f172a; }
         .legend .gradient { height: 10px; border-radius: 4px; margin: 4px 0; }
         .legend .labels { display: flex; justify-content: space-between; font-size: 10px; color: #475569; }
-
-        /* ===== Responsive ===== */
         @media (max-width: 768px) {
             #sidebar { width: 100%; min-width: 0; height: 45vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
             #map-container { height: 55vh; }
             body { flex-direction: column; }
             .legend { bottom: 10px; right: 10px; padding: 8px 12px; font-size: 10px; min-width: 100px; }
         }
-
         .ward-label {
             background: rgba(0,0,0,0.7);
             color: white;
@@ -306,7 +290,6 @@
             font-size: 12px;
             font-weight: 500;
         }
-
         .legend-placeholder { display: none; }
     </style>
 </head>
@@ -333,9 +316,9 @@
             <span id="statusLabel">Idle</span>
         </span>
         <select id="statSelect">
-            <option value="avg">Avg Price/ha</option>
-            <option value="min">Min Price/ha</option>
-            <option value="max">Max Price/ha</option>
+            <option value="avg">Avg Price</option>
+            <option value="min">Min Price</option>
+            <option value="max">Max Price</option>
             <option value="range">Price Range</option>
             <option value="count">Number of Listings</option>
         </select>
@@ -389,7 +372,7 @@
         schools: { markers: null },
         water: { markers: null }
     };
-    let subCountyStats = {};
+    let subCountyStats = {};      // stats based on total price
     let currentStat = 'avg';
     let isRunning = false;
     const propertyList = document.getElementById('property-list');
@@ -549,7 +532,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (Sub-county + Wards) with transparent choropleth
+    // LOAD BOUNDARIES with dynamic choropleth (using total price stats)
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -579,7 +562,7 @@
                         fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
                         fillOpacity: 0.1,          // transparent – heatmap visible
                         weight: 2,
-                        color: '#0f172a',          // dark outline
+                        color: '#0f172a',
                         opacity: 0.8
                     };
                 };
@@ -595,7 +578,7 @@
                         <div style="font-family: sans-serif; min-width: 180px;">
                             <strong>${name}</strong><br/>
                             <span style="color: #555;">
-                                Avg price/ha: <strong>KSh ${Math.round(avg).toLocaleString()}</strong><br/>
+                                Avg price: <strong>KSh ${Math.round(avg).toLocaleString()}</strong><br/>
                                 Min: KSh ${Math.round(min).toLocaleString()}<br/>
                                 Max: KSh ${Math.round(max).toLocaleString()}<br/>
                                 Listings: ${count}
@@ -609,9 +592,9 @@
                 if (currentTab === 'land') activeLayers.land.subcounty.addTo(map);
 
                 const legendTitle = {
-                    'avg': 'Avg Price / Ha',
-                    'min': 'Min Price / Ha',
-                    'max': 'Max Price / Ha',
+                    'avg': 'Avg Price',
+                    'min': 'Min Price',
+                    'max': 'Max Price',
                     'range': 'Price Range (Max-Min)',
                     'count': 'Number of Listings'
                 }[statType] || 'Value';
@@ -621,8 +604,8 @@
                         <div class="title">${legendTitle}</div>
                         <div class="gradient" style="background: linear-gradient(to right, ${colorScale(minVal).hex()}, ${colorScale(maxVal).hex()});"></div>
                         <div class="labels">
-                            <span>${minVal.toFixed(0)}</span>
-                            <span>${maxVal.toFixed(0)}</span>
+                            <span>KSh ${Math.round(minVal).toLocaleString()}</span>
+                            <span>KSh ${Math.round(maxVal).toLocaleString()}</span>
                         </div>
                     </div>
                 `;
@@ -765,17 +748,15 @@
             if (tab === 'land') {
                 allData.land = rawData;
 
-                // ---- Compute sub-county stats ----
+                // ---- Compute sub-county stats based on TOTAL PRICE ----
                 const stats = {};
                 rawData.forEach(item => {
                     const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
                     if (!stats[key]) {
-                        stats[key] = { prices: [], sizes: [], count: 0 };
+                        stats[key] = { prices: [], count: 0 };
                     }
-                    const size = getSize(item);
-                    if (item.price && size && size > 0) {
-                        stats[key].prices.push(item.price / size);
-                        stats[key].sizes.push(size);
+                    if (item.price && item.price > 0) {
+                        stats[key].prices.push(item.price);
                     }
                     stats[key].count += 1;
                 });
@@ -795,29 +776,23 @@
                     computed[key] = { count, avg, min, max, range };
                 });
                 subCountyStats = computed;
-                console.log('Sub-county stats:', computed);
+                console.log('Sub-county stats (total price):', computed);
 
-                // ---- Build heatmap with dynamic intensity ----
-                let maxPricePerHa = 0;
-                rawData.forEach(item => {
-                    const size = getSize(item);
-                    if (item.price && size && size > 0) {
-                        const ppHa = item.price / size;
-                        if (ppHa > maxPricePerHa) maxPricePerHa = ppHa;
-                    }
-                });
-                console.log('Max price/ha:', maxPricePerHa);
+                // ---- Build heatmap using TOTAL PRICE (global min/max normalisation) ----
+                const allPrices = rawData
+                    .filter(item => item.price > 0)
+                    .map(item => item.price);
+                const minPrice = Math.min(...allPrices, 0);
+                const maxPrice = Math.max(...allPrices, 1);
+                console.log('Global price range:', { min: minPrice, max: maxPrice });
 
                 const points = [];
                 const markerData = [];
                 rawData.forEach(item => {
                     const size = getSize(item);
                     if (item.latitude && item.longitude && item.price) {
-                        const pricePerHa = (size && size > 0) ? item.price / size : 0;
-                        const intensity = (maxPricePerHa > 0) ? Math.min(pricePerHa / maxPricePerHa, 1) : 0;
-                        if (size && size > 0) {
-                            points.push([item.latitude, item.longitude, intensity]);
-                        }
+                        const intensity = (maxPrice > minPrice) ? (item.price - minPrice) / (maxPrice - minPrice) : 0;
+                        points.push([item.latitude, item.longitude, intensity]);
                         markerData.push({
                             lat: item.latitude,
                             lng: item.longitude,
@@ -826,7 +801,7 @@
                             size_ha: size,
                             location: item.location || 'Nakuru',
                             source: item.source || '',
-                            pricePerHa: pricePerHa
+                            pricePerHa: size ? item.price / size : 0
                         });
                     }
                 });
@@ -842,11 +817,12 @@
                         blur: 25,
                         maxZoom: 15,
                         gradient: {
-                            0.1: '#22c55e',
-                            0.3: '#84cc16',
-                            0.5: '#eab308',
-                            0.7: '#f97316',
-                            0.9: '#ef4444'
+                            0.0: '#22c55e',
+                            0.2: '#84cc16',
+                            0.4: '#eab308',
+                            0.6: '#f97316',
+                            0.8: '#ef4444',
+                            1.0: '#dc2626'
                         }
                     });
                     activeLayers.land.heat.addTo(map);
