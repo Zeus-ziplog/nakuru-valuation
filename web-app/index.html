@@ -592,7 +592,7 @@
                 legendContainer.innerHTML = legendHtml;
             }
 
-            // ---- WARDS: now using nakuru_wards.geojson from public/ ----
+                        // ---- WARDS (professional, subtle) ----
             const wardRes = await fetch('/nakuru_wards.geojson');
             if (!wardRes.ok) {
                 console.warn('Ward GeoJSON not found (404)');
@@ -603,11 +603,10 @@
 
                 activeLayers.land.wards = L.geoJSON(wardData, {
                     style: {
-                        fill: true,
-                        fillColor: 'transparent',
-                        weight: 6,
-                        color: '#ff00ff',
-                        opacity: 1.0,
+                        fill: false,                 // no fill, just outline
+                        weight: 2,                   // thin, professional line
+                        color: '#4a5568',            // dark slate gray
+                        opacity: 0.8,
                         dashArray: null
                     },
                     onEachFeature: (feature, layer) => {
@@ -629,9 +628,7 @@
                 if (bounds.isValid()) {
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
-            }
-
-            // Layer control (toggle)
+            }// Layer control (toggle)
             const overlayControl = {
                 "Sub-counties (price)": activeLayers.land.subcounty,
                 "Wards (outlines)": activeLayers.land.wards
