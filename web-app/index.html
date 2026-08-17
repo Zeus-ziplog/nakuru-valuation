@@ -99,7 +99,7 @@
             align-items: center;
             gap: 14px;
         }
-        /* Vertical flag bar */
+        /* Vertical flag bar – correct Kenyan flag colours */
         .flag-bar-vertical {
             display: flex;
             flex-direction: column;
@@ -114,9 +114,15 @@
             width: 100%;
         }
         .flag-bar-vertical .stripe.black { background: #000000; }
+        .flag-bar-vertical .stripe.white { background: #ffffff; }
         .flag-bar-vertical .stripe.red { background: #ff0000; }
         .flag-bar-vertical .stripe.green { background: #006600; }
-        .flag-bar-vertical .stripe.white { background: #ffffff; }
+        /* Kenyan flag order: black, white, red, white, green (5 stripes) */
+        .flag-bar-vertical .stripe:nth-child(1) { background: #000000; }
+        .flag-bar-vertical .stripe:nth-child(2) { background: #ffffff; }
+        .flag-bar-vertical .stripe:nth-child(3) { background: #ff0000; }
+        .flag-bar-vertical .stripe:nth-child(4) { background: #ffffff; }
+        .flag-bar-vertical .stripe:nth-child(5) { background: #006600; }
 
         .top-header .logo {
             font-family: 'Georgia', 'Times New Roman', serif;
@@ -172,26 +178,6 @@
             transition: background 0.3s, border-color 0.3s, width 0.3s;
             position: relative;
         }
-        .sidebar-toggle {
-            display: none;
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            z-index: 20;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 18px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: 0.2s;
-            align-items: center;
-            justify-content: center;
-        }
-        .sidebar-toggle:hover { transform: scale(1.05); }
 
         /* ===== Tabs ===== */
         .tab-bar {
@@ -328,7 +314,7 @@
             flex-direction: column;
             flex: 1;
             overflow-y: auto;
-            padding: 8px 12px 80px 12px;
+            padding: 8px 12px 12px 12px;
             gap: 6px;
         }
         .health-stats {
@@ -413,7 +399,7 @@
         }
         .health-filter-bar .reset-btn:hover { background: #dc2626; }
 
-        /* ===== Property List ===== */
+        /* ===== Property List – scrollable ===== */
         #property-list, #default-list {
             flex: 1;
             overflow-y: auto;
@@ -472,13 +458,35 @@
             padding: 4px 6px;
         }
 
-        /* ===== Map ===== */
+        /* ===== Map Container ===== */
         #map-container {
             flex: 1;
             position: relative;
             background: var(--bg);
         }
         #map { height: 100%; width: 100%; }
+
+        /* ===== Toggle button – bottom-left on map ===== */
+        .map-toggle-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: 0.2s;
+            display: none; /* hidden on desktop */
+            align-items: center;
+            justify-content: center;
+        }
+        .map-toggle-btn:hover { transform: scale(1.05); }
 
         /* ===== Legend ===== */
         .legend {
@@ -543,9 +551,9 @@
             .health-stats { grid-template-columns: 1fr 1fr; }
             .health-charts { grid-template-columns: 1fr; }
             .chart-container { height: 130px; }
-            .sidebar-toggle { display: flex; }
             .top-header .logo { font-size: 22px; }
-            #health-dashboard { padding-bottom: 60px; }
+            .map-toggle-btn { display: flex; }  /* show toggle on mobile */
+            #health-dashboard { padding-bottom: 12px; }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
@@ -565,12 +573,13 @@
     <div class="header-row">
         <div class="logo-area">
             <div class="logo">Nakuru <span>Info</span></div>
-            <!-- Vertical flag bar -->
+            <!-- Vertical flag bar (Kenyan flag colours) -->
             <div class="flag-bar-vertical">
-                <div class="stripe black"></div>
-                <div class="stripe red"></div>
-                <div class="stripe green"></div>
-                <div class="stripe white"></div>
+                <div class="stripe"></div> <!-- black -->
+                <div class="stripe"></div> <!-- white -->
+                <div class="stripe"></div> <!-- red -->
+                <div class="stripe"></div> <!-- white -->
+                <div class="stripe"></div> <!-- green -->
             </div>
         </div>
         <div class="header-controls">
@@ -627,15 +636,14 @@
         <div id="default-list">
             <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">Loading data...</div>
         </div>
-
-        <!-- Sidebar toggle (mobile) -->
-        <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     </div>
 
     <!-- MAP -->
     <div id="map-container">
         <div id="map"></div>
         <div id="legend-container"></div>
+        <!-- Toggle button on map (bottom-left) -->
+        <button class="map-toggle-btn" id="sidebarToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     </div>
 </div>
 
@@ -672,7 +680,8 @@
         const sidebar = document.getElementById('sidebar');
         sidebarVisible = !sidebarVisible;
         sidebar.style.display = sidebarVisible ? 'flex' : 'none';
-        document.getElementById('sidebarToggle').innerHTML = sidebarVisible ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-chevron-left"></i>';
+        const btn = document.getElementById('sidebarToggle');
+        btn.innerHTML = sidebarVisible ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-chevron-right"></i>';
         setTimeout(() => map.invalidateSize(), 300);
     }
 
