@@ -18,315 +18,89 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
     <style>
-        /* ===== Reset & Base ===== */
+        /* (same styles as before – keep as is) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            color: #1e293b;
-        }
-        #sidebar {
-            width: 420px;
-            min-width: 420px;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #e2e8f0;
-            z-index: 10;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #sidebar-header {
-            padding: 16px 20px;
-            background: #0f172a;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        #sidebar-header h1 {
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f7fa; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
+        #sidebar { width: 420px; min-width: 420px; background: #ffffff; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; z-index: 10; height: 100vh; overflow: hidden; }
+        #sidebar-header { padding: 16px 20px; background: #0f172a; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        #sidebar-header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
         #sidebar-header h1 span { color: #22c55e; }
-        #sidebar-header .badge {
-            background: rgba(255,255,255,0.12);
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        .tab-bar {
-            display: flex;
-            background: #f1f5f9;
-            border-bottom: 1px solid #e2e8f0;
-            flex-shrink: 0;
-            overflow-x: auto;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 10px 8px;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            font-weight: 500;
-            font-size: 13px;
-            color: #475569;
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-            min-width: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
+        #sidebar-header .badge { background: rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 30px; font-size: 13px; font-weight: 500; }
+        .tab-bar { display: flex; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 10px 8px; background: transparent; border: none; border-bottom: 3px solid transparent; font-weight: 500; font-size: 13px; color: #475569; cursor: pointer; transition: 0.2s; white-space: nowrap; min-width: 80px; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .tab-btn:hover { background: #e9edf4; }
-        .tab-btn.active {
-            color: #0f172a;
-            border-bottom-color: #2563eb;
-            background: white;
-        }
+        .tab-btn.active { color: #0f172a; border-bottom-color: #2563eb; background: white; }
         .tab-btn i { font-size: 14px; }
-        #sidebar-controls {
-            padding: 12px 16px;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-            flex-wrap: wrap;
-        }
-        #sidebar-controls input {
-            flex: 1;
-            padding: 6px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 30px;
-            font-size: 13px;
-            outline: none;
-            background: white;
-            min-width: 100px;
-        }
+        #sidebar-controls { padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+        #sidebar-controls input { flex: 1; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 30px; font-size: 13px; outline: none; background: white; min-width: 100px; }
         #sidebar-controls input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        #sidebar-controls select {
-            padding: 6px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 30px;
-            font-size: 13px;
-            background: white;
-            outline: none;
-            cursor: pointer;
-            min-width: 120px;
-        }
+        #sidebar-controls select { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 30px; font-size: 13px; background: white; outline: none; cursor: pointer; min-width: 120px; }
         #sidebar-controls select:focus { border-color: #2563eb; }
-        #refreshBtn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.15s;
-            white-space: nowrap;
-        }
+        #refreshBtn { background: #2563eb; color: white; border: none; padding: 6px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; white-space: nowrap; }
         #refreshBtn:hover { background: #1d4ed8; }
         #refreshBtn:disabled { background: #94a3b8; cursor: not-allowed; }
-        #statusText {
-            font-size: 12px;
-            color: #475569;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-        .status-badge {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
+        #statusText { font-size: 12px; color: #475569; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .status-badge { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
         .status-badge.idle { background: #22c55e; }
         .status-badge.running { background: #eab308; animation: pulse 1s infinite; }
         .status-badge.error { background: #ef4444; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        .export-bar {
-            display: flex;
-            gap: 6px;
-            padding: 6px 12px;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            flex-shrink: 0;
-            flex-wrap: wrap;
-        }
-        .export-btn {
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 11px;
-            font-weight: 500;
-            color: #1e293b;
-            cursor: pointer;
-            transition: 0.15s;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
+        .export-bar { display: flex; gap: 6px; padding: 6px 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; flex-wrap: wrap; }
+        .export-btn { background: white; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 500; color: #1e293b; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 4px; }
         .export-btn:hover { background: #e9edf4; border-color: #2563eb; }
         .export-btn i { font-size: 13px; }
-        #property-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 4px 0;
-        }
+        #property-list { flex: 1; overflow-y: auto; padding: 4px 0; }
         #property-list::-webkit-scrollbar { width: 5px; }
         #property-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .property-item {
-            padding: 10px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            transition: background 0.1s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .property-item { padding: 10px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.1s; display: flex; justify-content: space-between; align-items: center; }
         .property-item:hover { background: #f1f5f9; }
         .property-item.active { background: #eef2ff; border-left: 3px solid #2563eb; }
-        .property-item .info {
-            flex: 1;
-            min-width: 0;
-        }
-        .property-item .info .title {
-            font-weight: 500;
-            font-size: 14px;
-            color: #0f172a;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .property-item .info .meta {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-        .property-item .info .meta span { margin-right: 12px; }
-        .property-item .price {
-            font-weight: 600;
-            font-size: 14px;
-            color: #0f172a;
-            white-space: nowrap;
-            margin-left: 12px;
-        }
-        .property-item .source-tag {
-            font-size: 9px;
-            text-transform: uppercase;
-            background: #e2e8f0;
-            padding: 2px 8px;
-            border-radius: 12px;
-            color: #475569;
-            margin-left: 6px;
-            letter-spacing: 0.3px;
-        }
-        #map-container {
-            flex: 1;
-            position: relative;
-        }
+        .property-item .info { flex: 1; min-width: 0; }
+        .property-item .info .title { font-weight: 500; font-size: 14px; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .property-item .info .meta { font-size: 12px; color: #64748b; margin-top: 2px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .property-item .info .meta span { margin-right: 0; }
+        .property-item .price { font-weight: 600; font-size: 14px; color: #0f172a; white-space: nowrap; margin-left: 12px; display: flex; flex-direction: column; align-items: flex-end; }
+        .property-item .price small { font-weight: 400; font-size: 11px; color: #64748b; }
+        .property-item .source-tag { font-size: 9px; text-transform: uppercase; background: #e2e8f0; padding: 2px 8px; border-radius: 12px; color: #475569; margin-left: 6px; letter-spacing: 0.3px; }
+        #map-container { flex: 1; position: relative; }
         #map { height: 100%; width: 100%; }
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            background: rgba(15,23,42,0.9);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            backdrop-filter: blur(8px);
-        }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; background: rgba(15,23,42,0.9); color: white; padding: 10px 24px; border-radius: 30px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; backdrop-filter: blur(8px); }
         .toast.show { opacity: 1; }
         .toast.error { background: rgba(239,68,68,0.9); }
         .toast.success { background: rgba(34,197,94,0.9); }
         .toast.info { background: rgba(37,99,235,0.9); }
-        .legend {
-            position: absolute;
-            bottom: 30px;
-            right: 20px;
-            z-index: 1000;
-            background: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-            font-size: 12px;
-            min-width: 140px;
-        }
+        .legend { position: absolute; bottom: 30px; right: 20px; z-index: 1000; background: white; padding: 12px 16px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 12px; min-width: 140px; }
         .legend .title { font-weight: 600; margin-bottom: 4px; color: #0f172a; }
         .legend .gradient { height: 10px; border-radius: 4px; margin: 4px 0; }
         .legend .labels { display: flex; justify-content: space-between; font-size: 10px; color: #475569; }
-        @media (max-width: 768px) {
-            #sidebar { width: 100%; min-width: 0; height: 45vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
-            #map-container { height: 55vh; }
-            body { flex-direction: column; }
-            .legend { bottom: 10px; right: 10px; padding: 8px 12px; font-size: 10px; min-width: 100px; }
-        }
-        .ward-label {
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .legend-placeholder { display: none; }
+        @media (max-width: 768px) { #sidebar { width: 100%; min-width: 0; height: 45vh; border-right: none; border-bottom: 1px solid #e2e8f0; } #map-container { height: 55vh; } body { flex-direction: column; } .legend { bottom: 10px; right: 10px; padding: 8px 12px; font-size: 10px; min-width: 100px; } }
     </style>
 </head>
 <body>
-
 <div id="sidebar">
     <div id="sidebar-header">
         <h1>Nakuru <span>Info</span></h1>
         <span class="badge" id="count-badge">0</span>
     </div>
-
-    <!-- Tabs -->
     <div class="tab-bar" id="tabBar">
         <button class="tab-btn active" data-tab="land"><i class="fas fa-map-marked-alt"></i> Land</button>
         <button class="tab-btn" data-tab="health"><i class="fas fa-hospital"></i> Health</button>
         <button class="tab-btn" data-tab="schools"><i class="fas fa-school"></i> Schools</button>
         <button class="tab-btn" data-tab="water"><i class="fas fa-water"></i> Water</button>
     </div>
-
-    <!-- Controls -->
     <div id="sidebar-controls">
-        <span id="statusText">
-            <span class="status-badge idle" id="statusBadge"></span>
-            <span id="statusLabel">Idle</span>
-        </span>
+        <span id="statusText"><span class="status-badge idle" id="statusBadge"></span><span id="statusLabel">Idle</span></span>
         <select id="statSelect">
-            <option value="avg">Avg Price</option>
-            <option value="min">Min Price</option>
-            <option value="max">Max Price</option>
+            <option value="median">Median Price/ha</option>
+            <option value="avg">Avg Price/ha</option>
+            <option value="min">Min Price/ha</option>
+            <option value="max">Max Price/ha</option>
             <option value="range">Price Range</option>
             <option value="count">Number of Listings</option>
         </select>
         <input type="text" id="searchInput" placeholder="Filter by title, location..." />
         <button id="refreshBtn" onclick="refreshMap()"><i class="fas fa-sync-alt"></i> Refresh</button>
     </div>
-
-    <!-- Export Bar -->
     <div class="export-bar" id="exportBar">
         <button class="export-btn" onclick="exportPNG()"><i class="fas fa-image"></i> PNG</button>
         <button class="export-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
@@ -334,18 +108,9 @@
         <button class="export-btn" onclick="exportGeoJSON()"><i class="fas fa-globe"></i> GeoJSON</button>
         <button class="export-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
-
-    <!-- Property List -->
-    <div id="property-list">
-        <div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">Loading data...</div>
-    </div>
+    <div id="property-list"><div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">Loading data...</div></div>
 </div>
-
-<div id="map-container">
-    <div id="map"></div>
-    <div id="legend-container"></div>
-</div>
-
+<div id="map-container"><div id="map"></div><div id="legend-container"></div></div>
 <div id="toast" class="toast">Loading...</div>
 
 <script>
@@ -356,12 +121,8 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const map = L.map('map').setView([-0.3031, 36.0800], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
-        maxZoom: 18
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(map);
 
     // ---- Global state ----
     let currentTab = 'land';
@@ -372,8 +133,8 @@
         schools: { markers: null },
         water: { markers: null }
     };
-    let subCountyStats = {};      // stats based on total price
-    let currentStat = 'avg';
+    let subCountyStats = {};      // stats based on price/ha
+    let currentStat = 'median';
     let isRunning = false;
     const propertyList = document.getElementById('property-list');
     const countBadge = document.getElementById('count-badge');
@@ -410,6 +171,14 @@
         return null;
     }
 
+    function median(arr) {
+        if (arr.length === 0) return 0;
+        const sorted = arr.slice().sort((a,b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        if (sorted.length % 2 === 0) return (sorted[mid-1] + sorted[mid]) / 2;
+        return sorted[mid];
+    }
+
     // ============================================================
     // BUILD POPUP HTML
     // ============================================================
@@ -439,15 +208,20 @@
     }
 
     function buildLandPopup(item) {
-        return `<b>${item.title || 'Untitled'}</b><br/>
-                <b>Price:</b> KSh ${(item.price || 0).toLocaleString()}<br/>
-                ${item.size_ha ? `<b>Size:</b> ${item.size_ha.toFixed(2)} Ha<br/>` : ''}
-                ${item.location ? `<b>Location:</b> ${item.location}<br/>` : ''}
-                ${item.source ? `<b>Source:</b> ${item.source}` : ''}`;
+        let html = `<b>${item.title || 'Untitled'}</b><br/>
+                <b>Price:</b> KSh ${(item.price || 0).toLocaleString()}<br/>`;
+        if (item.size_ha) {
+            const pricePerHa = item.price / item.size_ha;
+            html += `<b>Price/ha:</b> KSh ${Math.round(pricePerHa).toLocaleString()}<br/>`;
+            html += `<b>Size:</b> ${item.size_ha.toFixed(2)} Ha<br/>`;
+        }
+        if (item.location) html += `<b>Location:</b> ${item.location}<br/>`;
+        if (item.source) html += `<b>Source:</b> ${item.source}`;
+        return html;
     }
 
     // ============================================================
-    // RENDER LIST
+    // RENDER LIST (shows total price + price/ha for land)
     // ============================================================
     function renderList(data, tab) {
         let html = '';
@@ -458,10 +232,15 @@
                 let title, metaHtml, priceHtml;
                 if (tab === 'land') {
                     title = p.title || 'Untitled';
-                    const sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
                     const location = p.location || 'Nakuru';
+                    const sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
                     metaHtml = `<span>${location}</span><span>${sizeStr}</span>`;
-                    priceHtml = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
+                    let pricePerHa = '';
+                    if (p.size_ha && p.price) {
+                        pricePerHa = `<small>KSh ${Math.round(p.price / p.size_ha).toLocaleString()}/ha</small>`;
+                    }
+                    priceHtml = p.price ? `KSh ${Number(p.price).toLocaleString()}` : 'N/A';
+                    if (pricePerHa) priceHtml += ` ${pricePerHa}`;
                 } else if (tab === 'health') {
                     title = p.name || 'Unnamed';
                     const type = p.facility_type || '—';
@@ -519,10 +298,7 @@
     function filterList() {
         const query = searchInput.value.toLowerCase().trim();
         const data = allData[currentTab] || [];
-        if (!query) {
-            renderList(data, currentTab);
-            return;
-        }
+        if (!query) { renderList(data, currentTab); return; }
         const filtered = data.filter(p => {
             const name = (p.name || p.title || '').toLowerCase();
             const loc = (p.location || p.ward || '').toLowerCase();
@@ -532,86 +308,82 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES with dynamic choropleth (using total price stats)
+    // LOAD BOUNDARIES with dynamic choropleth (price/ha)
     // ============================================================
     async function loadBoundaries() {
         try {
             const subRes = await fetch('/nakuru_subcounties.geojson');
             if (!subRes.ok) {
                 console.warn('Sub-county GeoJSON not found (404)');
-            } else {
-                const subData = await subRes.json();
-                console.log('Sub-county features:', subData.features.length);
-                if (activeLayers.land.subcounty) map.removeLayer(activeLayers.land.subcounty);
-
-                const statType = currentStat;
-                const values = Object.values(subCountyStats).map(s => s[statType] || 0);
-                const maxVal = Math.max(...values, 1);
-                const minVal = Math.min(...values, 0);
-                const colorScale = chroma.scale(['#e0f2fe', '#0284c7', '#f97316', '#dc2626'])
-                    .domain([minVal, maxVal]);
-
-                const style = (feature) => {
-                    const name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || '';
-                    const stat = subCountyStats[name];
-                    let val = 0;
-                    if (stat) {
-                        val = stat[statType] || 0;
-                    }
-                    return {
-                        fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
-                        fillOpacity: 0.1,          // transparent – heatmap visible
-                        weight: 2,
-                        color: '#0f172a',
-                        opacity: 0.8
-                    };
-                };
-
-                const onEachFeature = (feature, layer) => {
-                    const name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || 'Unknown';
-                    const stat = subCountyStats[name];
-                    let avg = stat?.avg || 0;
-                    let count = stat?.count || 0;
-                    let min = stat?.min || 0;
-                    let max = stat?.max || 0;
-                    layer.bindPopup(`
-                        <div style="font-family: sans-serif; min-width: 180px;">
-                            <strong>${name}</strong><br/>
-                            <span style="color: #555;">
-                                Avg price: <strong>KSh ${Math.round(avg).toLocaleString()}</strong><br/>
-                                Min: KSh ${Math.round(min).toLocaleString()}<br/>
-                                Max: KSh ${Math.round(max).toLocaleString()}<br/>
-                                Listings: ${count}
-                            </span>
-                        </div>
-                    `);
-                };
-
-                activeLayers.land.subcounty = L.geoJSON(subData, { style, onEachFeature });
-                activeLayers.land.subcounty.setZIndex(0);
-                if (currentTab === 'land') activeLayers.land.subcounty.addTo(map);
-
-                const legendTitle = {
-                    'avg': 'Avg Price',
-                    'min': 'Min Price',
-                    'max': 'Max Price',
-                    'range': 'Price Range (Max-Min)',
-                    'count': 'Number of Listings'
-                }[statType] || 'Value';
-
-                const legendHtml = `
-                    <div class="legend">
-                        <div class="title">${legendTitle}</div>
-                        <div class="gradient" style="background: linear-gradient(to right, ${colorScale(minVal).hex()}, ${colorScale(maxVal).hex()});"></div>
-                        <div class="labels">
-                            <span>KSh ${Math.round(minVal).toLocaleString()}</span>
-                            <span>KSh ${Math.round(maxVal).toLocaleString()}</span>
-                        </div>
-                    </div>
-                `;
-                legendContainer.innerHTML = legendHtml;
-                legendContainer.style.display = 'block';
+                return;
             }
+            const subData = await subRes.json();
+            console.log('Sub-county features:', subData.features.length);
+            if (activeLayers.land.subcounty) map.removeLayer(activeLayers.land.subcounty);
+
+            const statType = currentStat;
+            const values = Object.values(subCountyStats).map(s => s[statType] || 0);
+            const maxVal = Math.max(...values, 1);
+            const minVal = Math.min(...values, 0);
+            const colorScale = chroma.scale(['#e0f2fe', '#0284c7', '#f97316', '#dc2626']).domain([minVal, maxVal]);
+
+            const style = (feature) => {
+                const name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || '';
+                const stat = subCountyStats[name];
+                let val = 0;
+                if (stat) val = stat[statType] || 0;
+                return {
+                    fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
+                    fillOpacity: 0.15,
+                    weight: 2,
+                    color: '#0f172a',
+                    opacity: 0.8
+                };
+            };
+
+            const onEachFeature = (feature, layer) => {
+                const name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || 'Unknown';
+                const stat = subCountyStats[name];
+                if (!stat) return;
+                layer.bindPopup(`
+                    <div style="font-family: sans-serif; min-width: 180px;">
+                        <strong>${name}</strong><br/>
+                        <span style="color: #555;">
+                            Median: KSh ${Math.round(stat.median).toLocaleString()}/ha<br/>
+                            Avg: KSh ${Math.round(stat.avg).toLocaleString()}/ha<br/>
+                            Min: KSh ${Math.round(stat.min).toLocaleString()}/ha<br/>
+                            Max: KSh ${Math.round(stat.max).toLocaleString()}/ha<br/>
+                            Listings: ${stat.count}
+                        </span>
+                    </div>
+                `);
+            };
+
+            activeLayers.land.subcounty = L.geoJSON(subData, { style, onEachFeature });
+            activeLayers.land.subcounty.setZIndex(0);
+            if (currentTab === 'land') activeLayers.land.subcounty.addTo(map);
+
+            const legendTitle = {
+                'median': 'Median Price/ha',
+                'avg': 'Avg Price/ha',
+                'min': 'Min Price/ha',
+                'max': 'Max Price/ha',
+                'range': 'Price Range (Max-Min)',
+                'count': 'Number of Listings'
+            }[statType] || 'Value';
+
+            const legendHtml = `
+                <div class="legend">
+                    <div class="title">${legendTitle}</div>
+                    <div class="gradient" style="background: linear-gradient(to right, ${colorScale(minVal).hex()}, ${colorScale(maxVal).hex()});"></div>
+                    <div class="labels">
+                        <span>KSh ${Math.round(minVal).toLocaleString()}</span>
+                        <span>KSh ${Math.round(maxVal).toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+            legendContainer.innerHTML = legendHtml;
+            legendContainer.style.display = 'block';
 
             // ---- WARDS (professional, subtle) ----
             const wardRes = await fetch('/nakuru_wards.geojson');
@@ -621,34 +393,19 @@
                 const wardData = await wardRes.json();
                 console.log('Ward features:', wardData.features.length);
                 if (activeLayers.land.wards) map.removeLayer(activeLayers.land.wards);
-
                 activeLayers.land.wards = L.geoJSON(wardData, {
-                    style: {
-                        fill: false,
-                        weight: 2,
-                        color: '#4a5568',
-                        opacity: 0.8,
-                        dashArray: null
-                    },
+                    style: { fill: false, weight: 2, color: '#4a5568', opacity: 0.8, dashArray: null },
                     onEachFeature: (feature, layer) => {
                         const name = feature.properties?.NAME || feature.properties?.name || 'Ward';
                         layer.bindPopup('<strong>' + name + '</strong><br/>Ward boundary');
                         layer.bindTooltip(name, { permanent: false, direction: 'center' });
                     }
                 });
-
                 activeLayers.land.wards.setZIndex(1000);
                 activeLayers.land.wards.bringToFront();
-
-                if (currentTab === 'land') {
-                    activeLayers.land.wards.addTo(map);
-                    console.log('Ward layer added to map?', map.hasLayer(activeLayers.land.wards));
-                }
-
+                if (currentTab === 'land') activeLayers.land.wards.addTo(map);
                 const bounds = activeLayers.land.wards.getBounds();
-                if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [50, 50] });
-                }
+                if (bounds.isValid()) map.fitBounds(bounds, { padding: [50, 50] });
             }
 
             const overlayControl = {
@@ -657,7 +414,6 @@
             };
             if (window._layerControl) map.removeControl(window._layerControl);
             window._layerControl = L.control.layers(null, overlayControl, { collapsed: false }).addTo(map);
-
             console.log('✅ Choropleth + wards loaded');
         } catch (err) {
             console.error('Error loading boundaries:', err);
@@ -669,35 +425,24 @@
     // ============================================================
     function switchTab(tab) {
         currentTab = tab;
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === tab);
-        });
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
         for (const key in activeLayers) {
             for (const layerKey in activeLayers[key]) {
                 const layer = activeLayers[key][layerKey];
-                if (layer && map.hasLayer(layer)) {
-                    map.removeLayer(layer);
-                }
+                if (layer && map.hasLayer(layer)) map.removeLayer(layer);
             }
         }
         const layers = activeLayers[tab];
         for (const layerKey in layers) {
             const layer = layers[layerKey];
-            if (layer && !map.hasLayer(layer)) {
-                layer.addTo(map);
-            }
+            if (layer && !map.hasLayer(layer)) layer.addTo(map);
         }
         const data = allData[tab] || [];
         renderList(data, tab);
         searchInput.value = '';
-        if (tab === 'land' && legendContainer.innerHTML) {
-            legendContainer.style.display = 'block';
-        } else {
-            legendContainer.style.display = 'none';
-        }
-        if (!allData[tab] || allData[tab].length === 0) {
-            refreshMap();
-        }
+        if (tab === 'land' && legendContainer.innerHTML) legendContainer.style.display = 'block';
+        else legendContainer.style.display = 'none';
+        if (!allData[tab] || allData[tab].length === 0) refreshMap();
     }
 
     // ============================================================
@@ -705,24 +450,13 @@
     // ============================================================
     async function loadTabData(tab) {
         let tableName;
-        if (tab === 'land') {
-            tableName = 'listings';
-        } else if (tab === 'health') {
-            tableName = 'health_facilities';
-        } else if (tab === 'schools') {
-            tableName = 'schools';
-        } else if (tab === 'water') {
-            tableName = 'water_sources';
-        } else {
-            return [];
-        }
-
+        if (tab === 'land') tableName = 'listings';
+        else if (tab === 'health') tableName = 'health_facilities';
+        else if (tab === 'schools') tableName = 'schools';
+        else if (tab === 'water') tableName = 'water_sources';
+        else return [];
         try {
-            const { data, error } = await supabaseClient
-                .from(tableName)
-                .select('*')
-                .not('latitude', 'is', null)
-                .limit(1000);
+            const { data, error } = await supabaseClient.from(tableName).select('*').not('latitude', 'is', null).limit(1000);
             if (error) throw error;
             return data || [];
         } catch (err) {
@@ -748,16 +482,15 @@
             if (tab === 'land') {
                 allData.land = rawData;
 
-                // ---- Compute sub-county stats based on TOTAL PRICE ----
+                // ---- Compute sub-county stats based on price/ha ----
                 const stats = {};
                 rawData.forEach(item => {
+                    const size = getSize(item);
+                    if (!item.price || !size || size <= 0) return;
+                    const pricePerHa = item.price / size;
                     const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
-                    if (!stats[key]) {
-                        stats[key] = { prices: [], count: 0 };
-                    }
-                    if (item.price && item.price > 0) {
-                        stats[key].prices.push(item.price);
-                    }
+                    if (!stats[key]) stats[key] = { prices: [], count: 0 };
+                    stats[key].prices.push(pricePerHa);
                     stats[key].count += 1;
                 });
 
@@ -766,32 +499,37 @@
                     const s = stats[key];
                     const prices = s.prices;
                     const count = s.count;
-                    let avg = 0, min = 0, max = 0, range = 0;
+                    let avg = 0, min = 0, max = 0, range = 0, med = 0;
                     if (prices.length > 0) {
                         avg = prices.reduce((a,b) => a+b,0) / prices.length;
                         min = Math.min(...prices);
                         max = Math.max(...prices);
                         range = max - min;
+                        med = median(prices);
                     }
-                    computed[key] = { count, avg, min, max, range };
+                    computed[key] = { count, avg, min, max, range, median: med };
                 });
                 subCountyStats = computed;
-                console.log('Sub-county stats (total price):', computed);
+                console.log('Sub-county stats (price/ha):', computed);
 
-                // ---- Build heatmap using TOTAL PRICE (global min/max normalisation) ----
-                const allPrices = rawData
-                    .filter(item => item.price > 0)
-                    .map(item => item.price);
-                const minPrice = Math.min(...allPrices, 0);
-                const maxPrice = Math.max(...allPrices, 1);
-                console.log('Global price range:', { min: minPrice, max: maxPrice });
+                // ---- Heatmap using price/ha ----
+                let maxPricePerHa = 0;
+                rawData.forEach(item => {
+                    const size = getSize(item);
+                    if (item.price && size && size > 0) {
+                        const ppHa = item.price / size;
+                        if (ppHa > maxPricePerHa) maxPricePerHa = ppHa;
+                    }
+                });
+                console.log('Max price/ha for heatmap:', maxPricePerHa);
 
                 const points = [];
                 const markerData = [];
                 rawData.forEach(item => {
                     const size = getSize(item);
-                    if (item.latitude && item.longitude && item.price) {
-                        const intensity = (maxPrice > minPrice) ? (item.price - minPrice) / (maxPrice - minPrice) : 0;
+                    if (item.latitude && item.longitude && item.price && size && size > 0) {
+                        const pricePerHa = item.price / size;
+                        const intensity = (maxPricePerHa > 0) ? Math.min(pricePerHa / maxPricePerHa, 1) : 0;
                         points.push([item.latitude, item.longitude, intensity]);
                         markerData.push({
                             lat: item.latitude,
@@ -801,12 +539,12 @@
                             size_ha: size,
                             location: item.location || 'Nakuru',
                             source: item.source || '',
-                            pricePerHa: size ? item.price / size : 0
+                            pricePerHa: pricePerHa
                         });
                     }
                 });
 
-                console.log('Heatmap points:', points.length);
+                console.log('Heatmap points (price/ha):', points.length);
 
                 if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
                 if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
@@ -842,7 +580,6 @@
                 });
 
                 allData.land = markerData;
-
                 await loadBoundaries();
 
                 if (points.length > 0) {
@@ -852,53 +589,34 @@
                 showToast('Loaded ' + rawData.length + ' plots', 'success');
 
             } else if (tab === 'health') {
+                // (unchanged)
                 allData.health = rawData;
                 if (activeLayers.health.markers) map.removeLayer(activeLayers.health.markers);
-
                 activeLayers.health.markers = L.layerGroup();
                 rawData.forEach(item => {
-                    const lat = item.latitude;
-                    const lng = item.longitude;
+                    const lat = item.latitude, lng = item.longitude;
                     if (lat && lng) {
-                        const popupContent = buildHealthPopup(item);
-                        const marker = L.circleMarker([lat, lng], {
-                            radius: 6,
-                            color: '#e74c3c',
-                            fillColor: '#e74c3c',
-                            fillOpacity: 0.6,
-                            weight: 2
-                        }).bindPopup(popupContent);
-                        marker._lat = lat;
-                        marker._lng = lng;
+                        const popup = buildHealthPopup(item);
+                        const marker = L.circleMarker([lat, lng], { radius: 6, color: '#e74c3c', fillColor: '#e74c3c', fillOpacity: 0.6, weight: 2 })
+                            .bindPopup(popup);
+                        marker._lat = lat; marker._lng = lng;
                         activeLayers.health.markers.addLayer(marker);
                     }
                 });
-                allData.health = rawData.map(item => ({
-                    ...item,
-                    lat: item.latitude,
-                    lng: item.longitude
-                }));
-
-                const points = rawData.filter(p => p.latitude && p.longitude)
-                    .map(p => [p.latitude, p.longitude]);
-                if (points.length > 0) {
-                    const bounds = L.latLngBounds(points);
-                    map.fitBounds(bounds, { padding: [50, 50] });
-                }
+                allData.health = rawData.map(item => ({ ...item, lat: item.latitude, lng: item.longitude }));
+                const pts = rawData.filter(p => p.latitude && p.longitude).map(p => [p.latitude, p.longitude]);
+                if (pts.length > 0) map.fitBounds(L.latLngBounds(pts), { padding: [50, 50] });
                 showToast('Loaded ' + rawData.length + ' health facilities', 'success');
             } else {
+                // (unchanged)
                 allData[tab] = rawData;
                 const groupName = tab;
                 if (activeLayers[groupName].markers) map.removeLayer(activeLayers[groupName].markers);
                 activeLayers[groupName].markers = L.layerGroup();
                 rawData.forEach(item => {
                     if (item.latitude && item.longitude) {
-                        const marker = L.circleMarker([item.latitude, item.longitude], {
-                            radius: 5,
-                            color: '#2ecc71',
-                            fillColor: '#2ecc71',
-                            fillOpacity: 0.5
-                        }).bindPopup(`<b>${item.name || 'Untitled'}</b><br/>${item.location || ''}`);
+                        const marker = L.circleMarker([item.latitude, item.longitude], { radius: 5, color: '#2ecc71', fillColor: '#2ecc71', fillOpacity: 0.5 })
+                            .bindPopup(`<b>${item.name || 'Untitled'}</b><br/>${item.location || ''}`);
                         activeLayers[groupName].markers.addLayer(marker);
                     }
                 });
@@ -907,7 +625,6 @@
             }
 
             switchTab(currentTab);
-
         } catch (err) {
             console.error(err);
             showToast('Error loading data', 'error');
@@ -930,7 +647,7 @@
     }
 
     // ============================================================
-    // EXPORT FUNCTIONS
+    // EXPORT FUNCTIONS (unchanged)
     // ============================================================
     function exportPNG() {
         leafletImage(map, function(err, canvas) {
@@ -952,9 +669,7 @@
             const pdfHeight = pdf.internal.pageSize.getHeight();
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(currentTab + '_dashboard.pdf');
-        }).catch(err => {
-            showToast('Error generating PDF', 'error');
-        });
+        }).catch(err => showToast('Error generating PDF', 'error'));
     }
 
     function exportCSV() {
@@ -984,10 +699,7 @@
         if (data.length === 0) { showToast('No data to export', 'info'); return; }
         const features = data.map(item => ({
             type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [item.lng || item.longitude, item.lat || item.latitude]
-            },
+            geometry: { type: 'Point', coordinates: [item.lng || item.longitude, item.lat || item.latitude] },
             properties: { ...item }
         }));
         const geojson = { type: 'FeatureCollection', features };
@@ -1002,17 +714,11 @@
     // INIT
     // ============================================================
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            switchTab(btn.dataset.tab);
-        });
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
-
     statSelect.addEventListener('change', updateChoropleth);
-
     searchInput.addEventListener('input', filterList);
-
     refreshMap();
-
     setInterval(() => { if (!isRunning) refreshMap(); }, 300000);
 </script>
 </body>
