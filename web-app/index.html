@@ -117,6 +117,17 @@
             min-width: 100px;
         }
         #sidebar-controls input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        #sidebar-controls select {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 30px;
+            font-size: 13px;
+            background: white;
+            outline: none;
+            cursor: pointer;
+            min-width: 120px;
+        }
+        #sidebar-controls select:focus { border-color: #2563eb; }
         #refreshBtn {
             background: #2563eb;
             color: white;
@@ -321,6 +332,13 @@
             <span class="status-badge idle" id="statusBadge"></span>
             <span id="statusLabel">Idle</span>
         </span>
+        <select id="statSelect">
+            <option value="avg">Avg Price/ha</option>
+            <option value="min">Min Price/ha</option>
+            <option value="max">Max Price/ha</option>
+            <option value="range">Price Range</option>
+            <option value="count">Number of Listings</option>
+        </select>
         <input type="text" id="searchInput" placeholder="Filter by title, location..." />
         <button id="refreshBtn" onclick="refreshMap()"><i class="fas fa-sync-alt"></i> Refresh</button>
     </div>
@@ -364,14 +382,15 @@
 
     // ---- Global state ----
     let currentTab = 'land';
-    let allData = {};               // { land: [...], health: [...], ... }
+    let allData = {};
     let activeLayers = {
         land: { heat: null, markers: null, subcounty: null, wards: null },
         health: { markers: null },
         schools: { markers: null },
         water: { markers: null }
     };
-    let avgPrices = {};
+    let subCountyStats = {};        // will hold computed stats per sub-county
+    let currentStat = 'avg';        // selected statistic
     let isRunning = false;
     const propertyList = document.getElementById('property-list');
     const countBadge = document.getElementById('count-badge');
@@ -379,6 +398,7 @@
     const toastEl = document.getElementById('toast');
     const refreshBtn = document.getElementById('refreshBtn');
     const legendContainer = document.getElementById('legend-container');
+    const statSelect = document.getElementById('statSelect');
 
     // ============================================================
     // HELPERS
@@ -467,7 +487,6 @@
                     metaHtml = `<span>${type}</span><span>${ward}</span><span>${sub}</span>`;
                     priceHtml = p.bed_capacity ? `Beds: ${p.bed_capacity}` : '—';
                 } else {
-                    // schools / water – placeholder
                     title = p.name || 'Untitled';
                     metaHtml = `<span>${p.location || 'Nakuru'}</span>`;
                     priceHtml = '—';
@@ -530,7 +549,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (Sub-county + Wards) – using new nakuru_wards.geojson
+    // LOAD BOUNDARIES (Sub-county + Wards) with dynamic choropleth
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -542,16 +561,25 @@
                 console.log('Sub-county features:', subData.features.length);
                 if (activeLayers.land.subcounty) map.removeLayer(activeLayers.land.subcounty);
 
-                const prices = Object.values(avgPrices).filter(p => p > 0);
-                const maxPrice = Math.max(...prices, 1);
-                const colorScale = chroma.scale(['#e0f2fe', '#0284c7', '#f97316', '#dc2626']).domain([0, maxPrice]);
+                // Determine the statistic values for each sub-county
+                const statType = currentStat;
+                const values = Object.values(subCountyStats).map(s => s[statType] || 0);
+                const maxVal = Math.max(...values, 1);
+                const minVal = Math.min(...values, 0);
+                // Use a colour scale based on the selected statistic
+                const colorScale = chroma.scale(['#e0f2fe', '#0284c7', '#f97316', '#dc2626'])
+                    .domain([minVal, maxVal]);
 
                 const style = (feature) => {
                     const name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || '';
-                    const price = avgPrices[name] || 0;
+                    const stat = subCountyStats[name];
+                    let val = 0;
+                    if (stat) {
+                        val = stat[statType] || 0;
+                    }
                     return {
-                        fillColor: price > 0 ? colorScale(price).hex() : '#f1f5f9',
-                        fillOpacity: 0.5,
+                        fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
+                        fillOpacity: 0.6,
                         weight: 2,
                         color: '#0f172a',
                         opacity: 1.0
@@ -560,16 +588,20 @@
 
                 const onEachFeature = (feature, layer) => {
                     const name = feature.properties?.NAME || feature.properties?.name || feature.properties?.SubCounty || 'Unknown';
-                    const price = avgPrices[name] || 0;
-                    const count = avgPrices[name + '_count'] || 0;
+                    const stat = subCountyStats[name];
+                    let avg = stat?.avg || 0;
+                    let count = stat?.count || 0;
+                    let min = stat?.min || 0;
+                    let max = stat?.max || 0;
                     layer.bindPopup(`
                         <div style="font-family: sans-serif; min-width: 180px;">
                             <strong>${name}</strong><br/>
                             <span style="color: #555;">
-                                Avg price/ha: <strong>KSh ${price.toLocaleString()}</strong><br/>
+                                Avg price/ha: <strong>KSh ${Math.round(avg).toLocaleString()}</strong><br/>
+                                Min: KSh ${Math.round(min).toLocaleString()}<br/>
+                                Max: KSh ${Math.round(max).toLocaleString()}<br/>
                                 Listings: ${count}
                             </span>
-                            ${price === 0 ? '<br/><em style="color:#999;">No data</em>' : ''}
                         </div>
                     `);
                 };
@@ -578,21 +610,30 @@
                 activeLayers.land.subcounty.setZIndex(0);
                 if (currentTab === 'land') activeLayers.land.subcounty.addTo(map);
 
-                // Legend
+                // Update legend
+                const legendTitle = {
+                    'avg': 'Avg Price / Ha',
+                    'min': 'Min Price / Ha',
+                    'max': 'Max Price / Ha',
+                    'range': 'Price Range (Max-Min)',
+                    'count': 'Number of Listings'
+                }[statType] || 'Value';
+
                 const legendHtml = `
                     <div class="legend">
-                        <div class="title">Avg Price / Ha</div>
-                        <div class="gradient" style="background: linear-gradient(to right, ${colorScale(0).hex()}, ${colorScale(maxPrice).hex()});"></div>
+                        <div class="title">${legendTitle}</div>
+                        <div class="gradient" style="background: linear-gradient(to right, ${colorScale(minVal).hex()}, ${colorScale(maxVal).hex()});"></div>
                         <div class="labels">
-                            <span>KSh 0</span>
-                            <span>KSh ${Math.round(maxPrice).toLocaleString()}</span>
+                            <span>${minVal.toFixed(0)}</span>
+                            <span>${maxVal.toFixed(0)}</span>
                         </div>
                     </div>
                 `;
                 legendContainer.innerHTML = legendHtml;
+                legendContainer.style.display = 'block';
             }
 
-                        // ---- WARDS (professional, subtle) ----
+            // ---- WARDS (professional, subtle) ----
             const wardRes = await fetch('/nakuru_wards.geojson');
             if (!wardRes.ok) {
                 console.warn('Ward GeoJSON not found (404)');
@@ -603,9 +644,9 @@
 
                 activeLayers.land.wards = L.geoJSON(wardData, {
                     style: {
-                        fill: false,                 // no fill, just outline
-                        weight: 2,                   // thin, professional line
-                        color: '#4a5568',            // dark slate gray
+                        fill: false,
+                        weight: 2,
+                        color: '#4a5568',
                         opacity: 0.8,
                         dashArray: null
                     },
@@ -628,7 +669,9 @@
                 if (bounds.isValid()) {
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
-            }// Layer control (toggle)
+            }
+
+            // Layer control (toggle)
             const overlayControl = {
                 "Sub-counties (price)": activeLayers.land.subcounty,
                 "Wards (outlines)": activeLayers.land.wards
@@ -725,31 +768,41 @@
             const rawData = await loadTabData(tab);
             if (tab === 'land') {
                 allData.land = rawData;
-                const groups = {};
+
+                // ---- Compute sub-county stats ----
+                const stats = {};
                 rawData.forEach(item => {
                     const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
-                    if (!groups[key]) groups[key] = { prices: [], sizes: [], count: 0 };
+                    if (!stats[key]) {
+                        stats[key] = { prices: [], sizes: [], count: 0 };
+                    }
                     const size = getSize(item);
                     if (item.price && size && size > 0) {
-                        groups[key].prices.push(item.price);
-                        groups[key].sizes.push(size);
+                        stats[key].prices.push(item.price / size); // price per ha
+                        stats[key].sizes.push(size);
                     }
-                    groups[key].count += 1;
+                    stats[key].count += 1;
                 });
-                const avg = {};
-                Object.keys(groups).forEach(key => {
-                    const g = groups[key];
-                    if (g.prices.length === 0) {
-                        avg[key] = 0;
-                    } else {
-                        const perHa = g.prices.map((p, i) => p / g.sizes[i]);
-                        avg[key] = perHa.reduce((a, b) => a + b, 0) / perHa.length;
-                    }
-                    avg[key + '_count'] = g.count;
-                });
-                avgPrices = avg;
-                console.log('Avg prices:', avgPrices);
 
+                const computed = {};
+                Object.keys(stats).forEach(key => {
+                    const s = stats[key];
+                    const prices = s.prices;
+                    const count = s.count;
+                    let avg = 0, min = 0, max = 0, range = 0;
+                    if (prices.length > 0) {
+                        avg = prices.reduce((a,b) => a+b,0) / prices.length;
+                        min = Math.min(...prices);
+                        max = Math.max(...prices);
+                        range = max - min;
+                    }
+                    computed[key] = { count, avg, min, max, range };
+                });
+                subCountyStats = computed;
+                window.subCountyStats = computed; // for debugging
+                console.log('Sub-county stats:', computed);
+
+                // ---- Build heatmap & markers ----
                 const points = [];
                 const markerData = [];
                 rawData.forEach(item => {
@@ -805,6 +858,8 @@
                 });
 
                 allData.land = markerData;
+
+                // ---- Load boundaries (choropleth + wards) ----
                 await loadBoundaries();
 
                 if (points.length > 0) {
@@ -879,6 +934,17 @@
         setStatus('idle', 'Idle');
         refreshBtn.disabled = false;
         refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+    }
+
+    // ============================================================
+    // UPDATE CHOROPLETH (called when dropdown changes)
+    // ============================================================
+    function updateChoropleth() {
+        const newStat = statSelect.value;
+        if (newStat === currentStat) return;
+        currentStat = newStat;
+        // Reload boundaries with new statistic
+        loadBoundaries();
     }
 
     // ============================================================
@@ -958,6 +1024,8 @@
             switchTab(btn.dataset.tab);
         });
     });
+
+    statSelect.addEventListener('change', updateChoropleth);
 
     searchInput.addEventListener('input', filterList);
 
