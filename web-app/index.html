@@ -549,7 +549,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (Sub-county + Wards) with dynamic choropleth
+    // LOAD BOUNDARIES (Sub-county + Wards) with transparent choropleth
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -577,10 +577,10 @@
                     }
                     return {
                         fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
-                        fillOpacity: 0.6,
+                        fillOpacity: 0.1,          // transparent – heatmap visible
                         weight: 2,
-                        color: '#0f172a',
-                        opacity: 1.0
+                        color: '#0f172a',          // dark outline
+                        opacity: 0.8
                     };
                 };
 
@@ -765,7 +765,7 @@
             if (tab === 'land') {
                 allData.land = rawData;
 
-                // ---- Compute sub-county stats ----
+                // ---- Compute sub-county stats (price/ha) ----
                 const stats = {};
                 rawData.forEach(item => {
                     const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
@@ -797,27 +797,22 @@
                 subCountyStats = computed;
                 console.log('Sub-county stats:', computed);
 
-                // ---- Build heatmap with dynamic intensity ----
-                let maxPricePerHa = 0;
-                rawData.forEach(item => {
-                    const size = getSize(item);
-                    if (item.price && size && size > 0) {
-                        const ppHa = item.price / size;
-                        if (ppHa > maxPricePerHa) maxPricePerHa = ppHa;
-                    }
-                });
-                console.log('Max price/ha:', maxPricePerHa);
+                // ---- Build heatmap using TOTAL PRICE (global min/max normalisation) ----
+                const prices = rawData
+                    .filter(item => item.price > 0)
+                    .map(item => item.price);
+                const minPrice = Math.min(...prices, 0);
+                const maxPrice = Math.max(...prices, 1);
+                console.log('Global price range:', { min: minPrice, max: maxPrice });
 
                 const points = [];
                 const markerData = [];
                 rawData.forEach(item => {
                     const size = getSize(item);
                     if (item.latitude && item.longitude && item.price) {
-                        const pricePerHa = (size && size > 0) ? item.price / size : 0;
-                        const intensity = (maxPricePerHa > 0) ? Math.min(pricePerHa / maxPricePerHa, 1) : 0;
-                        if (size && size > 0) {
-                            points.push([item.latitude, item.longitude, intensity]);
-                        }
+                        // Normalise total price between 0 and 1
+                        const intensity = (maxPrice > minPrice) ? (item.price - minPrice) / (maxPrice - minPrice) : 0;
+                        points.push([item.latitude, item.longitude, intensity]);
                         markerData.push({
                             lat: item.latitude,
                             lng: item.longitude,
@@ -826,7 +821,7 @@
                             size_ha: size,
                             location: item.location || 'Nakuru',
                             source: item.source || '',
-                            pricePerHa: pricePerHa
+                            pricePerHa: size ? item.price / size : 0
                         });
                     }
                 });
@@ -842,11 +837,12 @@
                         blur: 25,
                         maxZoom: 15,
                         gradient: {
-                            0.1: '#22c55e',
-                            0.3: '#84cc16',
-                            0.5: '#eab308',
-                            0.7: '#f97316',
-                            0.9: '#ef4444'
+                            0.0: '#22c55e',   // lowest price → green
+                            0.2: '#84cc16',
+                            0.4: '#eab308',
+                            0.6: '#f97316',
+                            0.8: '#ef4444',   // highest price → red
+                            1.0: '#dc2626'
                         }
                     });
                     activeLayers.land.heat.addTo(map);
