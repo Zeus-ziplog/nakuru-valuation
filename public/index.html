@@ -549,7 +549,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (Sub-county + Wards) with dynamic choropleth
+    // LOAD BOUNDARIES (Sub-county + Wards) with transparent choropleth
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -577,10 +577,10 @@
                     }
                     return {
                         fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
-                        fillOpacity: 0.6,
+                        fillOpacity: 0.1,          // transparent – heatmap visible
                         weight: 2,
-                        color: '#0f172a',
-                        opacity: 1.0
+                        color: '#0f172a',          // dark outline
+                        opacity: 0.8
                     };
                 };
 
