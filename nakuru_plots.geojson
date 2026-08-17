@@ -6,16 +6,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4387834,
-          -0.7224425
+          36.4388,
+          -0.7224
         ]
       },
       "properties": {
         "id": 1,
-        "title": null,
+        "title": "0.0430 ha Residential Land in Naivasha",
         "price": 490000.0,
         "size_ha": 4.0,
-        "location": null,
+        "location": "Residential Land Naivasha",
         "source": "buyrentkenya"
       }
     },
@@ -24,16 +24,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.581838,
-          -0.9792274
+          36.4388,
+          -0.7224
         ]
       },
       "properties": {
         "id": 2,
-        "title": null,
-        "price": 2500000.0,
-        "size_ha": 0.05,
-        "location": null,
+        "title": "3.5 Acres Nyamathi, Naivasha",
+        "price": 12000000.0,
+        "size_ha": 1.41645,
+        "location": "Nyamathi Naivasha",
         "source": "jiji"
       }
     },
@@ -42,16 +42,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.0656369,
-          -0.2854819
+          36.14,
+          -0.37
         ]
       },
       "properties": {
         "id": 3,
-        "title": null,
-        "price": 80000000.0,
-        "size_ha": 0.4047,
-        "location": null,
+        "title": "50 by 100 Acre Plot Kinungi",
+        "price": 750000.0,
+        "size_ha": 40.47,
+        "location": "Plot Kinungi",
         "source": "jiji"
       }
     },
@@ -60,16 +60,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4387834,
-          -0.7224425
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 4,
-        "title": null,
+        "title": "Prime Land Opposite Great North Rift ,3 Acres",
         "price": 60000000.0,
         "size_ha": 1.2141,
-        "location": null,
+        "location": "Prime Land Opposite",
         "source": "jiji"
       }
     },
@@ -78,16 +78,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1633675,
-          -0.2986237
+          36.33,
+          -0.5
         ]
       },
       "properties": {
         "id": 5,
-        "title": null,
-        "price": 12500000.0,
-        "size_ha": 3.2376,
-        "location": null,
+        "title": "1 Acre of Land for Sale Gilgil",
+        "price": 500000.0,
+        "size_ha": 0.4047,
+        "location": "Land Gilgil",
         "source": "jiji"
       }
     },
@@ -96,16 +96,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          35.7226702,
-          -0.154714
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 6,
-        "title": null,
-        "price": 45000000.0,
-        "size_ha": 0.8094,
-        "location": null,
+        "title": "Prime 20 Acres.",
+        "price": 75000000.0,
+        "size_ha": 8.094,
+        "location": "Prime",
         "source": "jiji"
       }
     },
@@ -114,16 +114,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.2098304,
-          -0.4890675
+          36.09,
+          -0.29
         ]
       },
       "properties": {
         "id": 7,
-        "title": null,
-        "price": 6400000.0,
-        "size_ha": 1.6188,
-        "location": null,
+        "title": "0.7 Acre Plot for Sale in Nakuru Eveready",
+        "price": 56000000.0,
+        "size_ha": 0.28329,
+        "location": "Plot Nakuru Eveready",
         "source": "jiji"
       }
     },
@@ -132,17 +132,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4257017,
-          -0.7879608
+          36.4388,
+          -0.7224
         ]
       },
       "properties": {
         "id": 8,
-        "title": null,
-        "price": 700000000.0,
-        "size_ha": 10.1175,
-        "location": null,
-        "source": "propertypro"
+        "title": "2 And) 1/2 Acre on Sale at Ihindu Naivasha Only 1km Frm Rd",
+        "price": 4000000.0,
+        "size_ha": 0.2023,
+        "location": "Ihindu Naivasha Only",
+        "source": "jiji"
       }
     },
     {
@@ -150,17 +150,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.0584119,
-          -0.2783492
+          36.08,
+          -0.3
         ]
       },
       "properties": {
         "id": 9,
-        "title": null,
-        "price": 42000000.0,
-        "size_ha": 8.094,
-        "location": null,
-        "source": "propertypro"
+        "title": "Garden Estate 1/2 Acre, Residential Plot",
+        "price": 45000000.0,
+        "size_ha": 0.2023,
+        "location": "Garden Estate Residential",
+        "source": "jiji"
       }
     },
     {
@@ -168,16 +168,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 10,
-        "title": null,
-        "price": 6900000.0,
-        "size_ha": 2.63055,
-        "location": null,
+        "title": "25 Acres Of Land \nMoi South Lake Rd, Naivasha East Nakuru\n 25 Acres Of Land / Land FOR Sale\n\n\n\nKSh 700,000,000\nPID : 8BLXJ",
+        "price": 7000000008.0,
+        "size_ha": 10.1175,
+        "location": "Land Moi South",
         "source": "propertypro"
       }
     },
@@ -186,16 +186,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.4388,
+          -0.7224
         ]
       },
       "properties": {
         "id": 11,
-        "title": null,
-        "price": 850000.0,
-        "size_ha": 10.1175,
-        "location": null,
+        "title": "15 Acres Of Land \nKinangop Rd Naivasha East Nakuru\n 15 Acres Of Land / Land FOR Sale\n\n\n\nKSh 270,000,000\nPID : 4BEUM",
+        "price": 2700000004.0,
+        "size_ha": 6.0705,
+        "location": "Land Kinangop Naivasha",
         "source": "propertypro"
       }
     },
@@ -204,16 +204,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 12,
-        "title": null,
-        "price": 770000.0,
-        "size_ha": 4.047,
-        "location": null,
+        "title": "Half An Acre Plot \nNjoro Nakuru\n Half An Acre Plot / Land FOR Sale\n\n\n\nKSh 1,800,000\nPID : 1BRLW",
+        "price": 18000001.0,
+        "size_ha": 0.2023,
+        "location": "Half Acre Plot",
         "source": "propertypro"
       }
     },
@@ -222,16 +222,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.0712,
+          -0.2803
         ]
       },
       "properties": {
         "id": 13,
-        "title": null,
-        "price": 2000000.0,
-        "size_ha": 51.3969,
-        "location": null,
+        "title": "20 Acres Land \nNakuru Town Nakuru\n 20 Acres Land / Land FOR Sale\n\n\n\nKSh 42,000,000\nPID : 9BRLR",
+        "price": 420000009.0,
+        "size_ha": 8.094,
+        "location": "Land Nakuru Town",
         "source": "propertypro"
       }
     },
@@ -240,16 +240,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.0707,
+          -0.2875
         ]
       },
       "properties": {
         "id": 14,
-        "title": null,
-        "price": 1500000.0,
-        "size_ha": 28.329,
-        "location": null,
+        "title": "6.5 Acre Land \nNakuru East Nakuru\n 6.5 Acre Land / Land FOR Sale\n\n\n\nKSh 6,900,000\nPID : 8BRLR",
+        "price": 69000008.0,
+        "size_ha": 2.63055,
+        "location": "Land Nakuru East",
         "source": "propertypro"
       }
     },
@@ -258,16 +258,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.0707,
+          -0.2875
         ]
       },
       "properties": {
         "id": 15,
-        "title": null,
-        "price": 9000000.0,
-        "size_ha": 40.47,
-        "location": null,
+        "title": "25 Acre Land \nNakuru East Nakuru\n 25 Acre Land / Land FOR Sale\n\n\n\nKSh 850,000\nPID : 6BRLR",
+        "price": 8500006.0,
+        "size_ha": 10.1175,
+        "location": "Land Nakuru East",
         "source": "propertypro"
       }
     },
@@ -276,17 +276,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4387834,
-          -0.7224425
+          36.0707,
+          -0.2875
         ]
       },
       "properties": {
         "id": 16,
-        "title": null,
-        "price": 490000.0,
-        "size_ha": 4.0,
-        "location": null,
-        "source": "buyrentkenya"
+        "title": "10 Acre Land \nNakuru East Nakuru\n 10 Acre Land / Land FOR Sale\n\n\n\nKSh 770,000\nPID : 5BRLR",
+        "price": 7700005.0,
+        "size_ha": 4.047,
+        "location": "Land Nakuru East",
+        "source": "propertypro"
       }
     },
     {
@@ -294,17 +294,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.2098304,
-          -0.4890675
+          36.0707,
+          -0.2875
         ]
       },
       "properties": {
         "id": 17,
-        "title": null,
-        "price": 6400000.0,
-        "size_ha": 1.6188,
-        "location": null,
-        "source": "jiji"
+        "title": "127 Acre Land \nNakuru East Nakuru\n 127 Acre Land / Land FOR Sale\n\n\n\nKSh 2,000,000\nPID : 4BRLR",
+        "price": 20000004.0,
+        "size_ha": 51.3969,
+        "location": "Land Nakuru East",
+        "source": "propertypro"
       }
     },
     {
@@ -312,17 +312,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.581838,
-          -0.9792274
+          36.0707,
+          -0.2875
         ]
       },
       "properties": {
         "id": 18,
-        "title": null,
-        "price": 2500000.0,
-        "size_ha": 0.05,
-        "location": null,
-        "source": "jiji"
+        "title": "70 Acres Land \nNakuru East Nakuru\n 70 Acres Land / Land FOR Sale\n\n\n\nKSh 1,500,000\nPID : 3BRLR",
+        "price": 15000003.0,
+        "size_ha": 28.329,
+        "location": "Land Nakuru East",
+        "source": "propertypro"
       }
     },
     {
@@ -330,17 +330,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.0656369,
-          -0.2854819
+          36.0707,
+          -0.2875
         ]
       },
       "properties": {
         "id": 19,
-        "title": null,
-        "price": 80000000.0,
-        "size_ha": 0.4047,
-        "location": null,
-        "source": "jiji"
+        "title": "100 Acres Land \nNakuru East Nakuru\n 100 Acres Land / Land FOR Sale\n\n\n\nKSh 9,000,000\nPID : 1BRLR",
+        "price": 90000001.0,
+        "size_ha": 40.47,
+        "location": "Land Nakuru East",
+        "source": "propertypro"
       }
     },
     {
@@ -348,17 +348,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4387834,
-          -0.7224425
+          35.7333,
+          -0.25
         ]
       },
       "properties": {
         "id": 20,
-        "title": null,
-        "price": 60000000.0,
-        "size_ha": 1.2141,
-        "location": null,
-        "source": "jiji"
+        "title": "24 Acre Land \nMolo Nakuru\n 24 Acre Land / Land FOR Sale\n\n\n\nKSh 1,500,000\nPID : 5BRLQ",
+        "price": 15000005.0,
+        "size_ha": 9.7128,
+        "location": "Land Molo Nakuru",
+        "source": "propertypro"
       }
     },
     {
@@ -366,17 +366,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1633675,
-          -0.2986237
+          36.0712,
+          -0.2803
         ]
       },
       "properties": {
         "id": 21,
-        "title": null,
-        "price": 12500000.0,
-        "size_ha": 3.2376,
-        "location": null,
-        "source": "jiji"
+        "title": "50 X 100 Residential Plots \nNakuru Town Nakuru\n 50 X 100 Residential Plots / Land FOR Sale\n\n\n\nKSh 1,200,000\nPID : 6BRKW",
+        "price": 12000006.0,
+        "size_ha": 0.0506,
+        "location": "Plots Nakuru Town",
+        "source": "propertypro"
       }
     },
     {
@@ -384,17 +384,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          35.7226702,
-          -0.154714
+          36.0712,
+          -0.2803
         ]
       },
       "properties": {
         "id": 22,
-        "title": null,
-        "price": 45000000.0,
-        "size_ha": 0.8094,
-        "location": null,
-        "source": "jiji"
+        "title": "20 Acres Land \nNakuru Town Nakuru\n 20 Acres Land / Land FOR Sale\n\n\n\nKSh 42,000,000\nPID : 3BNPY",
+        "price": 420000003.0,
+        "size_ha": 8.094,
+        "location": "Land Nakuru Town",
+        "source": "propertypro"
       }
     },
     {
@@ -402,16 +402,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4257017,
-          -0.7879608
+          36.4388,
+          -0.7224
         ]
       },
       "properties": {
         "id": 23,
-        "title": null,
-        "price": 700000000.0,
-        "size_ha": 10.1175,
-        "location": null,
+        "title": "1/4 Acre Plot \nNaivasha East Nakuru\n 1/4 Acre Plot / Land FOR Sale\n\n\n\nKSh 1,800,000\nPID : 8BMQT",
+        "price": 18000008.0,
+        "size_ha": 0.1012,
+        "location": "Plot Naivasha East",
         "source": "propertypro"
       }
     },
@@ -420,17 +420,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.0584119,
-          -0.2783492
+          36.07,
+          -0.29
         ]
       },
       "properties": {
         "id": 24,
-        "title": null,
-        "price": 42000000.0,
-        "size_ha": 8.094,
-        "location": null,
-        "source": "propertypro"
+        "title": "Nakuru Grove Gardens Phase 2",
+        "price": 450000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru Grove Gardens",
+        "source": "usernameproperties"
       }
     },
     {
@@ -438,53 +438,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 25,
-        "title": null,
-        "price": 6900000.0,
-        "size_ha": 2.63055,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 26,
-        "title": null,
-        "price": 850000.0,
-        "size_ha": 10.1175,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.065,
+          -0.28
         ]
       },
       "properties": {
         "id": 27,
-        "title": null,
-        "price": 770000.0,
-        "size_ha": 4.047,
-        "location": null,
-        "source": "propertypro"
+        "title": "Springfield-Nakuru",
+        "price": 950000.0,
+        "size_ha": 0.0506,
+        "location": "Springfield Nakuru",
+        "source": "usernameproperties"
       }
     },
     {
@@ -492,17 +456,35 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.07,
+          -0.29
+        ]
+      },
+      "properties": {
+        "id": 26,
+        "title": "Nakuru Grove Gardens",
+        "price": 350000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru Grove Gardens",
+        "source": "usernameproperties"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.085,
+          -0.285
         ]
       },
       "properties": {
         "id": 28,
-        "title": null,
-        "price": 2000000.0,
-        "size_ha": 51.3969,
-        "location": null,
-        "source": "propertypro"
+        "title": "Nakuru Harmony Gardens",
+        "price": 650000.0,
+        "size_ha": 0.0506,
+        "location": "Nakuru Harmony Gardens",
+        "source": "usernameproperties"
       }
     },
     {
@@ -510,17 +492,35 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          36.06,
+          -0.27
+        ]
+      },
+      "properties": {
+        "id": 25,
+        "title": "The Hamptons-Nakuru Phase II",
+        "price": 750000.0,
+        "size_ha": 0.0506,
+        "location": "The Hamptons Nakuru",
+        "source": "usernameproperties"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.6946,
+          -0.3457
         ]
       },
       "properties": {
         "id": 29,
-        "title": null,
-        "price": 1500000.0,
-        "size_ha": 28.329,
-        "location": null,
-        "source": "propertypro"
+        "title": "5 ACRES FARM LAND | NGATA, NAKURU",
+        "price": 6500000.0,
+        "size_ha": 2.0235,
+        "location": "Farm Land Ngata",
+        "source": "advancedvaluers"
       }
     },
     {
@@ -528,17 +528,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.1437369,
-          -0.4172695
+          35.7,
+          -0.34
         ]
       },
       "properties": {
         "id": 30,
-        "title": null,
-        "price": 9000000.0,
-        "size_ha": 40.47,
-        "location": null,
-        "source": "propertypro"
+        "title": "1 ACRE PRIME LAND FOR SALE | MIMWAITA \u2013 SOBEA",
+        "price": 6000000.0,
+        "size_ha": 0.4047,
+        "location": "Prime Land Mimwaita",
+        "source": "advancedvaluers"
       }
     },
     {
@@ -546,17 +546,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          35.7111659,
-          -0.3048962
+          36.072,
+          -0.282
         ]
       },
       "properties": {
         "id": 31,
-        "title": null,
-        "price": 1500000.0,
-        "size_ha": 9.7128,
-        "location": null,
-        "source": "propertypro"
+        "title": "Land for sale Nakuru Greenlands",
+        "price": 499000.0,
+        "size_ha": 0.0506,
+        "location": "Land Nakuru Greenlands",
+        "source": "amgrealtors"
       }
     },
     {
@@ -564,17 +564,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.0584119,
-          -0.2783492
+          36.068,
+          -0.278
         ]
       },
       "properties": {
         "id": 32,
-        "title": null,
-        "price": 42000000.0,
-        "size_ha": 8.094,
-        "location": null,
-        "source": "propertypro"
+        "title": "Land for sale Nakuru Breeze",
+        "price": 550000.0,
+        "size_ha": 0.0506,
+        "location": "Land Nakuru Breeze",
+        "source": "amgrealtors"
       }
     },
     {
@@ -582,17 +582,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.2225756,
-          -0.3843433
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 33,
-        "title": null,
-        "price": 1800000.0,
-        "size_ha": 1.6188,
-        "location": null,
-        "source": "propertypro"
+        "title": "Land for sale Nakuru Vantage Gardens",
+        "price": 449000.0,
+        "size_ha": 0.0506,
+        "location": "Land Nakuru Vantage",
+        "source": "amgrealtors"
       }
     },
     {
@@ -600,17 +600,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4387834,
-          -0.7224425
+          36.0712,
+          -0.2803
         ]
       },
       "properties": {
         "id": 34,
-        "title": null,
-        "price": 490000.0,
-        "size_ha": 4.0,
-        "location": null,
-        "source": "buyrentkenya"
+        "title": "10 Acres for Lease in Nakuru West",
+        "price": 80000.0,
+        "size_ha": 4.047,
+        "location": "Nakuru Town Nakuru",
+        "source": "pigiame"
       }
     },
     {
@@ -618,17 +618,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.2361646,
-          -0.5414303
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 35,
-        "title": null,
-        "price": 15000000.0,
-        "size_ha": 2.0235,
-        "location": null,
-        "source": "jiji"
+        "title": "Private Office Space for 2 Persons",
+        "price": 38630.0,
+        "size_ha": 0.1012,
+        "location": "Pramukh Towers Floor",
+        "source": "kenyapropertycentre"
       }
     },
     {
@@ -636,17 +636,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.0656369,
-          -0.2854819
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 36,
-        "title": null,
-        "price": 80000000.0,
-        "size_ha": 0.4047,
-        "location": null,
-        "source": "jiji"
+        "title": "Private Office Space for 3 Persons",
+        "price": 74560.0,
+        "size_ha": 0.1012,
+        "location": "Regus Village Market",
+        "source": "kenyapropertycentre"
       }
     },
     {
@@ -654,17 +654,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.028548,
-          -0.0628353
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 37,
-        "title": null,
-        "price": 4000000.0,
-        "size_ha": 1.6188,
-        "location": null,
-        "source": "jiji"
+        "title": "4-Bedroom Villa + 2 DSQS",
+        "price": 400000.0,
+        "size_ha": 0.1012,
+        "location": "Lavington Nairobi",
+        "source": "kenyapropertycentre"
       }
     },
     {
@@ -672,17 +672,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          35.9626823,
-          -0.1670583
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 38,
-        "title": null,
-        "price": 11000000.0,
-        "size_ha": 0.2023,
-        "location": null,
-        "source": "jiji"
+        "title": "Luxury 4-Bedroom + Attic Residence",
+        "price": 170000000.0,
+        "size_ha": 0.0402,
+        "location": "Loresho Crescent Loresho",
+        "source": "kenyapropertycentre"
       }
     },
     {
@@ -690,17 +690,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          35.9626823,
-          -0.1670583
+          36.0712048,
+          -0.2802724
         ]
       },
       "properties": {
         "id": 39,
-        "title": null,
-        "price": 5000000.0,
-        "size_ha": 2.0235,
-        "location": null,
-        "source": "jiji"
+        "title": "3-Bedroom Penthouse + DSQ",
+        "price": 2000.0,
+        "size_ha": 0.1012,
+        "location": "General Mathenge Road",
+        "source": "kenyapropertycentre"
       }
     },
     {
@@ -708,17 +708,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4387834,
-          -0.7224425
+          36.0712,
+          -0.2803
         ]
       },
       "properties": {
         "id": 40,
-        "title": null,
-        "price": 6000000.0,
-        "size_ha": 0.2023,
-        "location": null,
-        "source": "jiji"
+        "title": "Vacant Land / Plot",
+        "price": 78.0,
+        "size_ha": 202.35,
+        "location": "Nakuru Town",
+        "source": "property24"
       }
     },
     {
@@ -726,17 +726,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.4387834,
-          -0.7224425
+          36.4388,
+          -0.7224
         ]
       },
       "properties": {
         "id": 41,
-        "title": null,
-        "price": 60000000.0,
-        "size_ha": 1.2141,
-        "location": null,
-        "source": "jiji"
+        "title": "Vacant Land / Plot",
+        "price": 3500000.0,
+        "size_ha": 240.7965,
+        "location": "Naivasha",
+        "source": "property24"
       }
     },
     {
@@ -744,665 +744,17 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          36.028548,
-          -0.0628353
+          36.4388,
+          -0.7224
         ]
       },
       "properties": {
         "id": 42,
-        "title": null,
-        "price": 6000000.0,
-        "size_ha": 0.9308099999999999,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.2361646,
-          -0.5414303
-        ]
-      },
-      "properties": {
-        "id": 43,
-        "title": null,
+        "title": "Vacant Land / Plot",
         "price": 3500000.0,
-        "size_ha": 1.2141,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          35.8620545,
-          -0.1736647
-        ]
-      },
-      "properties": {
-        "id": 44,
-        "title": null,
-        "price": 850000.0,
-        "size_ha": 3.2376,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.028548,
-          -0.0628353
-        ]
-      },
-      "properties": {
-        "id": 45,
-        "title": null,
-        "price": 5000000.0,
-        "size_ha": 0.8094,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          35.7226702,
-          -0.154714
-        ]
-      },
-      "properties": {
-        "id": 46,
-        "title": null,
-        "price": 45000000.0,
-        "size_ha": 0.2023,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.028548,
-          -0.0628353
-        ]
-      },
-      "properties": {
-        "id": 47,
-        "title": null,
-        "price": 3000000.0,
-        "size_ha": 1.2141,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.028548,
-          -0.0628353
-        ]
-      },
-      "properties": {
-        "id": 48,
-        "title": null,
-        "price": 14000000.0,
-        "size_ha": 20.235,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.2361646,
-          -0.5414303
-        ]
-      },
-      "properties": {
-        "id": 49,
-        "title": null,
-        "price": 2000000.0,
-        "size_ha": 202.35,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          35.9803891,
-          -0.0311793
-        ]
-      },
-      "properties": {
-        "id": 50,
-        "title": null,
-        "price": 3200000.0,
-        "size_ha": 2.8329,
-        "location": null,
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.4411719,
-          -0.7483605
-        ]
-      },
-      "properties": {
-        "id": 51,
-        "title": null,
-        "price": 7000000008.0,
-        "size_ha": 10.1175,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          35.9204429,
-          -0.3847274
-        ]
-      },
-      "properties": {
-        "id": 52,
-        "title": null,
-        "price": 18000001.0,
-        "size_ha": 0.2023,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0584119,
-          -0.2783492
-        ]
-      },
-      "properties": {
-        "id": 53,
-        "title": null,
-        "price": 420000009.0,
-        "size_ha": 8.094,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 54,
-        "title": null,
-        "price": 69000008.0,
-        "size_ha": 2.63055,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 55,
-        "title": null,
-        "price": 8500006.0,
-        "size_ha": 10.1175,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 56,
-        "title": null,
-        "price": 7700005.0,
-        "size_ha": 4.047,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 57,
-        "title": null,
-        "price": 20000004.0,
-        "size_ha": 51.3969,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 58,
-        "title": null,
-        "price": 15000003.0,
-        "size_ha": 28.329,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1437369,
-          -0.4172695
-        ]
-      },
-      "properties": {
-        "id": 59,
-        "title": null,
-        "price": 90000001.0,
-        "size_ha": 40.47,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          35.7111659,
-          -0.3048962
-        ]
-      },
-      "properties": {
-        "id": 60,
-        "title": null,
-        "price": 15000005.0,
-        "size_ha": 9.7128,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0584119,
-          -0.2783492
-        ]
-      },
-      "properties": {
-        "id": 61,
-        "title": null,
-        "price": 12000006.0,
-        "size_ha": 0.0506,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0584119,
-          -0.2783492
-        ]
-      },
-      "properties": {
-        "id": 62,
-        "title": null,
-        "price": 420000003.0,
-        "size_ha": 8.094,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.2225756,
-          -0.3843433
-        ]
-      },
-      "properties": {
-        "id": 63,
-        "title": null,
-        "price": 18000008.0,
-        "size_ha": 0.1012,
-        "location": null,
-        "source": "propertypro"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0712048,
-          -0.2802724
-        ]
-      },
-      "properties": {
-        "id": 66,
-        "title": "5 ACRES FARM LAND | NGATA, NAKURU",
-        "price": 6500000.0,
-        "size_ha": 2.0235,
-        "location": "Nakuru",
-        "source": "advancedvaluers"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.08,
-          -0.3031
-        ]
-      },
-      "properties": {
-        "id": 68,
-        "title": "Land for sale Nakuru Greenlands",
-        "price": 499000.0,
-        "size_ha": 0.0506,
-        "location": "",
-        "source": "amgrealtors"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.028548,
-          -0.0628353
-        ]
-      },
-      "properties": {
-        "id": 64,
-        "title": "2 Acres for Sale at Mercy Njeri",
-        "price": 14000000.0,
-        "size_ha": 0.8094,
-        "location": "Rongai, Menengai West",
-        "source": "jiji"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0712048,
-          -0.2802724
-        ]
-      },
-      "properties": {
-        "id": 67,
-        "title": "1 ACRE PRIME LAND FOR SALE | MIMWAITA \u2013 SOBEA",
-        "price": 6000000.0,
-        "size_ha": 0.4047,
-        "location": "Nakuru",
-        "source": "advancedvaluers"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0712048,
-          -0.2802724
-        ]
-      },
-      "properties": {
-        "id": 71,
-        "title": "Nakuru Grove Gardens Phase 2",
-        "price": 450000.0,
-        "size_ha": 0.0506,
-        "location": "Nakuru",
-        "source": "usernameproperties"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0712048,
-          -0.2802724
-        ]
-      },
-      "properties": {
-        "id": 72,
-        "title": "Nakuru Opal Estate Annex",
-        "price": 750000.0,
-        "size_ha": 0.0506,
-        "location": "Nakuru",
-        "source": "usernameproperties"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0712048,
-          -0.2802724
-        ]
-      },
-      "properties": {
-        "id": 73,
-        "title": "Nakuru Grove Gardens",
-        "price": 350000.0,
-        "size_ha": 0.0506,
-        "location": "Nakuru",
-        "source": "usernameproperties"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0712048,
-          -0.2802724
-        ]
-      },
-      "properties": {
-        "id": 74,
-        "title": "Havanna Estate Nakuru Phase 6 Annex",
-        "price": 950000.0,
-        "size_ha": 0.0506,
-        "location": "Nakuru",
-        "source": "usernameproperties"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0712048,
-          -0.2802724
-        ]
-      },
-      "properties": {
-        "id": 75,
-        "title": "Nakuru Harmony Gardens",
-        "price": 650000.0,
-        "size_ha": 0.0506,
-        "location": "Nakuru",
-        "source": "usernameproperties"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.08,
-          -0.3031
-        ]
-      },
-      "properties": {
-        "id": 69,
-        "title": "Land for sale Nakuru Breeze",
-        "price": 550000.0,
-        "size_ha": 0.0506,
-        "location": "",
-        "source": "amgrealtors"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.08,
-          -0.3031
-        ]
-      },
-      "properties": {
-        "id": 70,
-        "title": "Land for sale Nakuru Vantage Gardens",
-        "price": 449000.0,
-        "size_ha": 0.0506,
-        "location": "",
-        "source": "amgrealtors"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1455815,
-          -0.3424494
-        ]
-      },
-      "properties": {
-        "id": 85,
-        "title": "Land for Lease",
-        "price": 700000.0,
-        "size_ha": 4.047,
-        "location": "Nakuru East,\n                                                                                Nakuru",
-        "source": "pigiame"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.1455815,
-          -0.3424494
-        ]
-      },
-      "properties": {
-        "id": 86,
-        "title": "Prime Plot in Pema Estate, Nakuru, 50*100 Plot for Sale",
-        "price": 2250000.0,
-        "size_ha": 0.08094000000000001,
-        "location": "Nakuru East,\n                                                                                Nakuru",
-        "source": "pigiame"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.4387834,
-          -0.7224425
-        ]
-      },
-      "properties": {
-        "id": 87,
-        "title": "Stone House with Spacious Garden and Single-Story Design",
-        "price": 4500000.0,
-        "size_ha": 0.8094,
-        "location": "Naivasha,\n                                                                                Nakuru",
-        "source": "pigiame"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          36.0584119,
-          -0.2783492
-        ]
-      },
-      "properties": {
-        "id": 88,
-        "title": "10 Acres for Lease in Nakuru West",
-        "price": 80000.0,
-        "size_ha": 4.047,
-        "location": "Nakuru Town,\n                                                                                Nakuru",
-        "source": "pigiame"
+        "size_ha": 240.7965,
+        "location": "Naivasha",
+        "source": "property24"
       }
     }
   ]
