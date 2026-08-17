@@ -530,7 +530,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (Sub-county + Wards) – bold magenta wards
+    // LOAD BOUNDARIES (Sub-county + Wards) – using new nakuru_wards.geojson
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -592,8 +592,8 @@
                 legendContainer.innerHTML = legendHtml;
             }
 
-            // ---- WARDS (bold, magenta, thick) ----
-            const wardRes = await fetch('/nakuru_ward.geojson');
+            // ---- WARDS: now using nakuru_wards.geojson from public/ ----
+            const wardRes = await fetch('/nakuru_wards.geojson');
             if (!wardRes.ok) {
                 console.warn('Ward GeoJSON not found (404)');
             } else {
