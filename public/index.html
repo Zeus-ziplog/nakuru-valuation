@@ -389,8 +389,8 @@
         schools: { markers: null },
         water: { markers: null }
     };
-    let subCountyStats = {};        // will hold computed stats per sub-county
-    let currentStat = 'avg';        // selected statistic
+    let subCountyStats = {};
+    let currentStat = 'avg';
     let isRunning = false;
     const propertyList = document.getElementById('property-list');
     const countBadge = document.getElementById('count-badge');
@@ -561,12 +561,10 @@
                 console.log('Sub-county features:', subData.features.length);
                 if (activeLayers.land.subcounty) map.removeLayer(activeLayers.land.subcounty);
 
-                // Determine the statistic values for each sub-county
                 const statType = currentStat;
                 const values = Object.values(subCountyStats).map(s => s[statType] || 0);
                 const maxVal = Math.max(...values, 1);
                 const minVal = Math.min(...values, 0);
-                // Use a colour scale based on the selected statistic
                 const colorScale = chroma.scale(['#e0f2fe', '#0284c7', '#f97316', '#dc2626'])
                     .domain([minVal, maxVal]);
 
@@ -610,7 +608,6 @@
                 activeLayers.land.subcounty.setZIndex(0);
                 if (currentTab === 'land') activeLayers.land.subcounty.addTo(map);
 
-                // Update legend
                 const legendTitle = {
                     'avg': 'Avg Price / Ha',
                     'min': 'Min Price / Ha',
@@ -671,7 +668,6 @@
                 }
             }
 
-            // Layer control (toggle)
             const overlayControl = {
                 "Sub-counties (price)": activeLayers.land.subcounty,
                 "Wards (outlines)": activeLayers.land.wards
@@ -778,7 +774,7 @@
                     }
                     const size = getSize(item);
                     if (item.price && size && size > 0) {
-                        stats[key].prices.push(item.price / size); // price per ha
+                        stats[key].prices.push(item.price / size);
                         stats[key].sizes.push(size);
                     }
                     stats[key].count += 1;
@@ -799,17 +795,26 @@
                     computed[key] = { count, avg, min, max, range };
                 });
                 subCountyStats = computed;
-                window.subCountyStats = computed; // for debugging
                 console.log('Sub-county stats:', computed);
 
-                // ---- Build heatmap & markers ----
+                // ---- Build heatmap with dynamic intensity ----
+                let maxPricePerHa = 0;
+                rawData.forEach(item => {
+                    const size = getSize(item);
+                    if (item.price && size && size > 0) {
+                        const ppHa = item.price / size;
+                        if (ppHa > maxPricePerHa) maxPricePerHa = ppHa;
+                    }
+                });
+                console.log('Max price/ha:', maxPricePerHa);
+
                 const points = [];
                 const markerData = [];
                 rawData.forEach(item => {
                     const size = getSize(item);
                     if (item.latitude && item.longitude && item.price) {
                         const pricePerHa = (size && size > 0) ? item.price / size : 0;
-                        const intensity = Math.min(pricePerHa / 1000000, 1);
+                        const intensity = (maxPricePerHa > 0) ? Math.min(pricePerHa / maxPricePerHa, 1) : 0;
                         if (size && size > 0) {
                             points.push([item.latitude, item.longitude, intensity]);
                         }
@@ -826,13 +831,15 @@
                     }
                 });
 
+                console.log('Heatmap points:', points.length);
+
                 if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
                 if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
 
                 if (points.length > 0) {
                     activeLayers.land.heat = L.heatLayer(points, {
-                        radius: 35,
-                        blur: 20,
+                        radius: 40,
+                        blur: 25,
                         maxZoom: 15,
                         gradient: {
                             0.1: '#22c55e',
@@ -842,6 +849,7 @@
                             0.9: '#ef4444'
                         }
                     });
+                    activeLayers.land.heat.addTo(map);
                 }
 
                 activeLayers.land.markers = L.layerGroup();
@@ -859,7 +867,6 @@
 
                 allData.land = markerData;
 
-                // ---- Load boundaries (choropleth + wards) ----
                 await loadBoundaries();
 
                 if (points.length > 0) {
@@ -943,7 +950,6 @@
         const newStat = statSelect.value;
         if (newStat === currentStat) return;
         currentStat = newStat;
-        // Reload boundaries with new statistic
         loadBoundaries();
     }
 
