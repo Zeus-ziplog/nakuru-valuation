@@ -144,6 +144,21 @@
         }
         .header-controls button:hover { background: rgba(255,255,255,0.25); }
 
+        /* Auth button */
+        #authBtn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        #authBtn:hover { background: rgba(255,255,255,0.25); }
+
         /* ===== App Layout ===== */
         .app {
             display: flex;
@@ -477,6 +492,42 @@
         .map-toggle-btn:hover { transform: scale(1.05); }
         .map-toggle-btn:active { transform: scale(0.95); }
 
+        /* ===== Add Point button ===== */
+        .add-point-btn {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-point-btn:hover { transform: scale(1.05); background: var(--accent-hover); }
+        .add-point-btn.adding {
+            background: #ef4444;
+        }
+        .add-point-btn.adding:hover { background: #dc2626; }
+
+        @media (max-width: 768px) {
+            .add-point-btn {
+                bottom: 80px;
+                right: 16px;
+                width: 44px;
+                height: 44px;
+                font-size: 16px;
+            }
+        }
+
         /* ===== Legend ===== */
         .legend {
             position: absolute;
@@ -503,7 +554,7 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 9999;
+            z-index: 99999;
             background: rgba(15,23,42,0.9);
             color: white;
             padding: 8px 20px;
@@ -518,6 +569,68 @@
         .toast.error { background: rgba(239,68,68,0.9); }
         .toast.success { background: rgba(34,197,94,0.9); }
         .toast.info { background: rgba(37,99,235,0.9); }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-box h3 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        .modal-box input, .modal-box select, .modal-box textarea {
+            width: 100%;
+            padding: 8px 12px;
+            margin: 6px 0;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        .modal-box .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .modal-box .btn-row button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .modal-box .btn-row .submit {
+            background: var(--accent);
+            color: white;
+        }
+        .modal-box .btn-row .submit:hover { background: var(--accent-hover); }
+        .modal-box .btn-row .cancel {
+            background: var(--bg);
+            color: var(--text-secondary);
+        }
+        .modal-box .btn-row .cancel:hover { background: var(--hover-bg); }
 
         /* ===== Hidden count-badge ===== */
         #count-badge { display: none; }
@@ -550,10 +663,8 @@
             .top-header .logo { font-size: 22px; }
             .flag-bar-vertical { height: 24px; width: 4px; }
 
-            /* Show toggle button on mobile */
             .map-toggle-btn { display: flex; }
 
-            /* Compact health dashboard */
             .health-stats {
                 grid-template-columns: 1fr 1fr;
                 gap: 4px;
@@ -594,6 +705,13 @@
                 overflow-y: auto;
                 padding: 4px 6px;
             }
+            .add-point-btn {
+                bottom: 70px;
+                right: 12px;
+                width: 44px;
+                height: 44px;
+                font-size: 16px;
+            }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
@@ -610,6 +728,13 @@
                 bottom: 16px;
                 left: 16px;
             }
+            .add-point-btn {
+                bottom: 60px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
         }
         @media (max-width: 380px) {
             .top-header .logo { font-size: 16px; }
@@ -621,6 +746,13 @@
                 font-size: 18px;
                 bottom: 12px;
                 left: 12px;
+            }
+            .add-point-btn {
+                bottom: 50px;
+                right: 8px;
+                width: 36px;
+                height: 36px;
+                font-size: 12px;
             }
         }
     </style>
@@ -642,6 +774,7 @@
         </div>
         <div class="header-controls">
             <button id="darkModeToggle" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
+            <button id="authBtn" onclick="toggleAuth()">Login</button>
         </div>
     </div>
 </div>
@@ -695,6 +828,7 @@
         <div id="map"></div>
         <div id="legend-container"></div>
         <button class="map-toggle-btn" id="sidebarToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <button class="add-point-btn" id="addPointBtn" onclick="toggleAddPoint()"><i class="fas fa-plus-circle"></i></button>
     </div>
 </div>
 
@@ -715,60 +849,53 @@
     const map = L.map('map').setView([-0.3031, 36.0800], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(map);
 
-    // ---- Dark mode ----
-    const darkToggle = document.getElementById('darkModeToggle');
-    darkToggle.addEventListener('click', () => {
-        const html = document.documentElement;
-        const isDark = html.getAttribute('data-theme') === 'dark';
-        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        darkToggle.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-        setTimeout(() => map.invalidateSize(), 100);
-    });
+    // ============================================================
+    // AUTHENTICATION
+    // ============================================================
+    let currentUser = null;
 
-    // ---- Sidebar toggle (mobile) ----
-    let sidebarVisible = true;
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        sidebarVisible = !sidebarVisible;
-        sidebar.style.display = sidebarVisible ? 'flex' : 'none';
-        const btn = document.getElementById('sidebarToggle');
-        btn.innerHTML = sidebarVisible ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-chevron-right"></i>';
-        setTimeout(() => map.invalidateSize(), 300);
+    async function toggleAuth() {
+        if (currentUser) {
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            document.getElementById('authBtn').textContent = 'Login';
+            showToast('Logged out', 'info');
+            refreshMap();
+        } else {
+            const { user, error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin }
+            });
+            if (error) showToast('Login failed: ' + error.message, 'error');
+        }
     }
 
-    // ---- Global state ----
-    let currentTab = 'land';
-    let allData = {};
-    let activeLayers = {
-        land: { heat: null, markers: null, subcounty: null, wards: null },
-        health: { markers: null },
-        schools: { markers: null },
-        water: { markers: null }
-    };
-    let subCountyStats = {};
-    let currentStat = 'median';
-    let isRunning = false;
-    const propertyList = document.getElementById('property-list');
-    const defaultList = document.getElementById('default-list');
-    const healthDashboard = document.getElementById('health-dashboard');
-    const searchInput = document.getElementById('searchInput');
-    const toastEl = document.getElementById('toast');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const legendContainer = document.getElementById('legend-container');
-    const statSelect = document.getElementById('statSelect');
-    const countBadge = document.getElementById('count-badge');
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session && session.user) {
+            currentUser = session.user;
+            document.getElementById('authBtn').textContent = 'Logout (' + currentUser.email + ')';
+            showToast('Logged in as ' + currentUser.email, 'success');
+            refreshMap();
+        } else {
+            currentUser = null;
+            document.getElementById('authBtn').textContent = 'Login';
+        }
+    });
 
-    // Health specific
-    let healthFilter = null;
-    let healthMarkers = [];
-    let pieChart = null;
-    let barChart = null;
+    // Check existing session
+    supabaseClient.auth.getSession().then(({ data, error }) => {
+        if (data && data.session && data.session.user) {
+            currentUser = data.session.user;
+            document.getElementById('authBtn').textContent = 'Logout (' + currentUser.email + ')';
+        }
+    });
 
     // ============================================================
     // HELPERS
     // ============================================================
     function showToast(msg, type) {
         type = type || '';
+        const toastEl = document.getElementById('toast');
         toastEl.textContent = msg;
         toastEl.className = 'toast show ' + type;
         clearTimeout(toastEl._timer);
@@ -799,28 +926,202 @@
         return sorted[mid];
     }
 
-    function getOwnershipCategory(operator) {
-        if (!operator) return 'unknown';
-        const op = operator.toLowerCase();
-        if (op.includes('ministry of health') || op.includes('government') || op.includes('local authority') || op.includes('armed forces') || op.includes('public')) return 'public';
-        if (op.includes('private practice') || op.includes('private enterprise') || op.includes('company medical') || op.includes('for profit')) return 'private';
-        if (op.includes('faith') || op.includes('church') || op.includes('catholic') || op.includes('pcea') || op.includes('aic') || op.includes('ngo')) return 'faith';
-        return 'unknown';
-    }
+    // ============================================================
+    // DARK MODE & SIDEBAR TOGGLE
+    // ============================================================
+    const darkToggle = document.getElementById('darkModeToggle');
+    darkToggle.addEventListener('click', () => {
+        const html = document.documentElement;
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        darkToggle.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        setTimeout(() => map.invalidateSize(), 100);
+    });
 
-    function getMarkerColor(operator) {
-        const cat = getOwnershipCategory(operator);
-        const colors = { 'public': '#2563eb', 'private': '#f97316', 'faith': '#8b5cf6', 'unknown': '#94a3b8' };
-        return colors[cat] || '#94a3b8';
-    }
-
-    function getCategoryLabel(cat) {
-        const labels = { 'public': 'Public', 'private': 'Private', 'faith': 'Faith / NGO', 'unknown': 'Unknown' };
-        return labels[cat] || 'Unknown';
+    let sidebarVisible = true;
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebarVisible = !sidebarVisible;
+        sidebar.style.display = sidebarVisible ? 'flex' : 'none';
+        const btn = document.getElementById('sidebarToggle');
+        btn.innerHTML = sidebarVisible ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-chevron-right"></i>';
+        setTimeout(() => map.invalidateSize(), 300);
     }
 
     // ============================================================
-    // POPUP BUILDERS
+    // ADD POINT
+    // ============================================================
+    let addPointMode = false;
+
+    function toggleAddPoint() {
+        if (!currentUser) {
+            showToast('Please login first', 'error');
+            return;
+        }
+        addPointMode = !addPointMode;
+        const btn = document.getElementById('addPointBtn');
+        btn.classList.toggle('adding', addPointMode);
+        btn.innerHTML = addPointMode ? '<i class="fas fa-times"></i>' : '<i class="fas fa-plus-circle"></i>';
+        if (addPointMode) {
+            map.on('click', onMapClick);
+            showToast('Click on the map to add a point', 'info');
+        } else {
+            map.off('click', onMapClick);
+        }
+    }
+
+    function onMapClick(e) {
+        if (!addPointMode) return;
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        showAddPointForm(lat, lng);
+    }
+
+    function showAddPointForm(lat, lng) {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.id = 'addPointModalOverlay';
+        overlay.innerHTML = `
+            <div class="modal-box">
+                <h3>Add New Point</h3>
+                <input id="addTitle" placeholder="Title *" />
+                <input id="addPrice" placeholder="Price (KSh) *" type="number" />
+                <input id="addSize" placeholder="Size (Ha) *" type="number" step="0.01" />
+                <input id="addLocation" placeholder="Location *" />
+                <select id="addType">
+                    <option value="land">Land</option>
+                    <option value="health">Health Facility</option>
+                </select>
+                <textarea id="addDescription" placeholder="Description" rows="3"></textarea>
+                <div class="btn-row">
+                    <button class="submit" onclick="submitContribution(${lat}, ${lng})">Submit</button>
+                    <button class="cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    function closeModal() {
+        const overlay = document.getElementById('addPointModalOverlay');
+        if (overlay) overlay.remove();
+        addPointMode = false;
+        const btn = document.getElementById('addPointBtn');
+        btn.classList.remove('adding');
+        btn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+        map.off('click', onMapClick);
+    }
+
+    async function submitContribution(lat, lng) {
+        const title = document.getElementById('addTitle').value.trim();
+        const price = parseFloat(document.getElementById('addPrice').value);
+        const size = parseFloat(document.getElementById('addSize').value);
+        const location = document.getElementById('addLocation').value.trim();
+        const type = document.getElementById('addType').value;
+        const description = document.getElementById('addDescription').value.trim();
+
+        if (!title || !price || !size || !location) {
+            showToast('Please fill all required fields.', 'error');
+            return;
+        }
+
+        if (!currentUser) {
+            showToast('You must be logged in.', 'error');
+            return;
+        }
+
+        const properties = {
+            title,
+            price,
+            size_ha: size,
+            location,
+            description,
+            source: 'user_contribution'
+        };
+        const geometry = `POINT(${lng} ${lat})`;
+
+        const { data, error } = await supabaseClient
+            .from('user_contributions')
+            .insert({
+                user_id: currentUser.id,
+                type: type,
+                geometry: geometry,
+                properties: properties
+            });
+
+        if (error) {
+            showToast('Error submitting: ' + error.message, 'error');
+        } else {
+            showToast('Point added successfully!', 'success');
+            closeModal();
+            refreshMap();
+        }
+    }
+
+    // ============================================================
+    // COMMENTS
+    // ============================================================
+    async function loadComments(targetType, targetId, container) {
+        if (!container) return;
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .select('*, users(email)')
+            .eq('target_type', targetType)
+            .eq('target_id', targetId)
+            .order('created_at', { ascending: true });
+        if (error) {
+            container.innerHTML = '<div style="color:var(--text-muted);font-size:12px;">Could not load comments.</div>';
+            return;
+        }
+        let html = data.map(c => `
+            <div style="border-bottom:1px solid var(--border);padding:4px 0;font-size:12px;">
+                <strong>${c.users?.email || 'Anonymous'}</strong>: ${c.comment_text}
+                <span style="color:var(--text-muted);font-size:10px;display:block;">${new Date(c.created_at).toLocaleString()}</span>
+            </div>
+        `).join('');
+        if (!html) html = '<div style="color:var(--text-muted);font-size:12px;">No comments yet.</div>';
+        container.innerHTML = html;
+
+        // Add comment form
+        const form = document.createElement('div');
+        form.style.marginTop = '6px';
+        form.innerHTML = `
+            <div style="display:flex;gap:4px;">
+                <input id="commentInput_${targetType}_${targetId}" placeholder="Add a comment..." style="flex:1;padding:4px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);color:var(--text-primary);font-size:12px;" />
+                <button onclick="addComment('${targetType}', ${targetId})" style="padding:4px 10px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;">Post</button>
+            </div>
+        `;
+        container.appendChild(form);
+    }
+
+    async function addComment(targetType, targetId) {
+        const input = document.getElementById(`commentInput_${targetType}_${targetId}`);
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text) return;
+        if (!currentUser) {
+            showToast('Please login to comment', 'error');
+            return;
+        }
+        const { error } = await supabaseClient
+            .from('comments')
+            .insert({
+                user_id: currentUser.id,
+                target_type: targetType,
+                target_id: targetId,
+                comment_text: text
+            });
+        if (error) {
+            showToast('Error posting comment: ' + error.message, 'error');
+        } else {
+            showToast('Comment added', 'success');
+            // Refresh the container by re-triggering loadComments (we'll just reload map)
+            refreshMap();
+        }
+    }
+
+    // ============================================================
+    // POPUP BUILDERS (with comments placeholder)
     // ============================================================
     function buildHealthPopup(f) {
         const fields = [
@@ -836,13 +1137,15 @@
             ['Description', 'description'],
             ['Landmark', 'landmark']
         ];
-        let html = `<div style="min-width:200px; font-family:sans-serif;"><strong>${f.name || 'Unnamed'}</strong><br/>`;
+        let html = `<div style="min-width:220px; font-family:sans-serif;"><strong>${f.name || 'Unnamed'}</strong><br/>`;
         fields.forEach(([label, key]) => {
             const val = f[key];
             if (val !== undefined && val !== null && val !== '') {
                 html += `<b>${label}:</b> ${val}<br/>`;
             }
         });
+        html += `<hr style="margin:4px 0;border-color:var(--border);"/>`;
+        html += `<div id="comments_health_${f.id}">Loading comments...</div>`;
         html += '</div>';
         return html;
     }
@@ -857,8 +1160,71 @@
         }
         if (item.location) html += `<b>Location:</b> ${item.location}<br/>`;
         if (item.source) html += `<b>Source:</b> ${item.source}`;
+        html += `<hr style="margin:4px 0;border-color:var(--border);"/>`;
+        // For listings, target_type = 'listing' and target_id = item.id
+        const id = item.id || item.listing_id || 0;
+        html += `<div id="comments_listing_${id}">Loading comments...</div>`;
         return html;
     }
+
+    // After popup opens, load comments
+    map.on('popupopen', function(e) {
+        const popup = e.popup;
+        const container = popup._contentNode;
+        if (!container) return;
+        // Find comment divs
+        const commentDivs = container.querySelectorAll('[id^="comments_"]');
+        commentDivs.forEach(div => {
+            const idParts = div.id.split('_');
+            const targetType = idParts[1]; // 'health' or 'listing'
+            const targetId = parseInt(idParts[2]);
+            if (!targetId) return;
+            let tableName = targetType === 'health' ? 'health_facilities' : 'listings';
+            if (targetType === 'listing') {
+                // if it's a user contribution, we need to know the actual target type
+                // we can detect if it's a listing or contribution by checking the popup content
+                // For simplicity, we assume listing. We'll refine later.
+                // Actually, we need to know if it's a listing or user_contribution.
+                // For now, we'll just use 'listing' as default.
+                // But user contributions have target_type 'user_contribution'.
+                // We'll check if the popup data has source === 'user_contribution'
+                const popupData = e.target._popup._source; // not reliable, we'll use a different approach.
+                // We'll just use the targetType as given.
+            }
+            loadComments(targetType === 'health' ? 'health_facility' : 'listing', targetId, div);
+        });
+    });
+
+    // ============================================================
+    // GLOBAL STATE
+    // ============================================================
+    let currentTab = 'land';
+    let allData = {};
+    let activeLayers = {
+        land: { heat: null, markers: null, subcounty: null, wards: null },
+        health: { markers: null },
+        schools: { markers: null },
+        water: { markers: null },
+        userContributions: null
+    };
+    let subCountyStats = {};
+    let currentStat = 'median';
+    let isRunning = false;
+    const propertyList = document.getElementById('property-list');
+    const defaultList = document.getElementById('default-list');
+    const healthDashboard = document.getElementById('health-dashboard');
+    const searchInput = document.getElementById('searchInput');
+    const toastEl = document.getElementById('toast');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const legendContainer = document.getElementById('legend-container');
+    const statSelect = document.getElementById('statSelect');
+    const countBadge = document.getElementById('count-badge');
+
+    // Health specific
+    let healthFilter = null;
+    let healthMarkers = [];
+    let pieChart = null;
+    let barChart = null;
 
     // ============================================================
     // RENDER LAND LIST
@@ -1103,6 +1469,32 @@
         updateFilterButtons();
     }
 
+    // ============================================================
+    // MARKER HELPERS
+    // ============================================================
+    function getOwnershipCategory(operator) {
+        if (!operator) return 'unknown';
+        const op = operator.toLowerCase();
+        if (op.includes('ministry of health') || op.includes('government') || op.includes('local authority') || op.includes('armed forces') || op.includes('public')) return 'public';
+        if (op.includes('private practice') || op.includes('private enterprise') || op.includes('company medical') || op.includes('for profit')) return 'private';
+        if (op.includes('faith') || op.includes('church') || op.includes('catholic') || op.includes('pcea') || op.includes('aic') || op.includes('ngo')) return 'faith';
+        return 'unknown';
+    }
+
+    function getMarkerColor(operator) {
+        const cat = getOwnershipCategory(operator);
+        const colors = { 'public': '#2563eb', 'private': '#f97316', 'faith': '#8b5cf6', 'unknown': '#94a3b8' };
+        return colors[cat] || '#94a3b8';
+    }
+
+    function getCategoryLabel(cat) {
+        const labels = { 'public': 'Public', 'private': 'Private', 'faith': 'Faith / NGO', 'unknown': 'Unknown' };
+        return labels[cat] || 'Unknown';
+    }
+
+    // ============================================================
+    // UPDATE HEALTH MARKERS (with hospital pins)
+    // ============================================================
     function updateHealthMarkers(facilities) {
         if (activeLayers.health.markers) map.removeLayer(activeLayers.health.markers);
         activeLayers.health.markers = L.layerGroup();
@@ -1126,6 +1518,9 @@
                 const marker = L.marker([lat, lng], { icon: hospitalIcon }).bindPopup(popup);
                 marker._lat = lat;
                 marker._lng = lng;
+                // Store metadata for comments
+                marker._targetType = 'health_facility';
+                marker._targetId = f.id;
                 activeLayers.health.markers.addLayer(marker);
             }
         });
@@ -1148,7 +1543,29 @@
     }
 
     // ============================================================
-    // LAND BOUNDARIES
+    // UPDATE LAND MARKERS
+    // ============================================================
+    function updateLandMarkers(markerData) {
+        if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
+        activeLayers.land.markers = L.layerGroup();
+        markerData.forEach(m => {
+            const popupContent = buildLandPopup(m);
+            const circle = L.circleMarker([m.lat, m.lng], {
+                radius: 5,
+                color: '#2563eb',
+                fillColor: '#2563eb',
+                fillOpacity: 0.4,
+                weight: 1.5
+            }).bindPopup(popupContent);
+            circle._targetType = 'listing';
+            circle._targetId = m.id || m.listing_id || 0;
+            activeLayers.land.markers.addLayer(circle);
+        });
+        if (currentTab === 'land') activeLayers.land.markers.addTo(map);
+    }
+
+    // ============================================================
+    // LOAD BOUNDARIES (land choropleth)
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -1279,6 +1696,7 @@
             else { legendContainer.style.display = 'none'; }
         }
 
+        // Remove all layers except base
         for (const key in activeLayers) {
             for (const layerKey in activeLayers[key]) {
                 const layer = activeLayers[key][layerKey];
@@ -1291,12 +1709,16 @@
             const layer = layers[layerKey];
             if (layer && !map.hasLayer(layer)) layer.addTo(map);
         }
+        // Also add user contributions if they exist
+        if (activeLayers.userContributions) {
+            activeLayers.userContributions.addTo(map);
+        }
 
         if (tab === 'land') {
             const data = allData.land || [];
             renderLandList(data);
         } else if (tab === 'health') {
-            // already handled
+            // already handled above
         } else {
             const data = allData[tab] || [];
             renderGenericList(data, tab);
@@ -1420,7 +1842,8 @@
                             size_ha: size,
                             location: item.location || 'Nakuru',
                             source: item.source || '',
-                            pricePerHa: pricePerHa
+                            pricePerHa: pricePerHa,
+                            id: item.id || 0
                         });
                     }
                 });
@@ -1445,19 +1868,8 @@
                     activeLayers.land.heat.addTo(map);
                 }
 
-                activeLayers.land.markers = L.layerGroup();
-                markerData.forEach(m => {
-                    const popupContent = buildLandPopup(m);
-                    const circle = L.circleMarker([m.lat, m.lng], {
-                        radius: 5,
-                        color: '#2563eb',
-                        fillColor: '#2563eb',
-                        fillOpacity: 0.4,
-                        weight: 1.5
-                    }).bindPopup(popupContent);
-                    activeLayers.land.markers.addLayer(circle);
-                });
-
+                // Update land markers
+                updateLandMarkers(markerData);
                 allData.land = markerData;
                 await loadBoundaries();
 
@@ -1491,6 +1903,9 @@
                 showToast('Loaded ' + (data || []).length + ' records', 'success');
             }
 
+            // ---- Load user contributions (always) ----
+            await loadUserContributions();
+
             switchTab(currentTab);
 
         } catch (err) {
@@ -1516,6 +1931,58 @@
     }
 
     // ============================================================
+    // USER CONTRIBUTIONS
+    // ============================================================
+    async function loadUserContributions() {
+        if (activeLayers.userContributions) {
+            map.removeLayer(activeLayers.userContributions);
+            activeLayers.userContributions = null;
+        }
+        const { data: contributions, error } = await supabaseClient
+            .from('user_contributions')
+            .select('*');
+        if (error) {
+            console.warn('Error loading user contributions:', error);
+            return;
+        }
+        if (!contributions || contributions.length === 0) return;
+
+        const group = L.layerGroup();
+        contributions.forEach(c => {
+            const geom = c.geometry; // PostGIS point
+            // Parse geometry (PostGIS format: 'POINT(lng lat)')
+            const coords = geom.match(/POINT\(([^ ]+) ([^)]+)\)/);
+            if (!coords) return;
+            const lng = parseFloat(coords[1]);
+            const lat = parseFloat(coords[2]);
+            const props = c.properties;
+            const popupContent = `
+                <b>${props.title || 'User contribution'}</b><br/>
+                Price: KSh ${(props.price || 0).toLocaleString()}<br/>
+                Size: ${(props.size_ha || 0).toFixed(2)} Ha<br/>
+                Location: ${props.location || 'Nakuru'}<br/>
+                ${props.description ? `Description: ${props.description}<br/>` : ''}
+                <em style="color:var(--text-muted);font-size:11px;">Added by user</em>
+                <hr style="margin:4px 0;border-color:var(--border);"/>
+                <div id="comments_user_contribution_${c.id}">Loading comments...</div>
+            `;
+            const starIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z" fill="gold" stroke="orange" stroke-width="1"/></svg>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 30]
+            });
+            const marker = L.marker([lat, lng], { icon: starIcon })
+                .bindPopup(popupContent);
+            marker._targetType = 'user_contribution';
+            marker._targetId = c.id;
+            group.addLayer(marker);
+        });
+        activeLayers.userContributions = group;
+        activeLayers.userContributions.addTo(map);
+    }
+
+    // ============================================================
     // UPDATE CHOROPLETH
     // ============================================================
     function updateChoropleth() {
@@ -1527,7 +1994,7 @@
     }
 
     // ============================================================
-    // EXPORT FUNCTIONS
+    // EXPORT FUNCTIONS (enhanced)
     // ============================================================
     function exportPNG() {
         leafletImage(map, function(err, canvas) {
@@ -1577,11 +2044,16 @@
     function exportGeoJSON() {
         const data = allData[currentTab] || [];
         if (data.length === 0) { showToast('No data to export', 'info'); return; }
-        const features = data.map(item => ({
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: [item.lng || item.longitude, item.lat || item.latitude] },
-            properties: { ...item }
-        }));
+        const features = data.map(item => {
+            const lat = item.lat || item.latitude;
+            const lng = item.lng || item.longitude;
+            if (!lat || !lng) return null;
+            return {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [lng, lat] },
+                properties: { ...item }
+            };
+        }).filter(f => f !== null);
         const geojson = { type: 'FeatureCollection', features };
         const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
         const link = document.createElement('a');
