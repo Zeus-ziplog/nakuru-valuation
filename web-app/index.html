@@ -354,7 +354,6 @@
     const SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
 
-    // Use a unique name to avoid conflicts with the global supabase object
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const map = L.map('map').setView([-0.3031, 36.0800], 10);
@@ -366,7 +365,7 @@
     // ---- Global state ----
     let currentTab = 'land';
     let allData = {};               // { land: [...], health: [...], ... }
-    let activeLayers = {            // layer groups for each tab
+    let activeLayers = {
         land: { heat: null, markers: null, subcounty: null, wards: null },
         health: { markers: null },
         schools: { markers: null },
@@ -409,38 +408,84 @@
     }
 
     // ============================================================
+    // BUILD POPUP HTML
+    // ============================================================
+    function buildHealthPopup(facility) {
+        const fields = [
+            ['Name', 'name'],
+            ['Type', 'facility_type'],
+            ['Operator', 'operator'],
+            ['Ward', 'ward'],
+            ['Sub‑county', 'sub_county'],
+            ['Town', 'town'],
+            ['Level', 'keph_level'],
+            ['Beds', 'bed_capacity'],
+            ['Regulatory Status', 'regul_status'],
+            ['Description', 'description'],
+            ['Landmark', 'landmark']
+        ];
+        let html = `<div style="min-width:220px; font-family:sans-serif;"><strong>${facility.name || 'Unnamed'}</strong><br/>`;
+        fields.forEach(([label, key]) => {
+            const val = facility[key];
+            if (val !== undefined && val !== null && val !== '') {
+                html += `<b>${label}:</b> ${val}<br/>`;
+            }
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function buildLandPopup(item) {
+        return `<b>${item.title || 'Untitled'}</b><br/>
+                <b>Price:</b> KSh ${(item.price || 0).toLocaleString()}<br/>
+                ${item.size_ha ? `<b>Size:</b> ${item.size_ha.toFixed(2)} Ha<br/>` : ''}
+                ${item.location ? `<b>Location:</b> ${item.location}<br/>` : ''}
+                ${item.source ? `<b>Source:</b> ${item.source}` : ''}`;
+    }
+
+    // ============================================================
     // RENDER LIST
     // ============================================================
     function renderList(data, tab) {
-        const isLand = (tab === 'land');
         let html = '';
         if (!data || data.length === 0) {
             html = '<div style="padding:30px 20px;text-align:center;color:#94a3b8;font-size:14px;">No data found.</div>';
         } else {
             data.forEach((p, index) => {
-                const priceStr = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
-                const sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
-                const title = p.title || 'Untitled';
-                const location = p.location || 'Nakuru';
-                const source = p.source || '';
-
+                let title, metaHtml, priceHtml;
+                if (tab === 'land') {
+                    title = p.title || 'Untitled';
+                    const sizeStr = p.size_ha ? p.size_ha.toFixed(2) + ' Ha' : '—';
+                    const location = p.location || 'Nakuru';
+                    metaHtml = `<span>${location}</span><span>${sizeStr}</span>`;
+                    priceHtml = p.price ? 'KSh ' + Number(p.price).toLocaleString() : 'N/A';
+                } else if (tab === 'health') {
+                    title = p.name || 'Unnamed';
+                    const type = p.facility_type || '—';
+                    const ward = p.ward || '—';
+                    const sub = p.sub_county || '—';
+                    metaHtml = `<span>${type}</span><span>${ward}</span><span>${sub}</span>`;
+                    priceHtml = p.bed_capacity ? `Beds: ${p.bed_capacity}` : '—';
+                } else {
+                    // schools / water – placeholder
+                    title = p.name || 'Untitled';
+                    metaHtml = `<span>${p.location || 'Nakuru'}</span>`;
+                    priceHtml = '—';
+                }
                 html += `
                     <div class="property-item" data-index="${index}" onclick="zoomToProperty(${index}, '${tab}')">
                         <div class="info">
                             <div class="title">${title}</div>
-                            <div class="meta">
-                                <span>${location}</span>
-                                <span>${sizeStr}</span>
-                                ${source ? `<span class="source-tag">${source}</span>` : ''}
-                            </div>
+                            <div class="meta">${metaHtml}</div>
                         </div>
-                        <div class="price">${priceStr}</div>
+                        <div class="price">${priceHtml}</div>
                     </div>
                 `;
             });
         }
         propertyList.innerHTML = html;
-        countBadge.textContent = data.length + ' ' + (isLand ? 'plots' : 'records');
+        const label = tab === 'land' ? 'plots' : 'records';
+        countBadge.textContent = data.length + ' ' + label;
     }
 
     // ============================================================
@@ -449,12 +494,16 @@
     function zoomToProperty(index, tab) {
         const data = allData[tab] || [];
         const p = data[index];
-        if (!p || !p.lat || !p.lng) return;
-        map.setView([p.lat, p.lng], 16);
+        if (!p) return;
+        // We store lat/lng in standard fields: either 'lat'/'lng' or 'latitude'/'longitude'
+        const lat = p.lat || p.latitude;
+        const lng = p.lng || p.longitude;
+        if (!lat || !lng) return;
+        map.setView([lat, lng], 16);
         const layerGroup = activeLayers[tab]?.markers;
         if (layerGroup) {
             layerGroup.eachLayer((layer) => {
-                if (layer._latlng && layer._latlng.lat === p.lat && layer._latlng.lng === p.lng) {
+                if (layer._latlng && layer._latlng.lat === lat && layer._latlng.lng === lng) {
                     layer.openPopup();
                 }
             });
@@ -474,16 +523,15 @@
             return;
         }
         const filtered = data.filter(p => {
-            const title = (p.title || '').toLowerCase();
-            const location = (p.location || '').toLowerCase();
-            const source = (p.source || '').toLowerCase();
-            return title.includes(query) || location.includes(query) || source.includes(query);
+            const name = (p.name || p.title || '').toLowerCase();
+            const loc = (p.location || p.ward || '').toLowerCase();
+            return name.includes(query) || loc.includes(query);
         });
         renderList(filtered, currentTab);
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (Sub-county + Wards)
+    // LOAD BOUNDARIES (Sub-county + Wards) – only for Land
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -628,25 +676,25 @@
         } else {
             legendContainer.style.display = 'none';
         }
+        // If we don't have data for this tab yet, load it
+        if (!allData[tab] || allData[tab].length === 0) {
+            refreshMap(); // this will load data for current tab
+        }
     }
 
     // ============================================================
     // LOAD DATA FOR A TAB (from Supabase)
     // ============================================================
     async function loadTabData(tab) {
-        let tableName, fields;
+        let tableName;
         if (tab === 'land') {
             tableName = 'listings';
-            fields = '*';
         } else if (tab === 'health') {
             tableName = 'health_facilities';
-            fields = '*';
         } else if (tab === 'schools') {
             tableName = 'schools';
-            fields = '*';
         } else if (tab === 'water') {
             tableName = 'water_sources';
-            fields = '*';
         } else {
             return [];
         }
@@ -654,7 +702,7 @@
         try {
             const { data, error } = await supabaseClient
                 .from(tableName)
-                .select(fields)
+                .select('*')
                 .not('latitude', 'is', null)
                 .limit(1000);
             if (error) throw error;
@@ -666,7 +714,7 @@
     }
 
     // ============================================================
-    // REFRESH ALL DATA
+    // REFRESH ALL DATA (for current tab)
     // ============================================================
     async function refreshMap() {
         if (isRunning) return;
@@ -677,115 +725,177 @@
         refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading…';
 
         try {
-            // For now, only land table exists. We'll add placeholders for others.
-            const landData = await loadTabData('land');
-            allData.land = landData;
-            console.log('Land data loaded:', landData.length);
-
-            // Compute avgPrices for land (sub-county aggregation)
-            const groups = {};
-            landData.forEach(item => {
-                const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
-                if (!groups[key]) groups[key] = { prices: [], sizes: [], count: 0 };
-                const size = getSize(item);
-                if (item.price && size && size > 0) {
-                    groups[key].prices.push(item.price);
-                    groups[key].sizes.push(size);
-                }
-                groups[key].count += 1;
-            });
-            const avg = {};
-            Object.keys(groups).forEach(key => {
-                const g = groups[key];
-                if (g.prices.length === 0) {
-                    avg[key] = 0;
-                } else {
-                    const perHa = g.prices.map((p, i) => p / g.sizes[i]);
-                    avg[key] = perHa.reduce((a, b) => a + b, 0) / perHa.length;
-                }
-                avg[key + '_count'] = g.count;
-            });
-            avgPrices = avg;
-            console.log('Avg prices:', avgPrices);
-
-            // Build heatmap & markers for land
-            const points = [];
-            const markerData = [];
-            landData.forEach(item => {
-                const size = getSize(item);
-                if (item.latitude && item.longitude && item.price) {
-                    const pricePerHa = (size && size > 0) ? item.price / size : 0;
-                    const intensity = Math.min(pricePerHa / 1000000, 1);
-                    if (size && size > 0) {
-                        points.push([item.latitude, item.longitude, intensity]);
+            const tab = currentTab;
+            // Load data for this tab
+            const rawData = await loadTabData(tab);
+            if (tab === 'land') {
+                // Process land data: compute averages, heatmap, markers
+                allData.land = rawData;
+                // Compute avgPrices for land (sub-county aggregation)
+                const groups = {};
+                rawData.forEach(item => {
+                    const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
+                    if (!groups[key]) groups[key] = { prices: [], sizes: [], count: 0 };
+                    const size = getSize(item);
+                    if (item.price && size && size > 0) {
+                        groups[key].prices.push(item.price);
+                        groups[key].sizes.push(size);
                     }
-                    markerData.push({
-                        lat: item.latitude,
-                        lng: item.longitude,
-                        title: item.title || 'Plot',
-                        price: item.price,
-                        size_ha: size,
-                        location: item.location || 'Nakuru',
-                        source: item.source || '',
-                        pricePerHa: pricePerHa
-                    });
-                }
-            });
+                    groups[key].count += 1;
+                });
+                const avg = {};
+                Object.keys(groups).forEach(key => {
+                    const g = groups[key];
+                    if (g.prices.length === 0) {
+                        avg[key] = 0;
+                    } else {
+                        const perHa = g.prices.map((p, i) => p / g.sizes[i]);
+                        avg[key] = perHa.reduce((a, b) => a + b, 0) / perHa.length;
+                    }
+                    avg[key + '_count'] = g.count;
+                });
+                avgPrices = avg;
+                console.log('Avg prices:', avgPrices);
 
-            // Remove old land layers
-            if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
-            if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
-
-            // Heatmap
-            if (points.length > 0) {
-                activeLayers.land.heat = L.heatLayer(points, {
-                    radius: 35,
-                    blur: 20,
-                    maxZoom: 15,
-                    gradient: {
-                        0.1: '#22c55e',
-                        0.3: '#84cc16',
-                        0.5: '#eab308',
-                        0.7: '#f97316',
-                        0.9: '#ef4444'
+                // Build heatmap & markers for land
+                const points = [];
+                const markerData = [];
+                rawData.forEach(item => {
+                    const size = getSize(item);
+                    if (item.latitude && item.longitude && item.price) {
+                        const pricePerHa = (size && size > 0) ? item.price / size : 0;
+                        const intensity = Math.min(pricePerHa / 1000000, 1);
+                        if (size && size > 0) {
+                            points.push([item.latitude, item.longitude, intensity]);
+                        }
+                        markerData.push({
+                            lat: item.latitude,
+                            lng: item.longitude,
+                            title: item.title || 'Plot',
+                            price: item.price,
+                            size_ha: size,
+                            location: item.location || 'Nakuru',
+                            source: item.source || '',
+                            pricePerHa: pricePerHa
+                        });
                     }
                 });
+
+                // Remove old land layers
+                if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
+                if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
+
+                // Heatmap
+                if (points.length > 0) {
+                    activeLayers.land.heat = L.heatLayer(points, {
+                        radius: 35,
+                        blur: 20,
+                        maxZoom: 15,
+                        gradient: {
+                            0.1: '#22c55e',
+                            0.3: '#84cc16',
+                            0.5: '#eab308',
+                            0.7: '#f97316',
+                            0.9: '#ef4444'
+                        }
+                    });
+                }
+
+                // Markers
+                activeLayers.land.markers = L.layerGroup();
+                markerData.forEach(m => {
+                    const popupContent = buildLandPopup(m);
+                    const circle = L.circleMarker([m.lat, m.lng], {
+                        radius: 5,
+                        color: '#2563eb',
+                        fillColor: '#2563eb',
+                        fillOpacity: 0.4,
+                        weight: 1.5
+                    }).bindPopup(popupContent);
+                    activeLayers.land.markers.addLayer(circle);
+                });
+
+                // Store processed marker data for list
+                allData.land = markerData;
+
+                // Load boundaries (sub-county + wards)
+                await loadBoundaries();
+
+                // Fit bounds
+                if (points.length > 0) {
+                    const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+                showToast('Loaded ' + rawData.length + ' plots', 'success');
+
+            } else if (tab === 'health') {
+                // Process health data
+                allData.health = rawData;
+                // Remove old markers
+                if (activeLayers.health.markers) map.removeLayer(activeLayers.health.markers);
+
+                // Build markers
+                activeLayers.health.markers = L.layerGroup();
+                rawData.forEach(item => {
+                    const lat = item.latitude;
+                    const lng = item.longitude;
+                    if (lat && lng) {
+                        // create a marker with popup
+                        const popupContent = buildHealthPopup(item);
+                        const marker = L.circleMarker([lat, lng], {
+                            radius: 6,
+                            color: '#e74c3c',
+                            fillColor: '#e74c3c',
+                            fillOpacity: 0.6,
+                            weight: 2
+                        }).bindPopup(popupContent);
+                        // Store extra data for zooming
+                        marker._lat = lat;
+                        marker._lng = lng;
+                        activeLayers.health.markers.addLayer(marker);
+                    }
+                });
+                // Store data for list (we'll use rawData)
+                // But we need to ensure each item has lat/lng for zoom
+                allData.health = rawData.map(item => ({
+                    ...item,
+                    lat: item.latitude,
+                    lng: item.longitude
+                }));
+
+                // Fit bounds
+                const points = rawData.filter(p => p.latitude && p.longitude)
+                    .map(p => [p.latitude, p.longitude]);
+                if (points.length > 0) {
+                    const bounds = L.latLngBounds(points);
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+                showToast('Loaded ' + rawData.length + ' health facilities', 'success');
+            } else {
+                // schools/water – placeholder
+                allData[tab] = rawData;
+                // Simple markers (if any)
+                const groupName = tab;
+                if (activeLayers[groupName].markers) map.removeLayer(activeLayers[groupName].markers);
+                activeLayers[groupName].markers = L.layerGroup();
+                rawData.forEach(item => {
+                    if (item.latitude && item.longitude) {
+                        const marker = L.circleMarker([item.latitude, item.longitude], {
+                            radius: 5,
+                            color: '#2ecc71',
+                            fillColor: '#2ecc71',
+                            fillOpacity: 0.5
+                        }).bindPopup(`<b>${item.name || 'Untitled'}</b><br/>${item.location || ''}`);
+                        activeLayers[groupName].markers.addLayer(marker);
+                    }
+                });
+                // store data
+                allData[tab] = rawData.map(item => ({ ...item, lat: item.latitude, lng: item.longitude }));
+                showToast('Loaded ' + rawData.length + ' records', 'success');
             }
 
-            // Markers
-            activeLayers.land.markers = L.layerGroup();
-            markerData.forEach(m => {
-                const popupContent = '<b>' + m.title + '</b>' +
-                    '<br><b>Price:</b> KSh ' + m.price.toLocaleString() +
-                    (m.size_ha ? '<br><b>Size:</b> ' + m.size_ha.toFixed(2) + ' Ha' : '') +
-                    (m.pricePerHa > 0 ? '<br><b>Price/Ha:</b> KSh ' + Math.round(m.pricePerHa).toLocaleString() : '') +
-                    (m.location ? '<br><b>Location:</b> ' + m.location : '');
-                const circle = L.circleMarker([m.lat, m.lng], {
-                    radius: 5,
-                    color: '#2563eb',
-                    fillColor: '#2563eb',
-                    fillOpacity: 0.4,
-                    weight: 1.5
-                }).bindPopup(popupContent);
-                activeLayers.land.markers.addLayer(circle);
-            });
-
-            // Also store marker data for list
-            allData.land = markerData;  // replace with markerData for display
-
-            // Load boundaries (sub-county + wards)
-            await loadBoundaries();
-
-            // Switch to current tab
+            // After processing, switch to current tab to show layers and list
             switchTab(currentTab);
-
-            // Fit bounds if we have points
-            if (points.length > 0) {
-                const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
-                map.fitBounds(bounds, { padding: [50, 50] });
-            }
-
-            showToast('Loaded ' + landData.length + ' plots', 'success');
 
         } catch (err) {
             console.error(err);
@@ -855,7 +965,7 @@
             type: 'Feature',
             geometry: {
                 type: 'Point',
-                coordinates: [item.lng, item.lat]
+                coordinates: [item.lng || item.longitude, item.lat || item.latitude]
             },
             properties: { ...item }
         }));
@@ -878,8 +988,10 @@
 
     searchInput.addEventListener('input', filterList);
 
+    // Load default tab (land)
     refreshMap();
 
+    // Auto-refresh every 5 minutes
     setInterval(() => { if (!isRunning) refreshMap(); }, 300000);
 </script>
 </body>
