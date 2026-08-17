@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nakuru Land Information Dashboard</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -81,6 +83,10 @@
             transition: 0.2s;
             white-space: nowrap;
             min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
         .tab-btn:hover { background: #e9edf4; }
         .tab-btn.active {
@@ -88,6 +94,7 @@
             border-bottom-color: #2563eb;
             background: white;
         }
+        .tab-btn i { font-size: 14px; }
         /* ===== Sidebar Controls ===== */
         #sidebar-controls {
             padding: 12px 16px;
@@ -168,7 +175,7 @@
             gap: 4px;
         }
         .export-btn:hover { background: #e9edf4; border-color: #2563eb; }
-        .export-btn i { font-size: 14px; }
+        .export-btn i { font-size: 13px; }
 
         /* ===== Property List ===== */
         #property-list {
@@ -289,7 +296,6 @@
             font-weight: 500;
         }
 
-        /* Hide legend container when not needed */
         .legend-placeholder { display: none; }
     </style>
 </head>
@@ -303,10 +309,10 @@
 
     <!-- Tabs -->
     <div class="tab-bar" id="tabBar">
-        <button class="tab-btn active" data-tab="land">🏠 Land</button>
-        <button class="tab-btn" data-tab="health">🏥 Health</button>
-        <button class="tab-btn" data-tab="schools">🎓 Schools</button>
-        <button class="tab-btn" data-tab="water">💧 Water</button>
+        <button class="tab-btn active" data-tab="land"><i class="fas fa-map-marked-alt"></i> Land</button>
+        <button class="tab-btn" data-tab="health"><i class="fas fa-hospital"></i> Health</button>
+        <button class="tab-btn" data-tab="schools"><i class="fas fa-school"></i> Schools</button>
+        <button class="tab-btn" data-tab="water"><i class="fas fa-water"></i> Water</button>
     </div>
 
     <!-- Controls -->
@@ -316,16 +322,16 @@
             <span id="statusLabel">Idle</span>
         </span>
         <input type="text" id="searchInput" placeholder="Filter by title, location..." />
-        <button id="refreshBtn" onclick="refreshMap()">Refresh</button>
+        <button id="refreshBtn" onclick="refreshMap()"><i class="fas fa-sync-alt"></i> Refresh</button>
     </div>
 
     <!-- Export Bar -->
     <div class="export-bar" id="exportBar">
-        <button class="export-btn" onclick="exportPNG()">🖼️ PNG</button>
-        <button class="export-btn" onclick="exportPDF()">📄 PDF</button>
-        <button class="export-btn" onclick="exportCSV()">📊 CSV</button>
-        <button class="export-btn" onclick="exportGeoJSON()">🌍 GeoJSON</button>
-        <button class="export-btn" onclick="window.print()">🖨️ Print</button>
+        <button class="export-btn" onclick="exportPNG()"><i class="fas fa-image"></i> PNG</button>
+        <button class="export-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        <button class="export-btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+        <button class="export-btn" onclick="exportGeoJSON()"><i class="fas fa-globe"></i> GeoJSON</button>
+        <button class="export-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
 
     <!-- Property List -->
@@ -348,7 +354,9 @@
     const SUPABASE_URL = 'https://oeaoglqrojkexfovrwgl.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lYW9nbHFyb2prZXhmb3Zyd2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDcyMzYsImV4cCI6MjEwMTY4MzIzNn0.k3DVFFyWwaSCxra2WipcKr1CDJ6eQ2dVELcBAbmFJu8';
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Use a unique name to avoid conflicts with the global supabase object
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const map = L.map('map').setView([-0.3031, 36.0800], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
@@ -478,7 +486,6 @@
     // LOAD BOUNDARIES (Sub-county + Wards)
     // ============================================================
     async function loadBoundaries() {
-        // Same as before – we'll keep it as is
         try {
             const subRes = await fetch('/nakuru_subcounties.geojson');
             if (!subRes.ok) {
@@ -632,7 +639,7 @@
             tableName = 'listings';
             fields = '*';
         } else if (tab === 'health') {
-            tableName = 'health_facilities';   // placeholder – we'll create this table later
+            tableName = 'health_facilities';
             fields = '*';
         } else if (tab === 'schools') {
             tableName = 'schools';
@@ -645,7 +652,7 @@
         }
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from(tableName)
                 .select(fields)
                 .not('latitude', 'is', null)
@@ -667,12 +674,13 @@
         setStatus('running', 'Refreshing…');
         showToast('Refreshing data…', 'info');
         refreshBtn.disabled = true;
-        refreshBtn.innerHTML = 'Loading…';
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading…';
 
         try {
             // For now, only land table exists. We'll add placeholders for others.
             const landData = await loadTabData('land');
             allData.land = landData;
+            console.log('Land data loaded:', landData.length);
 
             // Compute avgPrices for land (sub-county aggregation)
             const groups = {};
@@ -787,7 +795,7 @@
         isRunning = false;
         setStatus('idle', 'Idle');
         refreshBtn.disabled = false;
-        refreshBtn.innerHTML = 'Refresh';
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
     }
 
     // ============================================================
@@ -804,7 +812,6 @@
     }
 
     function exportPDF() {
-        // Capture map + sidebar using html2canvas
         const element = document.querySelector('#sidebar');
         html2canvas(element, { scale: 2 }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
@@ -863,7 +870,6 @@
     // ============================================================
     // INIT
     // ============================================================
-    // Tab click listeners
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             switchTab(btn.dataset.tab);
@@ -872,10 +878,8 @@
 
     searchInput.addEventListener('input', filterList);
 
-    // Load default tab (land)
     refreshMap();
 
-    // Auto-refresh every 5 minutes
     setInterval(() => { if (!isRunning) refreshMap(); }, 300000);
 </script>
 </body>
