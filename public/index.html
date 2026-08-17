@@ -437,6 +437,30 @@
             align-items: flex-end;
         }
         .property-item .price small { font-weight: 400; font-size: 9px; color: var(--text-muted); }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.15s;
+            margin-left: 6px;
+        }
+        .delete-btn:hover { background: #dc2626; }
+        .user-tag {
+            background: #fbbf24;
+            color: #78350f;
+            font-size: 9px;
+            padding: 0 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
 
         /* ===== Default list ===== */
         #default-list {
@@ -993,6 +1017,24 @@
     }
 
     // ============================================================
+    // DELETE CONTRIBUTION
+    // ============================================================
+    async function deleteContribution(id, event) {
+        if (event) event.stopPropagation();
+        if (!confirm('Delete this contribution permanently?')) return;
+        const { error } = await supabaseClient
+            .from('user_contributions')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            showToast('Error deleting: ' + error.message, 'error');
+        } else {
+            showToast('Deleted successfully', 'success');
+            refreshMap();
+        }
+    }
+
+    // ============================================================
     // COMMENTS – anonymous
     // ============================================================
     async function loadComments(targetType, targetId, container) {
@@ -1106,7 +1148,6 @@
             const targetId = parseInt(idParts[2]);
             if (!targetId) return;
             let realType = targetType === 'health' ? 'health_facility' : 'listing';
-            // user contributions are handled separately
             if (targetType === 'user') realType = 'user_contribution';
             loadComments(realType, targetId, div);
         });
@@ -1144,7 +1185,7 @@
     let barChart = null;
 
     // ============================================================
-    // RENDER LAND LIST
+    // RENDER LAND LIST (with user contributions & delete button)
     // ============================================================
     function renderLandList(data) {
         let html = '';
@@ -1160,10 +1201,15 @@
                     const ppHa = p.price / p.size_ha;
                     priceHtml += ` <small>KSh ${Math.round(ppHa).toLocaleString()}/ha</small>`;
                 }
+                const userTag = p.isUserContribution ? `<span class="user-tag">User</span>` : '';
+                const deleteBtn = p.isUserContribution ? `<button class="delete-btn" onclick="deleteContribution(${p.id}, event)"><i class="fas fa-trash-alt"></i></button>` : '';
                 html += `
                     <div class="property-item" data-index="${index}" onclick="zoomToProperty(${index}, 'land')">
-                        <div class="info"><div class="title">${title}</div><div class="meta"><span>${location}</span><span>${sizeStr}</span></div></div>
-                        <div class="price">${priceHtml}</div>
+                        <div class="info">
+                            <div class="title">${title} ${userTag}</div>
+                            <div class="meta"><span>${location}</span><span>${sizeStr}</span></div>
+                        </div>
+                        <div class="price">${priceHtml} ${deleteBtn}</div>
                     </div>
                 `;
             });
@@ -1173,7 +1219,7 @@
     }
 
     // ============================================================
-    // RENDER HEALTH LIST
+    // RENDER HEALTH LIST (with user contributions & delete button)
     // ============================================================
     function renderHealthList(data) {
         let html = '';
@@ -1186,10 +1232,15 @@
                 const ward = p.ward || '—';
                 const owner = p.operator || '—';
                 const beds = p.bed_capacity ? `${p.bed_capacity} beds` : '';
+                const userTag = p.isUserContribution ? `<span class="user-tag">User</span>` : '';
+                const deleteBtn = p.isUserContribution ? `<button class="delete-btn" onclick="deleteContribution(${p.id}, event)"><i class="fas fa-trash-alt"></i></button>` : '';
                 html += `
                     <div class="property-item" data-index="${index}" onclick="zoomToProperty(${index}, 'health')">
-                        <div class="info"><div class="title">${title}</div><div class="meta"><span>${type}</span><span>${ward}</span><span>${owner}</span></div></div>
-                        <div class="price">${beds}</div>
+                        <div class="info">
+                            <div class="title">${title} ${userTag}</div>
+                            <div class="meta"><span>${type}</span><span>${ward}</span><span>${owner}</span></div>
+                        </div>
+                        <div class="price">${beds} ${deleteBtn}</div>
                     </div>
                 `;
             });
@@ -1625,7 +1676,7 @@
             const layer = layers[layerKey];
             if (layer && !map.hasLayer(layer)) layer.addTo(map);
         }
-        // Also add user contributions if they exist
+        // Also add user contributions if they exist (star markers)
         if (activeLayers.userContributions) {
             activeLayers.userContributions.addTo(map);
         }
@@ -1668,19 +1719,50 @@
     // ============================================================
     async function loadHealthData() {
         try {
+            // Load scraped health facilities
             const { data, error } = await supabaseClient
                 .from('health_facilities')
                 .select('*')
                 .not('latitude', 'is', null)
                 .limit(1000);
             if (error) throw error;
-            if (data) {
-                allData.health = data;
-                healthMarkers = data;
-                buildHealthDashboard(data);
-                healthDashboard.style.display = 'flex';
-                defaultList.style.display = 'none';
+
+            // Load user contributions of type 'health'
+            const { data: userHealth, error: userErr } = await supabaseClient
+                .from('user_contributions')
+                .select('*')
+                .eq('type', 'health');
+            if (userErr) console.warn('Error loading user health contributions:', userErr);
+
+            let combined = data || [];
+            if (userHealth) {
+                userHealth.forEach(c => {
+                    const props = c.properties;
+                    const coords = c.geometry.match(/POINT\(([^ ]+) ([^)]+)\)/);
+                    if (coords) {
+                        combined.push({
+                            name: props.title || 'User contribution',
+                            facility_type: props.facility_type || 'Unknown',
+                            operator: props.operator || 'User',
+                            ward: props.ward || 'Nakuru',
+                            sub_county: props.sub_county || 'Nakuru',
+                            latitude: parseFloat(coords[2]),
+                            longitude: parseFloat(coords[1]),
+                            bed_capacity: props.bed_capacity || null,
+                            description: props.description || '',
+                            id: c.id,
+                            isUserContribution: true,
+                            source: 'user_contribution'
+                        });
+                    }
+                });
             }
+
+            allData.health = combined;
+            healthMarkers = combined;
+            buildHealthDashboard(combined);
+            healthDashboard.style.display = 'flex';
+            defaultList.style.display = 'none';
         } catch (err) {
             console.error('Error loading health data:', err);
             showToast('Error loading health data', 'error');
@@ -1701,9 +1783,18 @@
         try {
             const tab = currentTab;
             if (tab === 'land') {
+                // Load scraped land listings
                 const rawData = await loadTabData('listings');
-                allData.land = rawData;
+                // Load user contributions of type 'land'
+                const { data: userLand, error: userErr } = await supabaseClient
+                    .from('user_contributions')
+                    .select('*')
+                    .eq('type', 'land');
+                if (userErr) console.warn('Error loading user land contributions:', userErr);
 
+                let markerData = [];
+
+                // Process scraped listings
                 const stats = {};
                 rawData.forEach(item => {
                     const size = getSize(item);
@@ -1713,8 +1804,59 @@
                     if (!stats[key]) stats[key] = { prices: [], count: 0 };
                     stats[key].prices.push(pricePerHa);
                     stats[key].count += 1;
+                    // Add to markerData
+                    if (item.latitude && item.longitude) {
+                        markerData.push({
+                            lat: item.latitude,
+                            lng: item.longitude,
+                            title: item.title || 'Plot',
+                            price: item.price,
+                            size_ha: size,
+                            location: item.location || 'Nakuru',
+                            source: item.source || '',
+                            pricePerHa: pricePerHa,
+                            id: item.id || 0,
+                            isUserContribution: false
+                        });
+                    }
                 });
 
+                // Process user land contributions
+                if (userLand) {
+                    userLand.forEach(c => {
+                        const props = c.properties;
+                        const coords = c.geometry.match(/POINT\(([^ ]+) ([^)]+)\)/);
+                        if (coords) {
+                            const lat = parseFloat(coords[2]);
+                            const lng = parseFloat(coords[1]);
+                            const size = props.size_ha || 0;
+                            const price = props.price || 0;
+                            const pricePerHa = size > 0 ? price / size : 0;
+                            markerData.push({
+                                lat: lat,
+                                lng: lng,
+                                title: props.title || 'User contribution',
+                                price: price,
+                                size_ha: size,
+                                location: props.location || 'Nakuru',
+                                description: props.description || '',
+                                source: 'user_contribution',
+                                pricePerHa: pricePerHa,
+                                id: c.id,
+                                isUserContribution: true
+                            });
+                            // Also add to stats for choropleth? We'll include user contributions in sub-county stats.
+                            const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
+                            if (!stats[key]) stats[key] = { prices: [], count: 0 };
+                            if (price && size > 0) {
+                                stats[key].prices.push(pricePerHa);
+                                stats[key].count += 1;
+                            }
+                        }
+                    });
+                }
+
+                // Compute sub-county stats
                 const computed = {};
                 Object.keys(stats).forEach(key => {
                     const s = stats[key];
@@ -1733,34 +1875,17 @@
                 subCountyStats = computed;
                 console.log('Sub-county stats (price/ha):', computed);
 
+                // Heatmap points (only scraped? we can include user contributions too)
                 let maxPricePerHa = 0;
-                rawData.forEach(item => {
-                    const size = getSize(item);
-                    if (item.price && size && size > 0) {
-                        const ppHa = item.price / size;
-                        if (ppHa > maxPricePerHa) maxPricePerHa = ppHa;
-                    }
+                markerData.forEach(m => {
+                    if (m.pricePerHa && m.pricePerHa > maxPricePerHa) maxPricePerHa = m.pricePerHa;
                 });
 
                 const points = [];
-                const markerData = [];
-                rawData.forEach(item => {
-                    const size = getSize(item);
-                    if (item.latitude && item.longitude && item.price && size && size > 0) {
-                        const pricePerHa = item.price / size;
-                        const intensity = (maxPricePerHa > 0) ? Math.min(pricePerHa / maxPricePerHa, 1) : 0;
-                        points.push([item.latitude, item.longitude, intensity]);
-                        markerData.push({
-                            lat: item.latitude,
-                            lng: item.longitude,
-                            title: item.title || 'Plot',
-                            price: item.price,
-                            size_ha: size,
-                            location: item.location || 'Nakuru',
-                            source: item.source || '',
-                            pricePerHa: pricePerHa,
-                            id: item.id || 0
-                        });
+                markerData.forEach(m => {
+                    if (m.lat && m.lng && m.pricePerHa && m.pricePerHa > 0 && !m.isUserContribution) { // heatmap from scraped only
+                        const intensity = (maxPricePerHa > 0) ? Math.min(m.pricePerHa / maxPricePerHa, 1) : 0;
+                        points.push([m.lat, m.lng, intensity]);
                     }
                 });
 
@@ -1784,7 +1909,7 @@
                     activeLayers.land.heat.addTo(map);
                 }
 
-                // Update land markers
+                // Update land markers (scraped + user)
                 updateLandMarkers(markerData);
                 allData.land = markerData;
                 await loadBoundaries();
@@ -1794,7 +1919,7 @@
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
                 renderLandList(markerData);
-                showToast('Loaded ' + rawData.length + ' plots', 'success');
+                showToast('Loaded ' + markerData.length + ' items', 'success');
 
             } else if (tab === 'health') {
                 await loadHealthData();
@@ -1819,7 +1944,7 @@
                 showToast('Loaded ' + (data || []).length + ' records', 'success');
             }
 
-            // ---- Load user contributions (always) ----
+            // ---- Load user contributions (star markers) ----
             await loadUserContributions();
 
             switchTab(currentTab);
@@ -1847,7 +1972,7 @@
     }
 
     // ============================================================
-    // USER CONTRIBUTIONS
+    // USER CONTRIBUTIONS (star markers – all types)
     // ============================================================
     async function loadUserContributions() {
         if (activeLayers.userContributions) {
@@ -1865,7 +1990,7 @@
 
         const group = L.layerGroup();
         contributions.forEach(c => {
-            const geom = c.geometry; // PostGIS point
+            const geom = c.geometry;
             const coords = geom.match(/POINT\(([^ ]+) ([^)]+)\)/);
             if (!coords) return;
             const lng = parseFloat(coords[1]);
