@@ -905,11 +905,9 @@
     // ---- Helper: extract lat/lng from geometry ----
     function getCoordsFromGeometry(geom) {
         if (!geom) return null;
-        // If it's a GeoJSON object (type: 'Point')
         if (geom.type === 'Point' && geom.coordinates) {
             return { lng: geom.coordinates[0], lat: geom.coordinates[1] };
         }
-        // If it's a string like 'POINT(lng lat)'
         if (typeof geom === 'string') {
             const match = geom.match(/POINT\(([^ ]+) ([^)]+)\)/);
             if (match) {
@@ -1654,7 +1652,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (land choropleth) – now with fillOpacity: 0
+    // LOAD BOUNDARIES – with fillOpacity: 0
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -1680,7 +1678,7 @@
                 if (stat) val = stat[statType] || 0;
                 return {
                     fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
-                    fillOpacity: 0,          // completely transparent – heatmap visible
+                    fillOpacity: 0,
                     weight: 2,
                     color: '#0f172a',
                     opacity: 0.8
@@ -1767,7 +1765,7 @@
     }
 
     // ============================================================
-    // SWITCH TAB
+    // SWITCH TAB – with layer safety check
     // ============================================================
     function switchTab(tab) {
         currentTab = tab;
@@ -1785,22 +1783,28 @@
             else { legendContainer.style.display = 'none'; }
         }
 
-        // Remove all layers except base
+        // Remove all layers except base – with safety check
         for (const key in activeLayers) {
             for (const layerKey in activeLayers[key]) {
                 const layer = activeLayers[key][layerKey];
-                if (layer && map.hasLayer(layer)) map.removeLayer(layer);
+                if (layer && typeof layer === 'object' && map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                }
             }
         }
 
         const layers = activeLayers[tab];
         for (const layerKey in layers) {
             const layer = layers[layerKey];
-            if (layer && !map.hasLayer(layer)) layer.addTo(map);
+            if (layer && typeof layer === 'object' && !map.hasLayer(layer)) {
+                layer.addTo(map);
+            }
         }
         // Also add user contributions if they exist (star markers)
-        if (activeLayers.userContributions) {
-            activeLayers.userContributions.addTo(map);
+        if (activeLayers.userContributions && typeof activeLayers.userContributions === 'object') {
+            if (!map.hasLayer(activeLayers.userContributions)) {
+                activeLayers.userContributions.addTo(map);
+            }
         }
 
         if (tab === 'land') {
@@ -1841,7 +1845,6 @@
     // ============================================================
     async function loadHealthData() {
         try {
-            // Load scraped health facilities
             const { data, error } = await supabaseClient
                 .from('health_facilities')
                 .select('*')
@@ -1849,7 +1852,6 @@
                 .limit(1000);
             if (error) throw error;
 
-            // Load user contributions of type 'health'
             const { data: userHealth, error: userErr } = await supabaseClient
                 .from('user_contributions')
                 .select('*')
@@ -1894,7 +1896,7 @@
     }
 
     // ============================================================
-    // REFRESH ALL DATA – with heatmap gradient red->green and translucent
+    // REFRESH ALL DATA – with heatmap red→green and translucent
     // ============================================================
     async function refreshMap() {
         if (isRunning) return;
@@ -1907,9 +1909,7 @@
         try {
             const tab = currentTab;
             if (tab === 'land') {
-                // Load scraped land listings
                 const rawData = await loadTabData('listings');
-                // Load user contributions of type 'land'
                 const { data: userLand, error: userErr } = await supabaseClient
                     .from('user_contributions')
                     .select('*')
@@ -1919,7 +1919,6 @@
                 let markerData = [];
                 const stats = {};
 
-                // Process scraped listings
                 rawData.forEach(item => {
                     const size = getSize(item);
                     if (!item.price || !size || size <= 0) return;
@@ -1944,7 +1943,6 @@
                     }
                 });
 
-                // Process user land contributions
                 if (userLand) {
                     userLand.forEach(c => {
                         const coords = getCoordsFromGeometry(c.geometry);
@@ -1976,7 +1974,6 @@
                     });
                 }
 
-                // Compute sub-county stats
                 const computed = {};
                 Object.keys(stats).forEach(key => {
                     const s = stats[key];
@@ -1995,14 +1992,14 @@
                 subCountyStats = computed;
                 console.log('Sub-county stats (price/ha):', computed);
 
-                // ---- Heatmap with 95th percentile normalisation ----
+                // ---- Heatmap ----
                 let pricesPerHa = [];
                 markerData.forEach(m => {
                     if (m.pricePerHa && m.pricePerHa > 0) pricesPerHa.push(m.pricePerHa);
                 });
                 pricesPerHa.sort((a,b) => a - b);
                 const percentile95 = pricesPerHa[Math.floor(pricesPerHa.length * 0.95)] || 1;
-                const maxIntensity = percentile95; // use 95th percentile as max
+                const maxIntensity = percentile95;
 
                 const points = [];
                 markerData.forEach(m => {
@@ -2023,20 +2020,18 @@
                         blur: 30,
                         maxZoom: 15,
                         gradient: {
-                            // low intensity → red, high → green, with ~35% opacity
                             0.0: 'rgba(255,0,0,0.35)',
-                            0.33: 'rgba(255,165,0,0.35)',  // orange
-                            0.66: 'rgba(255,255,0,0.35)',  // yellow
-                            1.0: 'rgba(0,255,0,0.35)'      // green
+                            0.33: 'rgba(255,165,0,0.35)',
+                            0.66: 'rgba(255,255,0,0.35)',
+                            1.0: 'rgba(0,255,0,0.35)'
                         }
                     });
                     activeLayers.land.heat.addTo(map);
                 }
 
-                // Update land markers
                 updateLandMarkers(markerData);
                 allData.land = markerData;
-                await loadBoundaries(); // uses fillOpacity: 0
+                await loadBoundaries();
 
                 if (points.length > 0) {
                     const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
@@ -2068,9 +2063,7 @@
                 showToast('Loaded ' + (data || []).length + ' records', 'success');
             }
 
-            // ---- Load user contributions (star markers) ----
             await loadUserContributions();
-
             switchTab(currentTab);
 
         } catch (err) {
@@ -2096,7 +2089,7 @@
     }
 
     // ============================================================
-    // USER CONTRIBUTIONS (star markers – all types)
+    // USER CONTRIBUTIONS
     // ============================================================
     async function loadUserContributions() {
         if (activeLayers.userContributions) {
@@ -2159,7 +2152,7 @@
     }
 
     // ============================================================
-    // EXPORT FUNCTIONS (enhanced)
+    // EXPORT FUNCTIONS
     // ============================================================
     function exportPNG() {
         leafletImage(map, function(err, canvas) {
