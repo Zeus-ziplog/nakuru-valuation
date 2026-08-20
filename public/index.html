@@ -295,6 +295,25 @@
         .export-btn:hover { background: var(--hover-bg); border-color: var(--accent); }
         .export-btn i { font-size: 11px; }
 
+        /* ===== LAND ANALYTICS ===== */
+        #land-analytics {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
+            display: none;
+        }
+        #land-analytics .chart-container {
+            background: var(--card-bg);
+            border-radius: 6px;
+            padding: 6px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            height: 140px;
+        }
+        @media (max-width: 480px) {
+            #land-analytics .chart-container { height: 120px; }
+        }
+
         /* ===== Health Dashboard – scrollable ===== */
         #health-dashboard {
             display: none;
@@ -730,6 +749,7 @@
                 font-size: 16px;
             }
             .modal-box { max-width: 95%; }
+            #land-analytics .chart-container { height: 110px; }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
@@ -753,6 +773,7 @@
                 height: 40px;
                 font-size: 14px;
             }
+            #land-analytics .chart-container { height: 100px; }
         }
         @media (max-width: 380px) {
             .top-header .logo { font-size: 16px; }
@@ -772,6 +793,7 @@
                 height: 36px;
                 font-size: 12px;
             }
+            #land-analytics .chart-container { height: 80px; }
         }
     </style>
 </head>
@@ -822,6 +844,21 @@
             <button class="export-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
         </div>
 
+        <!-- ===== LAND ANALYTICS ===== -->
+        <div id="land-analytics">
+            <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAnalytics()">
+                <span style="font-weight:600; font-size:13px; color:var(--text-primary);"><i class="fas fa-chart-bar"></i> Land Analytics</span>
+                <span id="analyticsToggleIcon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div id="analyticsContent" style="margin-top:6px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    <div class="chart-container"><canvas id="histChart"></canvas></div>
+                    <div class="chart-container"><canvas id="subcountyChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Dashboard -->
         <div id="health-dashboard">
             <div class="health-stats" id="healthStats"></div>
             <div class="health-charts">
@@ -835,6 +872,7 @@
             <div id="property-list"></div>
         </div>
 
+        <!-- Default list -->
         <div id="default-list">
             <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">Loading data...</div>
         </div>
@@ -1304,6 +1342,110 @@
     let pieChart = null;
     let barChart = null;
 
+    // Land Analytics Charts
+    let histChart = null;
+    let subcountyChart = null;
+
+    // ============================================================
+    // LAND ANALYTICS TOGGLE & BUILD
+    // ============================================================
+    function toggleAnalytics() {
+        const content = document.getElementById('analyticsContent');
+        const icon = document.getElementById('analyticsToggleIcon');
+        const isOpen = content.style.display !== 'none';
+        content.style.display = isOpen ? 'none' : 'block';
+        icon.innerHTML = isOpen ? '<i class="fas fa-chevron-right"></i>' : '<i class="fas fa-chevron-down"></i>';
+        if (!isOpen) {
+            setTimeout(() => { if (histChart) histChart.resize(); if (subcountyChart) subcountyChart.resize(); }, 200);
+        }
+    }
+
+    function buildLandAnalytics(markerData, stats) {
+        const histContainer = document.getElementById('histChart');
+        const subContainer = document.getElementById('subcountyChart');
+        if (!histContainer || !subContainer) return;
+
+        // ---- Histogram ----
+        const prices = markerData.map(m => m.pricePerHa).filter(v => v > 0);
+        if (prices.length > 0) {
+            const bins = 10;
+            const min = Math.min(...prices);
+            const max = Math.max(...prices);
+            const step = (max - min) / bins;
+            const labels = [];
+            const data = [];
+            for (let i = 0; i < bins; i++) {
+                const lower = min + i * step;
+                const upper = lower + step;
+                labels.push(`${Math.round(lower).toLocaleString()} – ${Math.round(upper).toLocaleString()}`);
+                data.push(prices.filter(v => v >= lower && v < upper).length);
+            }
+            if (histChart) histChart.destroy();
+            const ctx = histContainer.getContext('2d');
+            histChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Parcels',
+                        data: data,
+                        backgroundColor: 'rgba(59,130,246,0.6)',
+                        borderColor: '#2563eb',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y} parcels` } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { font: { size: 8 } } },
+                        x: { ticks: { font: { size: 8 }, maxRotation: 45, minRotation: 30 } }
+                    }
+                }
+            });
+        }
+
+        // ---- Comparative Sub-county Stats ----
+        const subNames = Object.keys(stats).filter(k => stats[k].count > 0);
+        if (subNames.length > 0) {
+            const sorted = subNames.sort((a,b) => stats[b].median - stats[a].median);
+            const labels = sorted;
+            const data = sorted.map(k => stats[k].median);
+            if (subcountyChart) subcountyChart.destroy();
+            const ctx2 = subContainer.getContext('2d');
+            subcountyChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Median Price/ha',
+                        data: data,
+                        backgroundColor: 'rgba(16,185,129,0.6)',
+                        borderColor: '#10b981',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => `KSh ${Math.round(ctx.parsed.x).toLocaleString()}/ha` } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { font: { size: 8 } } },
+                        y: { ticks: { font: { size: 8 } } }
+                    }
+                }
+            });
+        }
+    }
+
     // ============================================================
     // RENDER LAND LIST (with user contributions & delete button)
     // ============================================================
@@ -1765,22 +1907,34 @@
     }
 
     // ============================================================
-    // SWITCH TAB – with layer safety check
+    // SWITCH TAB – with analytics show/hide
     // ============================================================
     function switchTab(tab) {
         currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
 
-        if (tab === 'health') {
+        // Show/hide panels
+        const analytics = document.getElementById('land-analytics');
+        if (tab === 'land') {
+            analytics.style.display = 'block';
+            // Build charts if data exists
+            if (allData.land && subCountyStats) {
+                buildLandAnalytics(allData.land, subCountyStats);
+            }
+            healthDashboard.style.display = 'none';
+            defaultList.style.display = 'block';
+            loadBoundaries();
+        } else if (tab === 'health') {
+            analytics.style.display = 'none';
             healthDashboard.style.display = 'flex';
             defaultList.style.display = 'none';
             if (healthMarkers.length > 0) { applyHealthFilter(); }
             else { loadHealthData(); }
         } else {
+            analytics.style.display = 'none';
             healthDashboard.style.display = 'none';
             defaultList.style.display = 'block';
-            if (tab === 'land') { loadBoundaries(); }
-            else { legendContainer.style.display = 'none'; }
+            legendContainer.style.display = 'none';
         }
 
         // Remove all layers except base – with safety check
@@ -1800,7 +1954,6 @@
                 layer.addTo(map);
             }
         }
-        // Also add user contributions if they exist (star markers)
         if (activeLayers.userContributions && typeof activeLayers.userContributions === 'object') {
             if (!map.hasLayer(activeLayers.userContributions)) {
                 activeLayers.userContributions.addTo(map);
@@ -1811,7 +1964,7 @@
             const data = allData.land || [];
             renderLandList(data);
         } else if (tab === 'health') {
-            // already handled above
+            // already handled
         } else {
             const data = allData[tab] || [];
             renderGenericList(data, tab);
@@ -1896,7 +2049,7 @@
     }
 
     // ============================================================
-    // REFRESH ALL DATA – with heatmap red→green and translucent
+    // REFRESH ALL DATA – builds land analytics
     // ============================================================
     async function refreshMap() {
         if (isRunning) return;
@@ -2032,6 +2185,9 @@
                 updateLandMarkers(markerData);
                 allData.land = markerData;
                 await loadBoundaries();
+
+                // ---- Build Land Analytics Charts ----
+                buildLandAnalytics(markerData, computed);
 
                 if (points.length > 0) {
                     const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
