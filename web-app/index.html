@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
     <style>
-        /* ===== CSS Variables ===== */
+        /* ===== CSS Variables (unchanged) ===== */
         :root {
             --bg: #f1f5f9;
             --bg-sidebar: #ffffff;
@@ -58,7 +58,6 @@
             --accent-hover: #60a5fa;
             --accent-light: #60a5fa;
         }
-
         /* ===== Reset ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -596,8 +595,8 @@
             background: var(--card-bg);
             border-radius: 12px;
             padding: 24px;
-            max-width: 400px;
-            width: 90%;
+            max-width: 500px;
+            width: 95%;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -640,6 +639,14 @@
             color: var(--text-secondary);
         }
         .modal-box .btn-row .cancel:hover { background: var(--hover-bg); }
+
+        /* ===== Dynamic form groups ===== */
+        .form-group-land, .form-group-health {
+            display: none;
+        }
+        .form-group-land.active, .form-group-health.active {
+            display: block;
+        }
 
         /* ===== Hidden count-badge ===== */
         #count-badge { display: none; }
@@ -721,6 +728,7 @@
                 height: 44px;
                 font-size: 16px;
             }
+            .modal-box { max-width: 95%; }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
@@ -916,9 +924,11 @@
     }
 
     // ============================================================
-    // ADD POINT – anonymous
+    // ADD POINT – dynamic form with manual lat/lng and location
     // ============================================================
     let addPointMode = false;
+    let clickLat = null;
+    let clickLng = null;
 
     function toggleAddPoint() {
         addPointMode = !addPointMode;
@@ -927,7 +937,7 @@
         btn.innerHTML = addPointMode ? '<i class="fas fa-times"></i>' : '<i class="fas fa-plus-circle"></i>';
         if (addPointMode) {
             map.on('click', onMapClick);
-            showToast('Click on the map to add a point', 'info');
+            showToast('Click on the map to set coordinates, or fill them manually in the form.', 'info');
         } else {
             map.off('click', onMapClick);
         }
@@ -935,34 +945,84 @@
 
     function onMapClick(e) {
         if (!addPointMode) return;
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
-        showAddPointForm(lat, lng);
+        clickLat = e.latlng.lat;
+        clickLng = e.latlng.lng;
+        // If the modal is already open, update the lat/lng fields
+        const latField = document.getElementById('addLat');
+        const lngField = document.getElementById('addLng');
+        if (latField && lngField) {
+            latField.value = clickLat.toFixed(6);
+            lngField.value = clickLng.toFixed(6);
+            showToast('Coordinates set from map click', 'success');
+        } else {
+            // If modal not open, open it with these coordinates
+            showAddPointForm(clickLat, clickLng);
+        }
     }
 
     function showAddPointForm(lat, lng) {
+        clickLat = lat;
+        clickLng = lng;
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
         overlay.id = 'addPointModalOverlay';
         overlay.innerHTML = `
             <div class="modal-box">
                 <h3>Add New Point</h3>
-                <input id="addTitle" placeholder="Title *" />
-                <input id="addPrice" placeholder="Price (KSh) *" type="number" />
-                <input id="addSize" placeholder="Size (Ha) *" type="number" step="0.01" />
-                <input id="addLocation" placeholder="Location *" />
-                <select id="addType">
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
+                    Click on the map to set coordinates, or enter them manually.
+                </p>
+                <select id="addType" onchange="togglePointForm()">
                     <option value="land">Land</option>
                     <option value="health">Health Facility</option>
                 </select>
-                <textarea id="addDescription" placeholder="Description" rows="3"></textarea>
+
+                <!-- Land fields -->
+                <div id="landFields" class="form-group-land active">
+                    <input id="addTitle" placeholder="Title *" />
+                    <input id="addPrice" placeholder="Price (KSh) *" type="number" />
+                    <input id="addSize" placeholder="Size (Ha) *" type="number" step="0.01" />
+                    <input id="addLocation" placeholder="Location (address/area) *" />
+                    <textarea id="addDescription" placeholder="Description" rows="3"></textarea>
+                    <div style="display:flex;gap:6px;">
+                        <input id="addLat" placeholder="Latitude (optional)" type="number" step="any" value="${lat.toFixed(6)}" style="flex:1;" />
+                        <input id="addLng" placeholder="Longitude (optional)" type="number" step="any" value="${lng.toFixed(6)}" style="flex:1;" />
+                    </div>
+                </div>
+
+                <!-- Health fields -->
+                <div id="healthFields" class="form-group-health">
+                    <input id="addHealthName" placeholder="Name *" />
+                    <input id="addHealthType" placeholder="Facility Type *" />
+                    <input id="addHealthOperator" placeholder="Operator *" />
+                    <input id="addHealthWard" placeholder="Ward *" />
+                    <input id="addHealthSubCounty" placeholder="Sub-County *" />
+                    <input id="addHealthTown" placeholder="Town" />
+                    <input id="addHealthBeds" placeholder="Bed Capacity" type="number" />
+                    <input id="addHealthLocation" placeholder="Location (address/area) *" />
+                    <textarea id="addHealthDescription" placeholder="Description" rows="3"></textarea>
+                    <div style="display:flex;gap:6px;">
+                        <input id="addHealthLat" placeholder="Latitude (optional)" type="number" step="any" value="${lat.toFixed(6)}" style="flex:1;" />
+                        <input id="addHealthLng" placeholder="Longitude (optional)" type="number" step="any" value="${lng.toFixed(6)}" style="flex:1;" />
+                    </div>
+                </div>
+
                 <div class="btn-row">
-                    <button class="submit" onclick="submitContribution(${lat}, ${lng})">Submit</button>
+                    <button class="submit" onclick="submitContribution()">Submit</button>
                     <button class="cancel" onclick="closeModal()">Cancel</button>
                 </div>
             </div>
         `;
         document.body.appendChild(overlay);
+        togglePointForm();
+    }
+
+    function togglePointForm() {
+        const type = document.getElementById('addType').value;
+        const landGroup = document.getElementById('landFields');
+        const healthGroup = document.getElementById('healthFields');
+        landGroup.classList.toggle('active', type === 'land');
+        healthGroup.classList.toggle('active', type === 'health');
     }
 
     function closeModal() {
@@ -973,35 +1033,82 @@
         btn.classList.remove('adding');
         btn.innerHTML = '<i class="fas fa-plus-circle"></i>';
         map.off('click', onMapClick);
+        clickLat = null;
+        clickLng = null;
     }
 
-    async function submitContribution(lat, lng) {
-        const title = document.getElementById('addTitle').value.trim();
-        const price = parseFloat(document.getElementById('addPrice').value);
-        const size = parseFloat(document.getElementById('addSize').value);
-        const location = document.getElementById('addLocation').value.trim();
+    async function submitContribution() {
         const type = document.getElementById('addType').value;
-        const description = document.getElementById('addDescription').value.trim();
 
-        if (!title || !price || !size || !location) {
-            showToast('Please fill all required fields.', 'error');
-            return;
+        let properties = {};
+        let lat, lng;
+        let errorMsg = '';
+
+        if (type === 'land') {
+            const title = document.getElementById('addTitle').value.trim();
+            const price = parseFloat(document.getElementById('addPrice').value);
+            const size = parseFloat(document.getElementById('addSize').value);
+            const location = document.getElementById('addLocation').value.trim();
+            const description = document.getElementById('addDescription').value.trim();
+            const latInput = document.getElementById('addLat').value.trim();
+            const lngInput = document.getElementById('addLng').value.trim();
+
+            if (!title || !price || !size || !location) {
+                showToast('Please fill all required fields (Title, Price, Size, Location).', 'error');
+                return;
+            }
+            // Use manual coordinates if provided, else use map click
+            lat = latInput ? parseFloat(latInput) : clickLat;
+            lng = lngInput ? parseFloat(lngInput) : clickLng;
+            if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+                showToast('Please click on the map or enter valid coordinates.', 'error');
+                return;
+            }
+            properties = { title, price, size_ha: size, location, description };
+        } else {
+            // Health
+            const name = document.getElementById('addHealthName').value.trim();
+            const facility_type = document.getElementById('addHealthType').value.trim();
+            const operator = document.getElementById('addHealthOperator').value.trim();
+            const ward = document.getElementById('addHealthWard').value.trim();
+            const sub_county = document.getElementById('addHealthSubCounty').value.trim();
+            const town = document.getElementById('addHealthTown').value.trim();
+            const bed_capacity = parseInt(document.getElementById('addHealthBeds').value) || null;
+            const location = document.getElementById('addHealthLocation').value.trim();
+            const description = document.getElementById('addHealthDescription').value.trim();
+            const latInput = document.getElementById('addHealthLat').value.trim();
+            const lngInput = document.getElementById('addHealthLng').value.trim();
+
+            if (!name || !facility_type || !operator || !ward || !sub_county || !location) {
+                showToast('Please fill all required health fields (Name, Type, Operator, Ward, Sub-County, Location).', 'error');
+                return;
+            }
+            lat = latInput ? parseFloat(latInput) : clickLat;
+            lng = lngInput ? parseFloat(lngInput) : clickLng;
+            if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+                showToast('Please click on the map or enter valid coordinates.', 'error');
+                return;
+            }
+            properties = {
+                name,
+                facility_type,
+                operator,
+                ward,
+                sub_county,
+                town: town || null,
+                bed_capacity,
+                location,
+                description,
+                source: 'user_contribution'
+            };
         }
 
-        const properties = {
-            title,
-            price,
-            size_ha: size,
-            location,
-            description,
-            source: 'user_contribution'
-        };
         const geometry = `POINT(${lng} ${lat})`;
 
         const { data, error } = await supabaseClient
             .from('user_contributions')
             .insert({
-                user_id: null, // anonymous
+                user_id: null,
                 type: type,
                 geometry: geometry,
                 properties: properties
@@ -1009,6 +1116,7 @@
 
         if (error) {
             showToast('Error submitting: ' + error.message, 'error');
+            console.error(error);
         } else {
             showToast('Point added successfully!', 'success');
             closeModal();
@@ -1078,7 +1186,7 @@
         const { error } = await supabaseClient
             .from('comments')
             .insert({
-                user_id: null, // anonymous
+                user_id: null,
                 target_type: targetType,
                 target_id: targetId,
                 comment_text: text
@@ -1741,15 +1849,17 @@
                     const coords = c.geometry.match(/POINT\(([^ ]+) ([^)]+)\)/);
                     if (coords) {
                         combined.push({
-                            name: props.title || 'User contribution',
+                            name: props.name || 'User contribution',
                             facility_type: props.facility_type || 'Unknown',
                             operator: props.operator || 'User',
                             ward: props.ward || 'Nakuru',
                             sub_county: props.sub_county || 'Nakuru',
-                            latitude: parseFloat(coords[2]),
-                            longitude: parseFloat(coords[1]),
+                            town: props.town || null,
                             bed_capacity: props.bed_capacity || null,
                             description: props.description || '',
+                            location: props.location || 'Nakuru',
+                            latitude: parseFloat(coords[2]),
+                            longitude: parseFloat(coords[1]),
                             id: c.id,
                             isUserContribution: true,
                             source: 'user_contribution'
@@ -1845,7 +1955,7 @@
                                 id: c.id,
                                 isUserContribution: true
                             });
-                            // Also add to stats for choropleth? We'll include user contributions in sub-county stats.
+                            // Also add to stats for choropleth
                             const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
                             if (!stats[key]) stats[key] = { prices: [], count: 0 };
                             if (price && size > 0) {
@@ -1875,7 +1985,7 @@
                 subCountyStats = computed;
                 console.log('Sub-county stats (price/ha):', computed);
 
-                // Heatmap points (only scraped? we can include user contributions too)
+                // Heatmap points (only scraped)
                 let maxPricePerHa = 0;
                 markerData.forEach(m => {
                     if (m.pricePerHa && m.pricePerHa > maxPricePerHa) maxPricePerHa = m.pricePerHa;
@@ -1883,7 +1993,7 @@
 
                 const points = [];
                 markerData.forEach(m => {
-                    if (m.lat && m.lng && m.pricePerHa && m.pricePerHa > 0 && !m.isUserContribution) { // heatmap from scraped only
+                    if (m.lat && m.lng && m.pricePerHa && m.pricePerHa > 0 && !m.isUserContribution) {
                         const intensity = (maxPricePerHa > 0) ? Math.min(m.pricePerHa / maxPricePerHa, 1) : 0;
                         points.push([m.lat, m.lng, intensity]);
                     }
@@ -1997,11 +2107,15 @@
             const lat = parseFloat(coords[2]);
             const props = c.properties;
             const popupContent = `
-                <b>${props.title || 'User contribution'}</b><br/>
-                Price: KSh ${(props.price || 0).toLocaleString()}<br/>
-                Size: ${(props.size_ha || 0).toFixed(2)} Ha<br/>
+                <b>${props.title || props.name || 'User contribution'}</b><br/>
+                ${props.price ? `Price: KSh ${(props.price || 0).toLocaleString()}<br/>` : ''}
+                ${props.size_ha ? `Size: ${(props.size_ha || 0).toFixed(2)} Ha<br/>` : ''}
                 Location: ${props.location || 'Nakuru'}<br/>
                 ${props.description ? `Description: ${props.description}<br/>` : ''}
+                ${props.facility_type ? `Type: ${props.facility_type}<br/>` : ''}
+                ${props.operator ? `Operator: ${props.operator}<br/>` : ''}
+                ${props.ward ? `Ward: ${props.ward}<br/>` : ''}
+                ${props.sub_county ? `Sub-County: ${props.sub_county}<br/>` : ''}
                 <em style="color:var(--text-muted);font-size:11px;">Added by user</em>
                 <hr style="margin:4px 0;border-color:var(--border);"/>
                 <div id="comments_user_${c.id}">Loading comments...</div>
