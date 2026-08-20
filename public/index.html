@@ -18,9 +18,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- JSZip for QGIS Package -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- shp-write for Shapefile export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shp-write/2.0.0/shpwrite.min.js"></script>
     <!-- Supabase & Chroma -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json">
     <style>
         /* ===== CSS Variables ===== */
         :root {
@@ -830,7 +834,7 @@
     }
 
     // ============================================================
-    // ADD POINT – unchanged
+    // ADD POINT
     // ============================================================
     let addPointMode = false;
     let clickLat = null;
@@ -1102,7 +1106,7 @@
     }
 
     // ============================================================
-    // POPUP BUILDERS
+    // POPUP BUILDERS – updated with outlier warning
     // ============================================================
     function buildHealthPopup(f) {
         const fields = [
@@ -1141,6 +1145,10 @@
         }
         if (item.location) html += `<b>Location:</b> ${item.location}<br/>`;
         if (item.source) html += `<b>Source:</b> ${item.source}`;
+        // Outlier warning
+        if (item.isOutlier) {
+            html += `<br/><span style="color:#eab308;font-weight:bold;">⚠️ Outlier – price/ha unusually high/low</span>`;
+        }
         html += `<hr style="margin:4px 0;border-color:var(--border);"/>`;
         const id = item.id || item.listing_id || 0;
         html += `<div id="comments_listing_${id}">Loading comments...</div>`;
@@ -1216,7 +1224,6 @@
         } else if (currentTab === 'health') {
             healthPanel.style.display = filtersVisible ? 'flex' : 'none';
         }
-        // Populate dropdowns if needed
         if (filtersVisible && currentTab === 'land') populateLandFilterDropdowns();
         if (filtersVisible && currentTab === 'health') populateHealthFilterDropdowns();
     }
@@ -1230,7 +1237,6 @@
     function toggleHotspot() {
         hotspotEnabled = !hotspotEnabled;
         document.getElementById('hotspotToggle').classList.toggle('active', hotspotEnabled);
-        // Rebuild heatmap with recency weighting if hotspot is on
         if (allData.land && allData.land.length > 0) {
             buildHeatmap(allData.land, true);
         }
@@ -1344,10 +1350,8 @@
         const sourceSelect = document.getElementById('landSource');
         const subSelect = document.getElementById('landSubCounty');
         if (!sourceSelect || !subSelect) return;
-        // Sources
         const sources = [...new Set(allData.land.map(p => p.source).filter(Boolean))];
         sourceSelect.innerHTML = '<option value="">All</option>' + sources.map(s => `<option value="${s}">${s}</option>`).join('');
-        // Sub-counties
         const subs = Object.keys(subCountyStats);
         subSelect.innerHTML = '<option value="">All</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
     }
@@ -1408,7 +1412,6 @@
         landFilters.sizeMax = parseFloat(document.getElementById('landSizeMax').value) || null;
         landFilters.source = document.getElementById('landSource').value || null;
         landFilters.subCounty = document.getElementById('landSubCounty').value || null;
-        // Re-render list with filters
         const filtered = getFilteredLandData();
         renderLandList(filtered);
         updateLandMarkersForFilter(filtered);
@@ -1533,7 +1536,7 @@
     }
 
     // ============================================================
-    // RENDER LAND LIST (with filters and user contributions)
+    // RENDER LAND LIST – updated with outlier icon
     // ============================================================
     function renderLandList(data) {
         let html = '';
@@ -1551,10 +1554,11 @@
                 }
                 const userTag = p.isUserContribution ? `<span class="user-tag">User</span>` : '';
                 const deleteBtn = p.isUserContribution ? `<button class="delete-btn" onclick="deleteContribution(${p.id}, event)"><i class="fas fa-trash-alt"></i></button>` : '';
+                const outlierIcon = p.isOutlier ? `<i class="fas fa-exclamation-triangle" style="color:#eab308;margin-left:4px;" title="Outlier (price/ha far from average)"></i>` : '';
                 html += `
                     <div class="property-item" data-index="${index}" onclick="zoomToProperty(${index}, 'land')">
                         <div class="info">
-                            <div class="title">${title} ${userTag}</div>
+                            <div class="title">${title} ${userTag} ${outlierIcon}</div>
                             <div class="meta"><span>${location}</span><span>${sizeStr}</span></div>
                         </div>
                         <div class="price">${priceHtml} ${deleteBtn}</div>
@@ -1567,7 +1571,7 @@
     }
 
     // ============================================================
-    // RENDER HEALTH LIST (with filters and user contributions)
+    // RENDER HEALTH LIST
     // ============================================================
     function renderHealthList(data) {
         let html = '';
@@ -1999,7 +2003,6 @@
         currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
 
-        // Show/hide panels
         const analytics = document.getElementById('land-analytics');
         const landFilters = document.getElementById('land-filters');
         const healthFilters = document.getElementById('health-filters');
@@ -2026,7 +2029,6 @@
             defaultList.style.display = 'none';
             if (healthMarkers.length > 0) { applyHealthFilter(); }
             else { loadHealthData(); }
-            // Populate health filter dropdowns
             if (allData.health) populateHealthFilterDropdowns();
         } else {
             analytics.style.display = 'none';
@@ -2038,7 +2040,6 @@
             legendContainer.style.display = 'none';
         }
 
-        // Remove all layers except base – with safety check
         for (const key in activeLayers) {
             for (const layerKey in activeLayers[key]) {
                 const layer = activeLayers[key][layerKey];
@@ -2150,7 +2151,44 @@
     }
 
     // ============================================================
-    // REFRESH ALL DATA
+    // SHAPEFILE EXPORT – NEW FUNCTION
+    // ============================================================
+    function exportShapefile() {
+        const data = getFilteredData();
+        if (data.length === 0) { showToast('No data to export', 'info'); return; }
+
+        const features = data.map(item => {
+            const lat = item.lat || item.latitude;
+            const lng = item.lng || item.longitude;
+            if (!lat || !lng) return null;
+            const props = { ...item };
+            delete props.lat;
+            delete props.lng;
+            delete props._targetType;
+            delete props._targetId;
+            return {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [lng, lat] },
+                properties: props
+            };
+        }).filter(f => f !== null);
+        const geojson = { type: 'FeatureCollection', features };
+
+        try {
+            const zip = shpwrite.zip(geojson);
+            const link = document.createElement('a');
+            link.download = currentTab + '_filtered.shp.zip';
+            link.href = URL.createObjectURL(zip);
+            link.click();
+            showToast('Shapefile downloaded!', 'success');
+        } catch (err) {
+            showToast('Error creating shapefile: ' + err.message, 'error');
+            console.error(err);
+        }
+    }
+
+    // ============================================================
+    // REFRESH ALL DATA – UPDATED WITH OUTLIER DETECTION
     // ============================================================
     async function refreshMap() {
         if (isRunning) return;
@@ -2173,6 +2211,7 @@
                 let markerData = [];
                 const stats = {};
 
+                // First pass: collect prices per sub-county
                 rawData.forEach(item => {
                     const size = getSize(item);
                     if (!item.price || !size || size <= 0) return;
@@ -2181,6 +2220,57 @@
                     if (!stats[key]) stats[key] = { prices: [], count: 0 };
                     stats[key].prices.push(pricePerHa);
                     stats[key].count += 1;
+                });
+                if (userLand) {
+                    userLand.forEach(c => {
+                        const coords = getCoordsFromGeometry(c.geometry);
+                        if (coords) {
+                            const props = c.properties;
+                            const size = props.size_ha || 0;
+                            const price = props.price || 0;
+                            if (price && size > 0) {
+                                const pricePerHa = price / size;
+                                const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
+                                if (!stats[key]) stats[key] = { prices: [], count: 0 };
+                                stats[key].prices.push(pricePerHa);
+                                stats[key].count += 1;
+                            }
+                        }
+                    });
+                }
+
+                // Compute per-sub-county stats: mean, std, median, etc.
+                const computed = {};
+                Object.keys(stats).forEach(key => {
+                    const prices = stats[key].prices;
+                    const count = prices.length;
+                    let avg = 0, min = 0, max = 0, range = 0, med = 0, std = 0;
+                    if (count > 0) {
+                        avg = prices.reduce((a,b) => a+b,0) / count;
+                        min = Math.min(...prices);
+                        max = Math.max(...prices);
+                        range = max - min;
+                        med = median(prices);
+                        std = Math.sqrt(prices.reduce((a,b) => a + (b-avg)**2, 0) / count);
+                    }
+                    computed[key] = { count, avg, min, max, range, median: med, std };
+                });
+                subCountyStats = computed;
+                console.log('Sub-county stats (with std):', computed);
+
+                // Second pass: build markerData with outlier flag
+                rawData.forEach(item => {
+                    const size = getSize(item);
+                    if (!item.price || !size || size <= 0) return;
+                    const pricePerHa = item.price / size;
+                    const key = item.location ? item.location.replace(/ County$/i, '').trim() : 'Nakuru';
+                    const stat = computed[key];
+                    let isOutlier = false;
+                    if (stat && stat.count > 1 && stat.std > 0) {
+                        const upper = stat.avg + 3 * stat.std;
+                        const lower = stat.avg - 3 * stat.std;
+                        isOutlier = pricePerHa > upper || pricePerHa < lower;
+                    }
                     if (item.latitude && item.longitude) {
                         markerData.push({
                             lat: item.latitude,
@@ -2193,7 +2283,8 @@
                             pricePerHa: pricePerHa,
                             id: item.id || 0,
                             isUserContribution: false,
-                            scraped_at: item.scraped_at || null
+                            scraped_at: item.scraped_at || null,
+                            isOutlier: isOutlier
                         });
                     }
                 });
@@ -2206,6 +2297,14 @@
                             const size = props.size_ha || 0;
                             const price = props.price || 0;
                             const pricePerHa = size > 0 ? price / size : 0;
+                            const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
+                            const stat = computed[key];
+                            let isOutlier = false;
+                            if (stat && stat.count > 1 && stat.std > 0) {
+                                const upper = stat.avg + 3 * stat.std;
+                                const lower = stat.avg - 3 * stat.std;
+                                isOutlier = pricePerHa > upper || pricePerHa < lower;
+                            }
                             markerData.push({
                                 lat: coords.lat,
                                 lng: coords.lng,
@@ -2218,35 +2317,12 @@
                                 pricePerHa: pricePerHa,
                                 id: c.id,
                                 isUserContribution: true,
-                                scraped_at: c.created_at || null
+                                scraped_at: c.created_at || null,
+                                isOutlier: isOutlier
                             });
-                            const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
-                            if (!stats[key]) stats[key] = { prices: [], count: 0 };
-                            if (price && size > 0) {
-                                stats[key].prices.push(pricePerHa);
-                                stats[key].count += 1;
-                            }
                         }
                     });
                 }
-
-                const computed = {};
-                Object.keys(stats).forEach(key => {
-                    const s = stats[key];
-                    const prices = s.prices;
-                    const count = s.count;
-                    let avg = 0, min = 0, max = 0, range = 0, med = 0;
-                    if (prices.length > 0) {
-                        avg = prices.reduce((a,b) => a+b,0) / prices.length;
-                        min = Math.min(...prices);
-                        max = Math.max(...prices);
-                        range = max - min;
-                        med = median(prices);
-                    }
-                    computed[key] = { count, avg, min, max, range, median: med };
-                });
-                subCountyStats = computed;
-                console.log('Sub-county stats (price/ha):', computed);
 
                 // ---- Build Heatmap (with hotspot if enabled) ----
                 buildHeatmap(markerData, hotspotEnabled);
@@ -2452,6 +2528,7 @@
                     <button class="submit" onclick="exportFilteredCSV()"><i class="fas fa-file-csv"></i> CSV</button>
                     <button class="submit" onclick="exportFilteredGeoJSON()"><i class="fas fa-globe"></i> GeoJSON</button>
                     <button class="submit" onclick="exportQGISPackage()"><i class="fas fa-box"></i> QGIS Package (ZIP)</button>
+                    <button class="submit" onclick="exportShapefile()"><i class="fas fa-draw-polygon"></i> Shapefile (ZIP)</button>
                     <button class="cancel" onclick="closeExportModal()">Cancel</button>
                 </div>
             </div>
@@ -2538,7 +2615,6 @@
             return;
         }
 
-        // Build the filtered GeoJSON
         const features = data.map(item => {
             const lat = item.lat || item.latitude;
             const lng = item.lng || item.longitude;
@@ -2556,13 +2632,9 @@
         }).filter(f => f !== null);
         const filteredGeojson = { type: 'FeatureCollection', features };
 
-        // Prepare the ZIP
         const zip = new JSZip();
-
-        // Add filtered plots
         zip.file('nakuru_plots_filtered.geojson', JSON.stringify(filteredGeojson, null, 2));
 
-        // Fetch and add static files from public/docs/
         const staticFiles = [
             'nakuru_wards.geojson',
             'nakuru_subcounties.geojson',
@@ -2577,12 +2649,10 @@
                 zip.file(file, blob);
             } catch (err) {
                 console.warn(`Could not add ${file}:`, err);
-                // Fallback: include a placeholder text
                 zip.file(file, `# ${file} was not found. Please obtain it from the project repository.`);
             }
         }
 
-        // Generate and download the ZIP
         const content = await zip.generateAsync({ type: 'blob' });
         const link = document.createElement('a');
         link.download = 'nakuru_valuation_qgis_package.zip';
@@ -2616,6 +2686,15 @@
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(currentTab + '_dashboard.pdf');
         }).catch(err => showToast('Error generating PDF', 'error'));
+    }
+
+    // ============================================================
+    // SERVICE WORKER REGISTRATION (PWA)
+    // ============================================================
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('Service Worker registered'))
+            .catch(err => console.warn('SW registration failed:', err));
     }
 
     // ============================================================
