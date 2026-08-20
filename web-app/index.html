@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
     <style>
-        /* ===== CSS Variables (unchanged) ===== */
+        /* ===== CSS Variables ===== */
         :root {
             --bg: #f1f5f9;
             --bg-sidebar: #ffffff;
@@ -58,6 +58,7 @@
             --accent-hover: #60a5fa;
             --accent-light: #60a5fa;
         }
+
         /* ===== Reset ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -901,6 +902,23 @@
         return sorted[mid];
     }
 
+    // ---- Helper: extract lat/lng from geometry ----
+    function getCoordsFromGeometry(geom) {
+        if (!geom) return null;
+        // If it's a GeoJSON object (type: 'Point')
+        if (geom.type === 'Point' && geom.coordinates) {
+            return { lng: geom.coordinates[0], lat: geom.coordinates[1] };
+        }
+        // If it's a string like 'POINT(lng lat)'
+        if (typeof geom === 'string') {
+            const match = geom.match(/POINT\(([^ ]+) ([^)]+)\)/);
+            if (match) {
+                return { lng: parseFloat(match[1]), lat: parseFloat(match[2]) };
+            }
+        }
+        return null;
+    }
+
     // ============================================================
     // DARK MODE & SIDEBAR TOGGLE
     // ============================================================
@@ -947,7 +965,6 @@
         if (!addPointMode) return;
         clickLat = e.latlng.lat;
         clickLng = e.latlng.lng;
-        // If the modal is already open, update the lat/lng fields
         const latField = document.getElementById('addLat');
         const lngField = document.getElementById('addLng');
         if (latField && lngField) {
@@ -955,7 +972,6 @@
             lngField.value = clickLng.toFixed(6);
             showToast('Coordinates set from map click', 'success');
         } else {
-            // If modal not open, open it with these coordinates
             showAddPointForm(clickLat, clickLng);
         }
     }
@@ -1057,7 +1073,6 @@
                 showToast('Please fill all required fields (Title, Price, Size, Location).', 'error');
                 return;
             }
-            // Use manual coordinates if provided, else use map click
             lat = latInput ? parseFloat(latInput) : clickLat;
             lng = lngInput ? parseFloat(lngInput) : clickLng;
             if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
@@ -1166,7 +1181,6 @@
         if (!html) html = '<div style="color:var(--text-muted);font-size:12px;">No comments yet.</div>';
         container.innerHTML = html;
 
-        // Add comment form
         const form = document.createElement('div');
         form.style.marginTop = '6px';
         form.innerHTML = `
@@ -1640,7 +1654,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (land choropleth)
+    // LOAD BOUNDARIES (land choropleth) – now with fillOpacity: 0
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -1666,7 +1680,7 @@
                 if (stat) val = stat[statType] || 0;
                 return {
                     fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
-                    fillOpacity: 0.15,
+                    fillOpacity: 0,          // completely transparent – heatmap visible
                     weight: 2,
                     color: '#0f172a',
                     opacity: 0.8
@@ -1845,9 +1859,9 @@
             let combined = data || [];
             if (userHealth) {
                 userHealth.forEach(c => {
-                    const props = c.properties;
-                    const coords = c.geometry.match(/POINT\(([^ ]+) ([^)]+)\)/);
+                    const coords = getCoordsFromGeometry(c.geometry);
                     if (coords) {
+                        const props = c.properties;
                         combined.push({
                             name: props.name || 'User contribution',
                             facility_type: props.facility_type || 'Unknown',
@@ -1858,8 +1872,8 @@
                             bed_capacity: props.bed_capacity || null,
                             description: props.description || '',
                             location: props.location || 'Nakuru',
-                            latitude: parseFloat(coords[2]),
-                            longitude: parseFloat(coords[1]),
+                            latitude: coords.lat,
+                            longitude: coords.lng,
                             id: c.id,
                             isUserContribution: true,
                             source: 'user_contribution'
@@ -1880,7 +1894,7 @@
     }
 
     // ============================================================
-    // REFRESH ALL DATA
+    // REFRESH ALL DATA – with heatmap gradient red->green and translucent
     // ============================================================
     async function refreshMap() {
         if (isRunning) return;
@@ -1903,9 +1917,9 @@
                 if (userErr) console.warn('Error loading user land contributions:', userErr);
 
                 let markerData = [];
+                const stats = {};
 
                 // Process scraped listings
-                const stats = {};
                 rawData.forEach(item => {
                     const size = getSize(item);
                     if (!item.price || !size || size <= 0) return;
@@ -1914,7 +1928,6 @@
                     if (!stats[key]) stats[key] = { prices: [], count: 0 };
                     stats[key].prices.push(pricePerHa);
                     stats[key].count += 1;
-                    // Add to markerData
                     if (item.latitude && item.longitude) {
                         markerData.push({
                             lat: item.latitude,
@@ -1934,17 +1947,15 @@
                 // Process user land contributions
                 if (userLand) {
                     userLand.forEach(c => {
-                        const props = c.properties;
-                        const coords = c.geometry.match(/POINT\(([^ ]+) ([^)]+)\)/);
+                        const coords = getCoordsFromGeometry(c.geometry);
                         if (coords) {
-                            const lat = parseFloat(coords[2]);
-                            const lng = parseFloat(coords[1]);
+                            const props = c.properties;
                             const size = props.size_ha || 0;
                             const price = props.price || 0;
                             const pricePerHa = size > 0 ? price / size : 0;
                             markerData.push({
-                                lat: lat,
-                                lng: lng,
+                                lat: coords.lat,
+                                lng: coords.lng,
                                 title: props.title || 'User contribution',
                                 price: price,
                                 size_ha: size,
@@ -1955,7 +1966,6 @@
                                 id: c.id,
                                 isUserContribution: true
                             });
-                            // Also add to stats for choropleth
                             const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
                             if (!stats[key]) stats[key] = { prices: [], count: 0 };
                             if (price && size > 0) {
@@ -1985,44 +1995,48 @@
                 subCountyStats = computed;
                 console.log('Sub-county stats (price/ha):', computed);
 
-                // Heatmap points (only scraped)
-                let maxPricePerHa = 0;
+                // ---- Heatmap with 95th percentile normalisation ----
+                let pricesPerHa = [];
                 markerData.forEach(m => {
-                    if (m.pricePerHa && m.pricePerHa > maxPricePerHa) maxPricePerHa = m.pricePerHa;
+                    if (m.pricePerHa && m.pricePerHa > 0) pricesPerHa.push(m.pricePerHa);
                 });
+                pricesPerHa.sort((a,b) => a - b);
+                const percentile95 = pricesPerHa[Math.floor(pricesPerHa.length * 0.95)] || 1;
+                const maxIntensity = percentile95; // use 95th percentile as max
 
                 const points = [];
                 markerData.forEach(m => {
                     if (m.lat && m.lng && m.pricePerHa && m.pricePerHa > 0 && !m.isUserContribution) {
-                        const intensity = (maxPricePerHa > 0) ? Math.min(m.pricePerHa / maxPricePerHa, 1) : 0;
+                        const intensity = Math.min(m.pricePerHa / maxIntensity, 1);
                         points.push([m.lat, m.lng, intensity]);
                     }
                 });
+
+                console.log('Heatmap points (price/ha):', points.length);
 
                 if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
                 if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
 
                 if (points.length > 0) {
                     activeLayers.land.heat = L.heatLayer(points, {
-                        radius: 40,
-                        blur: 25,
+                        radius: 50,
+                        blur: 30,
                         maxZoom: 15,
                         gradient: {
-                            0.0: '#22c55e',
-                            0.2: '#84cc16',
-                            0.4: '#eab308',
-                            0.6: '#f97316',
-                            0.8: '#ef4444',
-                            1.0: '#dc2626'
+                            // low intensity → red, high → green, with ~35% opacity
+                            0.0: 'rgba(255,0,0,0.35)',
+                            0.33: 'rgba(255,165,0,0.35)',  // orange
+                            0.66: 'rgba(255,255,0,0.35)',  // yellow
+                            1.0: 'rgba(0,255,0,0.35)'      // green
                         }
                     });
                     activeLayers.land.heat.addTo(map);
                 }
 
-                // Update land markers (scraped + user)
+                // Update land markers
                 updateLandMarkers(markerData);
                 allData.land = markerData;
-                await loadBoundaries();
+                await loadBoundaries(); // uses fillOpacity: 0
 
                 if (points.length > 0) {
                     const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
@@ -2100,11 +2114,8 @@
 
         const group = L.layerGroup();
         contributions.forEach(c => {
-            const geom = c.geometry;
-            const coords = geom.match(/POINT\(([^ ]+) ([^)]+)\)/);
+            const coords = getCoordsFromGeometry(c.geometry);
             if (!coords) return;
-            const lng = parseFloat(coords[1]);
-            const lat = parseFloat(coords[2]);
             const props = c.properties;
             const popupContent = `
                 <b>${props.title || props.name || 'User contribution'}</b><br/>
@@ -2126,7 +2137,7 @@
                 iconSize: [30, 30],
                 iconAnchor: [15, 30]
             });
-            const marker = L.marker([lat, lng], { icon: starIcon })
+            const marker = L.marker([coords.lat, coords.lng], { icon: starIcon })
                 .bindPopup(popupContent);
             marker._targetType = 'user_contribution';
             marker._targetId = c.id;

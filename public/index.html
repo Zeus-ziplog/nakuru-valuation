@@ -58,6 +58,7 @@
             --accent-hover: #60a5fa;
             --accent-light: #60a5fa;
         }
+
         /* ===== Reset ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -1653,7 +1654,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES (land choropleth)
+    // LOAD BOUNDARIES (land choropleth) – now with fillOpacity: 0
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -1679,7 +1680,7 @@
                 if (stat) val = stat[statType] || 0;
                 return {
                     fillColor: val > 0 ? colorScale(val).hex() : '#f1f5f9',
-                    fillOpacity: 0.15,
+                    fillOpacity: 0,          // completely transparent – heatmap visible
                     weight: 2,
                     color: '#0f172a',
                     opacity: 0.8
@@ -1893,7 +1894,7 @@
     }
 
     // ============================================================
-    // REFRESH ALL DATA
+    // REFRESH ALL DATA – with heatmap gradient red->green and translucent
     // ============================================================
     async function refreshMap() {
         if (isRunning) return;
@@ -1916,9 +1917,9 @@
                 if (userErr) console.warn('Error loading user land contributions:', userErr);
 
                 let markerData = [];
+                const stats = {};
 
                 // Process scraped listings
-                const stats = {};
                 rawData.forEach(item => {
                     const size = getSize(item);
                     if (!item.price || !size || size <= 0) return;
@@ -1927,7 +1928,6 @@
                     if (!stats[key]) stats[key] = { prices: [], count: 0 };
                     stats[key].prices.push(pricePerHa);
                     stats[key].count += 1;
-                    // Add to markerData
                     if (item.latitude && item.longitude) {
                         markerData.push({
                             lat: item.latitude,
@@ -1966,7 +1966,6 @@
                                 id: c.id,
                                 isUserContribution: true
                             });
-                            // Also add to stats for choropleth
                             const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
                             if (!stats[key]) stats[key] = { prices: [], count: 0 };
                             if (price && size > 0) {
@@ -1996,44 +1995,48 @@
                 subCountyStats = computed;
                 console.log('Sub-county stats (price/ha):', computed);
 
-                // Heatmap points (only scraped)
-                let maxPricePerHa = 0;
+                // ---- Heatmap with 95th percentile normalisation ----
+                let pricesPerHa = [];
                 markerData.forEach(m => {
-                    if (m.pricePerHa && m.pricePerHa > maxPricePerHa) maxPricePerHa = m.pricePerHa;
+                    if (m.pricePerHa && m.pricePerHa > 0) pricesPerHa.push(m.pricePerHa);
                 });
+                pricesPerHa.sort((a,b) => a - b);
+                const percentile95 = pricesPerHa[Math.floor(pricesPerHa.length * 0.95)] || 1;
+                const maxIntensity = percentile95; // use 95th percentile as max
 
                 const points = [];
                 markerData.forEach(m => {
                     if (m.lat && m.lng && m.pricePerHa && m.pricePerHa > 0 && !m.isUserContribution) {
-                        const intensity = (maxPricePerHa > 0) ? Math.min(m.pricePerHa / maxPricePerHa, 1) : 0;
+                        const intensity = Math.min(m.pricePerHa / maxIntensity, 1);
                         points.push([m.lat, m.lng, intensity]);
                     }
                 });
+
+                console.log('Heatmap points (price/ha):', points.length);
 
                 if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
                 if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
 
                 if (points.length > 0) {
                     activeLayers.land.heat = L.heatLayer(points, {
-                        radius: 40,
-                        blur: 25,
+                        radius: 50,
+                        blur: 30,
                         maxZoom: 15,
                         gradient: {
-                            0.0: '#22c55e',
-                            0.2: '#84cc16',
-                            0.4: '#eab308',
-                            0.6: '#f97316',
-                            0.8: '#ef4444',
-                            1.0: '#dc2626'
+                            // low intensity → red, high → green, with ~35% opacity
+                            0.0: 'rgba(255,0,0,0.35)',
+                            0.33: 'rgba(255,165,0,0.35)',  // orange
+                            0.66: 'rgba(255,255,0,0.35)',  // yellow
+                            1.0: 'rgba(0,255,0,0.35)'      // green
                         }
                     });
                     activeLayers.land.heat.addTo(map);
                 }
 
-                // Update land markers (scraped + user)
+                // Update land markers
                 updateLandMarkers(markerData);
                 allData.land = markerData;
-                await loadBoundaries();
+                await loadBoundaries(); // uses fillOpacity: 0
 
                 if (points.length > 0) {
                     const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
