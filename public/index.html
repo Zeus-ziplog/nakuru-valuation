@@ -295,6 +295,112 @@
         .export-btn:hover { background: var(--hover-bg); border-color: var(--accent); }
         .export-btn i { font-size: 11px; }
 
+        /* ===== Filter Panel ===== */
+        .filter-panel {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
+            display: none;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .filter-panel .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .filter-panel .filter-group input,
+        .filter-panel .filter-group select {
+            padding: 2px 6px;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 11px;
+            max-width: 80px;
+        }
+        .filter-panel .filter-group select { max-width: 120px; }
+        .filter-panel .apply-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 2px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .filter-panel .apply-btn:hover { background: var(--accent-hover); }
+        .filter-panel .reset-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 2px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .filter-panel .reset-btn:hover { background: #dc2626; }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .toggle-switch {
+            position: relative;
+            width: 36px;
+            height: 20px;
+            background: #ccc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+        .toggle-switch .knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.2s;
+        }
+        .toggle-switch.active .knob {
+            left: 18px;
+        }
+        .predictor-box {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
+            display: none;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        .predictor-box .pred-result {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .filter-toggle,
+        .predictor-toggle {
+            cursor: pointer;
+            user-select: none;
+            font-weight: 500;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .filter-toggle:hover,
+        .predictor-toggle:hover { color: var(--text-primary); }
+
         /* ===== LAND ANALYTICS ===== */
         #land-analytics {
             background: var(--bg);
@@ -323,433 +429,126 @@
             padding: 8px 12px 12px 12px;
             gap: 6px;
         }
-        .health-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 6px;
-            padding: 8px 10px;
-            box-shadow: var(--card-shadow);
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-        .stat-card .number {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        .stat-card .label {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-top: 2px;
-            font-weight: 500;
-        }
-        .stat-card .sub {
-            font-size: 9px;
-            color: var(--text-muted);
-        }
+        .health-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; }
+        .stat-card { background: var(--card-bg); border-radius: 6px; padding: 8px 10px; box-shadow: var(--card-shadow); text-align: center; border: 1px solid var(--border); }
+        .stat-card .number { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+        .stat-card .label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; font-weight: 500; }
+        .stat-card .sub { font-size: 9px; color: var(--text-muted); }
         .stat-card.public .number { color: #2563eb; }
         .stat-card.private .number { color: #f97316; }
         .stat-card.faith .number { color: #8b5cf6; }
         .stat-card.unknown .number { color: var(--text-muted); }
 
-        .health-charts {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        .chart-container {
-            background: var(--card-bg);
-            border-radius: 6px;
-            padding: 6px;
-            box-shadow: var(--card-shadow);
-            height: 120px;
-            position: relative;
-            border: 1px solid var(--border);
-        }
-        .chart-container canvas {
-            max-height: 100% !important;
-            max-width: 100% !important;
-        }
+        .health-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; }
+        .chart-container { background: var(--card-bg); border-radius: 6px; padding: 6px; box-shadow: var(--card-shadow); height: 120px; position: relative; border: 1px solid var(--border); }
+        .chart-container canvas { max-height: 100% !important; max-width: 100% !important; }
 
-        .health-filter-bar {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            align-items: center;
-            padding: 4px 0;
-            flex-shrink: 0;
-        }
-        .health-filter-bar button {
-            background: var(--bg);
-            border: 1px solid var(--input-border);
-            padding: 3px 10px;
-            border-radius: 16px;
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: 0.15s;
-        }
+        .health-filter-bar { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; padding: 4px 0; flex-shrink: 0; }
+        .health-filter-bar button { background: var(--bg); border: 1px solid var(--input-border); padding: 3px 10px; border-radius: 16px; font-size: 10px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: 0.15s; }
         .health-filter-bar button:hover { background: var(--hover-bg); }
         .health-filter-bar button.active { background: var(--accent); color: white; border-color: var(--accent); }
-        .health-filter-bar .reset-btn {
-            background: #ef4444;
-            color: white;
-            border-color: #ef4444;
-        }
+        .health-filter-bar .reset-btn { background: #ef4444; color: white; border-color: #ef4444; }
         .health-filter-bar .reset-btn:hover { background: #dc2626; }
 
         /* ===== Property List – scrollable ===== */
-        #property-list, #default-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2px 0;
-            margin: 0 -6px;
-        }
+        #property-list, #default-list { flex: 1; overflow-y: auto; padding: 2px 0; margin: 0 -6px; }
         #property-list::-webkit-scrollbar, #default-list::-webkit-scrollbar { width: 4px; }
         #property-list::-webkit-scrollbar-thumb, #default-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .property-item {
-            padding: 6px 10px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.1s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            margin: 0 4px 2px 4px;
-            border-radius: 4px;
-        }
+        .property-item { padding: 6px 10px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); margin: 0 4px 2px 4px; border-radius: 4px; }
         .property-item:hover { background: var(--hover-bg); }
         .property-item.active { background: var(--active-bg); border-left: 3px solid var(--accent); }
         .property-item .info { flex: 1; min-width: 0; }
-        .property-item .info .title {
-            font-weight: 500;
-            font-size: 12px;
-            color: var(--text-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .property-item .info .meta {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-top: 1px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .property-item .price {
-            font-weight: 600;
-            font-size: 12px;
-            color: var(--text-primary);
-            white-space: nowrap;
-            margin-left: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
+        .property-item .info .title { font-weight: 500; font-size: 12px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .property-item .info .meta { font-size: 10px; color: var(--text-secondary); margin-top: 1px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .property-item .price { font-weight: 600; font-size: 12px; color: var(--text-primary); white-space: nowrap; margin-left: 8px; display: flex; flex-direction: column; align-items: flex-end; }
         .property-item .price small { font-weight: 400; font-size: 9px; color: var(--text-muted); }
-        .delete-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 11px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.15s;
-            margin-left: 6px;
-        }
+        .delete-btn { background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: 0.15s; margin-left: 6px; }
         .delete-btn:hover { background: #dc2626; }
-        .user-tag {
-            background: #fbbf24;
-            color: #78350f;
-            font-size: 9px;
-            padding: 0 6px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
+        .user-tag { background: #fbbf24; color: #78350f; font-size: 9px; padding: 0 6px; border-radius: 10px; font-weight: 600; }
 
         /* ===== Default list ===== */
-        #default-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 4px 6px;
-        }
+        #default-list { flex: 1; overflow-y: auto; padding: 4px 6px; }
 
         /* ===== Map Container ===== */
-        #map-container {
-            flex: 1;
-            position: relative;
-            background: var(--bg);
-        }
+        #map-container { flex: 1; position: relative; background: var(--bg); }
         #map { height: 100%; width: 100%; }
 
         /* ===== Toggle button – fixed bottom-left on mobile ===== */
-        .map-toggle-btn {
-            position: fixed;
-            bottom: 24px;
-            left: 20px;
-            z-index: 9999;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 56px;
-            height: 56px;
-            font-size: 24px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-            cursor: pointer;
-            transition: 0.2s;
-            display: none; /* hidden on desktop */
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
+        .map-toggle-btn { position: fixed; bottom: 24px; left: 20px; z-index: 9999; background: var(--accent); color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.35); cursor: pointer; transition: 0.2s; display: none; align-items: center; justify-content: center; touch-action: manipulation; }
         .map-toggle-btn:hover { transform: scale(1.05); }
         .map-toggle-btn:active { transform: scale(0.95); }
 
         /* ===== Add Point button ===== */
-        .add-point-btn {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            z-index: 1000;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 52px;
-            height: 52px;
-            font-size: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .add-point-btn { position: absolute; bottom: 80px; right: 20px; z-index: 1000; background: var(--accent); color: white; border: none; border-radius: 50%; width: 52px; height: 52px; font-size: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .add-point-btn:hover { transform: scale(1.05); background: var(--accent-hover); }
-        .add-point-btn.adding {
-            background: #ef4444;
-        }
+        .add-point-btn.adding { background: #ef4444; }
         .add-point-btn.adding:hover { background: #dc2626; }
-
-        @media (max-width: 768px) {
-            .add-point-btn {
-                bottom: 80px;
-                right: 16px;
-                width: 44px;
-                height: 44px;
-                font-size: 16px;
-            }
-        }
+        @media (max-width: 768px) { .add-point-btn { bottom: 80px; right: 16px; width: 44px; height: 44px; font-size: 16px; } }
 
         /* ===== Legend ===== */
-        .legend {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: var(--card-bg);
-            padding: 8px 12px;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            font-size: 11px;
-            min-width: 100px;
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-        }
+        .legend { position: absolute; bottom: 20px; right: 20px; z-index: 1000; background: var(--card-bg); padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); font-size: 11px; min-width: 100px; border: 1px solid var(--border); color: var(--text-primary); }
         .legend .title { font-weight: 600; margin-bottom: 3px; font-size: 11px; }
         .legend .gradient { height: 6px; border-radius: 3px; margin: 3px 0; }
         .legend .labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-secondary); }
         .legend .legend-item { display: flex; align-items: center; gap: 4px; margin: 2px 0; }
 
         /* ===== Toast ===== */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 99999;
-            background: rgba(15,23,42,0.9);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-size: 13px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            backdrop-filter: blur(8px);
-        }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 99999; background: rgba(15,23,42,0.9); color: white; padding: 8px 20px; border-radius: 30px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; backdrop-filter: blur(8px); }
         .toast.show { opacity: 1; }
         .toast.error { background: rgba(239,68,68,0.9); }
         .toast.success { background: rgba(34,197,94,0.9); }
         .toast.info { background: rgba(37,99,235,0.9); }
 
         /* ===== Modal ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-box {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 500px;
-            width: 95%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .modal-box h3 {
-            margin-bottom: 12px;
-            color: var(--text-primary);
-        }
-        .modal-box input, .modal-box select, .modal-box textarea {
-            width: 100%;
-            padding: 8px 12px;
-            margin: 6px 0;
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            background: var(--input-bg);
-            color: var(--text-primary);
-            font-size: 13px;
-        }
-        .modal-box .btn-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .modal-box .btn-row button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-        .modal-box .btn-row .submit {
-            background: var(--accent);
-            color: white;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; justify-content: center; }
+        .modal-box { background: var(--card-bg); border-radius: 12px; padding: 24px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal-box h3 { margin-bottom: 12px; color: var(--text-primary); }
+        .modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 8px 12px; margin: 6px 0; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--text-primary); font-size: 13px; }
+        .modal-box .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+        .modal-box .btn-row button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.15s; }
+        .modal-box .btn-row .submit { background: var(--accent); color: white; }
         .modal-box .btn-row .submit:hover { background: var(--accent-hover); }
-        .modal-box .btn-row .cancel {
-            background: var(--bg);
-            color: var(--text-secondary);
-        }
+        .modal-box .btn-row .cancel { background: var(--bg); color: var(--text-secondary); }
         .modal-box .btn-row .cancel:hover { background: var(--hover-bg); }
 
         /* ===== Dynamic form groups ===== */
-        .form-group-land, .form-group-health {
-            display: none;
-        }
-        .form-group-land.active, .form-group-health.active {
-            display: block;
-        }
+        .form-group-land, .form-group-health { display: none; }
+        .form-group-land.active, .form-group-health.active { display: block; }
 
         /* ===== Hidden count-badge ===== */
         #count-badge { display: none; }
 
+        /* ===== Export Modal checkboxes ===== */
+        .export-column-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; max-height: 200px; overflow-y: auto; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px; padding: 8px; }
+        .export-column-list label { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-secondary); cursor: pointer; }
+        .export-column-list label input[type="checkbox"] { margin: 0; }
+
         /* ===== Responsive ===== */
-        @media (max-width: 1024px) {
-            #sidebar { width: 400px; min-width: 400px; }
-        }
+        @media (max-width: 1024px) { #sidebar { width: 400px; min-width: 400px; } }
         @media (max-width: 768px) {
-            .app {
-                flex-direction: column;
-                height: 100vh;
-                overflow: hidden;
-            }
-            #sidebar {
-                width: 100%;
-                min-width: 0;
-                height: 55vh;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                position: relative;
-                overflow: hidden;
-                flex-shrink: 0;
-            }
-            #map-container {
-                height: 45vh;
-                flex: 1;
-                position: relative;
-            }
+            .app { flex-direction: column; height: 100vh; overflow: hidden; }
+            #sidebar { width: 100%; min-width: 0; height: 55vh; border-right: none; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; flex-shrink: 0; }
+            #map-container { height: 45vh; flex: 1; position: relative; }
             .top-header .logo { font-size: 22px; }
             .flag-bar-vertical { height: 24px; width: 4px; }
-
             .map-toggle-btn { display: flex; }
-
-            .health-stats {
-                grid-template-columns: 1fr 1fr;
-                gap: 4px;
-            }
-            .stat-card {
-                padding: 4px 6px;
-            }
+            .health-stats { grid-template-columns: 1fr 1fr; gap: 4px; }
+            .stat-card { padding: 4px 6px; }
             .stat-card .number { font-size: 16px; }
             .stat-card .label { font-size: 9px; }
-            .health-charts {
-                grid-template-columns: 1fr 1fr;
-                gap: 4px;
-            }
-            .chart-container {
-                height: 80px !important;
-            }
-            .health-filter-bar {
-                gap: 2px;
-                flex-wrap: wrap;
-            }
-            .health-filter-bar button {
-                font-size: 9px;
-                padding: 2px 8px;
-            }
-            #health-dashboard {
-                padding: 4px 8px 8px 8px;
-                flex: 1;
-                overflow-y: auto;
-            }
-            #property-list {
-                flex: 1;
-                min-height: 80px;
-                overflow-y: auto;
-                padding: 2px 4px;
-            }
-            #default-list {
-                flex: 1;
-                overflow-y: auto;
-                padding: 4px 6px;
-            }
-            .add-point-btn {
-                bottom: 70px;
-                right: 12px;
-                width: 44px;
-                height: 44px;
-                font-size: 16px;
-            }
+            .health-charts { grid-template-columns: 1fr 1fr; gap: 4px; }
+            .chart-container { height: 80px !important; }
+            .health-filter-bar { gap: 2px; flex-wrap: wrap; }
+            .health-filter-bar button { font-size: 9px; padding: 2px 8px; }
+            #health-dashboard { padding: 4px 8px 8px 8px; flex: 1; overflow-y: auto; }
+            #property-list { flex: 1; min-height: 80px; overflow-y: auto; padding: 2px 4px; }
+            #default-list { flex: 1; overflow-y: auto; padding: 4px 6px; }
+            .add-point-btn { bottom: 70px; right: 12px; width: 44px; height: 44px; font-size: 16px; }
             .modal-box { max-width: 95%; }
             #land-analytics .chart-container { height: 110px; }
+            .filter-panel .filter-group { flex-wrap: wrap; }
+            .filter-panel .filter-group input { max-width: 60px; }
+            .filter-panel .filter-group select { max-width: 90px; }
         }
         @media (max-width: 480px) {
             #sidebar { height: 50vh; }
@@ -759,40 +558,16 @@
             .chart-container { height: 90px !important; }
             .top-header .logo { font-size: 18px; }
             .flag-bar-vertical { height: 20px; width: 3px; }
-            .map-toggle-btn {
-                width: 48px;
-                height: 48px;
-                font-size: 20px;
-                bottom: 16px;
-                left: 16px;
-            }
-            .add-point-btn {
-                bottom: 60px;
-                right: 10px;
-                width: 40px;
-                height: 40px;
-                font-size: 14px;
-            }
+            .map-toggle-btn { width: 48px; height: 48px; font-size: 20px; bottom: 16px; left: 16px; }
+            .add-point-btn { bottom: 60px; right: 10px; width: 40px; height: 40px; font-size: 14px; }
             #land-analytics .chart-container { height: 100px; }
         }
         @media (max-width: 380px) {
             .top-header .logo { font-size: 16px; }
             .stat-card .number { font-size: 14px; }
             .chart-container { height: 70px !important; }
-            .map-toggle-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 18px;
-                bottom: 12px;
-                left: 12px;
-            }
-            .add-point-btn {
-                bottom: 50px;
-                right: 8px;
-                width: 36px;
-                height: 36px;
-                font-size: 12px;
-            }
+            .map-toggle-btn { width: 44px; height: 44px; font-size: 18px; bottom: 12px; left: 12px; }
+            .add-point-btn { bottom: 50px; right: 8px; width: 36px; height: 36px; font-size: 12px; }
             #land-analytics .chart-container { height: 80px; }
         }
     </style>
@@ -842,6 +617,82 @@
             <button class="export-btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
             <button class="export-btn" onclick="exportGeoJSON()"><i class="fas fa-globe"></i> GeoJSON</button>
             <button class="export-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+            <button class="export-btn" onclick="openExportModal()"><i class="fas fa-cog"></i> Export Options</button>
+        </div>
+
+        <!-- ===== LAND FILTERS ===== -->
+        <div id="land-filters" class="filter-panel">
+            <div class="filter-group">
+                <label>Price (KSh):</label>
+                <input type="number" id="landPriceMin" placeholder="Min" />
+                <span>–</span>
+                <input type="number" id="landPriceMax" placeholder="Max" />
+            </div>
+            <div class="filter-group">
+                <label>Size (Ha):</label>
+                <input type="number" id="landSizeMin" placeholder="Min" step="0.01" />
+                <span>–</span>
+                <input type="number" id="landSizeMax" placeholder="Max" step="0.01" />
+            </div>
+            <div class="filter-group">
+                <label>Source:</label>
+                <select id="landSource"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label>Sub‑county:</label>
+                <select id="landSubCounty"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <button class="apply-btn" onclick="applyLandFilters()">Apply</button>
+                <button class="reset-btn" onclick="resetLandFilters()">Reset</button>
+            </div>
+        </div>
+
+        <!-- ===== HEALTH FILTERS ===== -->
+        <div id="health-filters" class="filter-panel">
+            <div class="filter-group">
+                <label>Type:</label>
+                <select id="healthType"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label>Operator:</label>
+                <select id="healthOperator"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label>Ward:</label>
+                <select id="healthWard"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label>Sub‑county:</label>
+                <select id="healthSubCounty"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <button class="apply-btn" onclick="applyHealthFilters()">Apply</button>
+                <button class="reset-btn" onclick="resetHealthFilters()">Reset</button>
+            </div>
+        </div>
+
+        <!-- ===== PRICE PREDICTOR (Land only) ===== -->
+        <div id="price-predictor" class="predictor-box">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px; width:100%;">
+                <span style="font-weight:500; font-size:12px;">Predict Price:</span>
+                <select id="predSubCounty"><option value="">Select sub‑county</option></select>
+                <input type="number" id="predSize" placeholder="Size (Ha)" step="0.01" style="width:80px;padding:3px 6px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);color:var(--text-primary);" />
+                <button onclick="predictPrice()" style="background:var(--accent);color:white;border:none;padding:2px 12px;border-radius:4px;cursor:pointer;font-size:12px;">Predict</button>
+                <span id="predResult" class="pred-result"></span>
+            </div>
+        </div>
+
+        <!-- ===== TOGGLES & LAND ANALYTICS ===== -->
+        <div style="display:flex; flex-wrap:wrap; gap:8px; padding:4px 12px; background:var(--bg); border-bottom:1px solid var(--border);">
+            <span class="filter-toggle" onclick="toggleFilters()"><i class="fas fa-sliders-h"></i> Filters</span>
+            <span class="predictor-toggle" onclick="togglePredictor()"><i class="fas fa-calculator"></i> Predictor</span>
+            <div class="toggle-container">
+                <span style="font-size:11px;">Hotspot</span>
+                <div id="hotspotToggle" class="toggle-switch" onclick="toggleHotspot()">
+                    <div class="knob"></div>
+                </div>
+            </div>
         </div>
 
         <!-- ===== LAND ANALYTICS ===== -->
@@ -940,7 +791,6 @@
         return sorted[mid];
     }
 
-    // ---- Helper: extract lat/lng from geometry ----
     function getCoordsFromGeometry(geom) {
         if (!geom) return null;
         if (geom.type === 'Point' && geom.coordinates) {
@@ -978,7 +828,7 @@
     }
 
     // ============================================================
-    // ADD POINT – dynamic form with manual lat/lng and location
+    // ADD POINT – unchanged
     // ============================================================
     let addPointMode = false;
     let clickLat = null;
@@ -1194,7 +1044,7 @@
     }
 
     // ============================================================
-    // COMMENTS – anonymous
+    // COMMENTS
     // ============================================================
     async function loadComments(targetType, targetId, container) {
         if (!container) return;
@@ -1250,7 +1100,7 @@
     }
 
     // ============================================================
-    // POPUP BUILDERS (with comments placeholder)
+    // POPUP BUILDERS
     // ============================================================
     function buildHealthPopup(f) {
         const fields = [
@@ -1345,6 +1195,45 @@
     // Land Analytics Charts
     let histChart = null;
     let subcountyChart = null;
+
+    // Hotspot toggle
+    let hotspotEnabled = false;
+
+    // ============================================================
+    // TOGGLES: FILTERS, PREDICTOR, HOTSPOT
+    // ============================================================
+    let filtersVisible = false;
+    let predictorVisible = false;
+
+    function toggleFilters() {
+        filtersVisible = !filtersVisible;
+        const landPanel = document.getElementById('land-filters');
+        const healthPanel = document.getElementById('health-filters');
+        if (currentTab === 'land') {
+            landPanel.style.display = filtersVisible ? 'flex' : 'none';
+        } else if (currentTab === 'health') {
+            healthPanel.style.display = filtersVisible ? 'flex' : 'none';
+        }
+        // Populate dropdowns if needed
+        if (filtersVisible && currentTab === 'land') populateLandFilterDropdowns();
+        if (filtersVisible && currentTab === 'health') populateHealthFilterDropdowns();
+    }
+
+    function togglePredictor() {
+        predictorVisible = !predictorVisible;
+        document.getElementById('price-predictor').style.display = predictorVisible ? 'flex' : 'none';
+        if (predictorVisible) populatePredictorDropdown();
+    }
+
+    function toggleHotspot() {
+        hotspotEnabled = !hotspotEnabled;
+        document.getElementById('hotspotToggle').classList.toggle('active', hotspotEnabled);
+        // Rebuild heatmap with recency weighting if hotspot is on
+        if (allData.land && allData.land.length > 0) {
+            buildHeatmap(allData.land, true);
+        }
+        showToast(hotspotEnabled ? 'Hotspot mode ON – newer listings glow brighter' : 'Hotspot mode OFF', 'info');
+    }
 
     // ============================================================
     // LAND ANALYTICS TOGGLE & BUILD
@@ -1447,7 +1336,202 @@
     }
 
     // ============================================================
-    // RENDER LAND LIST (with user contributions & delete button)
+    // FILTER DROPDOWNS
+    // ============================================================
+    function populateLandFilterDropdowns() {
+        const sourceSelect = document.getElementById('landSource');
+        const subSelect = document.getElementById('landSubCounty');
+        if (!sourceSelect || !subSelect) return;
+        // Sources
+        const sources = [...new Set(allData.land.map(p => p.source).filter(Boolean))];
+        sourceSelect.innerHTML = '<option value="">All</option>' + sources.map(s => `<option value="${s}">${s}</option>`).join('');
+        // Sub-counties
+        const subs = Object.keys(subCountyStats);
+        subSelect.innerHTML = '<option value="">All</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    function populateHealthFilterDropdowns() {
+        const data = allData.health || [];
+        const typeSelect = document.getElementById('healthType');
+        const opSelect = document.getElementById('healthOperator');
+        const wardSelect = document.getElementById('healthWard');
+        const subSelect = document.getElementById('healthSubCounty');
+        if (!typeSelect || !opSelect || !wardSelect || !subSelect) return;
+        const types = [...new Set(data.map(f => f.facility_type).filter(Boolean))];
+        const ops = [...new Set(data.map(f => f.operator).filter(Boolean))];
+        const wards = [...new Set(data.map(f => f.ward).filter(Boolean))];
+        const subs = [...new Set(data.map(f => f.sub_county).filter(Boolean))];
+        typeSelect.innerHTML = '<option value="">All</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+        opSelect.innerHTML = '<option value="">All</option>' + ops.map(o => `<option value="${o}">${o}</option>`).join('');
+        wardSelect.innerHTML = '<option value="">All</option>' + wards.map(w => `<option value="${w}">${w}</option>`).join('');
+        subSelect.innerHTML = '<option value="">All</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    // ============================================================
+    // PRICE PREDICTOR
+    // ============================================================
+    function populatePredictorDropdown() {
+        const sel = document.getElementById('predSubCounty');
+        const subs = Object.keys(subCountyStats).filter(k => subCountyStats[k].count > 0);
+        sel.innerHTML = '<option value="">Select sub‑county</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    function predictPrice() {
+        const sub = document.getElementById('predSubCounty').value;
+        const size = parseFloat(document.getElementById('predSize').value);
+        const result = document.getElementById('predResult');
+        if (!sub || !size || size <= 0) {
+            result.textContent = 'Select sub‑county and enter size.';
+            return;
+        }
+        const stats = subCountyStats[sub];
+        if (!stats || stats.count === 0) {
+            result.textContent = 'No data for this sub‑county.';
+            return;
+        }
+        const medianPricePerHa = stats.median;
+        const estimatedPrice = medianPricePerHa * size;
+        result.textContent = `~KSh ${Math.round(estimatedPrice).toLocaleString()}`;
+    }
+
+    // ============================================================
+    // FILTER APPLICATION (Land)
+    // ============================================================
+    let landFilters = { priceMin: null, priceMax: null, sizeMin: null, sizeMax: null, source: null, subCounty: null };
+
+    function applyLandFilters() {
+        landFilters.priceMin = parseFloat(document.getElementById('landPriceMin').value) || null;
+        landFilters.priceMax = parseFloat(document.getElementById('landPriceMax').value) || null;
+        landFilters.sizeMin = parseFloat(document.getElementById('landSizeMin').value) || null;
+        landFilters.sizeMax = parseFloat(document.getElementById('landSizeMax').value) || null;
+        landFilters.source = document.getElementById('landSource').value || null;
+        landFilters.subCounty = document.getElementById('landSubCounty').value || null;
+        // Re-render list with filters
+        const filtered = getFilteredLandData();
+        renderLandList(filtered);
+        updateLandMarkersForFilter(filtered);
+        showToast(`Filtered to ${filtered.length} plots`, 'success');
+    }
+
+    function resetLandFilters() {
+        document.getElementById('landPriceMin').value = '';
+        document.getElementById('landPriceMax').value = '';
+        document.getElementById('landSizeMin').value = '';
+        document.getElementById('landSizeMax').value = '';
+        document.getElementById('landSource').value = '';
+        document.getElementById('landSubCounty').value = '';
+        landFilters = { priceMin: null, priceMax: null, sizeMin: null, sizeMax: null, source: null, subCounty: null };
+        const data = allData.land || [];
+        renderLandList(data);
+        updateLandMarkersForFilter(data);
+        showToast('Filters reset', 'info');
+    }
+
+    function getFilteredLandData() {
+        let data = allData.land || [];
+        if (landFilters.priceMin) data = data.filter(p => p.price >= landFilters.priceMin);
+        if (landFilters.priceMax) data = data.filter(p => p.price <= landFilters.priceMax);
+        if (landFilters.sizeMin) data = data.filter(p => p.size_ha >= landFilters.sizeMin);
+        if (landFilters.sizeMax) data = data.filter(p => p.size_ha <= landFilters.sizeMax);
+        if (landFilters.source) data = data.filter(p => p.source === landFilters.source);
+        if (landFilters.subCounty) data = data.filter(p => p.location === landFilters.subCounty || (p.location && p.location.includes(landFilters.subCounty)));
+        return data;
+    }
+
+    function updateLandMarkersForFilter(data) {
+        if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
+        activeLayers.land.markers = L.layerGroup();
+        data.forEach(m => {
+            const popupContent = buildLandPopup(m);
+            const circle = L.circleMarker([m.lat, m.lng], {
+                radius: 5,
+                color: '#2563eb',
+                fillColor: '#2563eb',
+                fillOpacity: 0.4,
+                weight: 1.5
+            }).bindPopup(popupContent);
+            activeLayers.land.markers.addLayer(circle);
+        });
+        if (currentTab === 'land') activeLayers.land.markers.addTo(map);
+    }
+
+    // ============================================================
+    // FILTER APPLICATION (Health)
+    // ============================================================
+    let healthFilters = { type: null, operator: null, ward: null, subCounty: null };
+
+    function applyHealthFilters() {
+        healthFilters.type = document.getElementById('healthType').value || null;
+        healthFilters.operator = document.getElementById('healthOperator').value || null;
+        healthFilters.ward = document.getElementById('healthWard').value || null;
+        healthFilters.subCounty = document.getElementById('healthSubCounty').value || null;
+        const filtered = getFilteredHealthData();
+        renderHealthList(filtered);
+        updateHealthMarkers(filtered);
+        showToast(`Filtered to ${filtered.length} facilities`, 'success');
+    }
+
+    function resetHealthFilters() {
+        document.getElementById('healthType').value = '';
+        document.getElementById('healthOperator').value = '';
+        document.getElementById('healthWard').value = '';
+        document.getElementById('healthSubCounty').value = '';
+        healthFilters = { type: null, operator: null, ward: null, subCounty: null };
+        const data = allData.health || [];
+        renderHealthList(data);
+        updateHealthMarkers(data);
+        showToast('Filters reset', 'info');
+    }
+
+    function getFilteredHealthData() {
+        let data = allData.health || [];
+        if (healthFilters.type) data = data.filter(f => f.facility_type === healthFilters.type);
+        if (healthFilters.operator) data = data.filter(f => f.operator === healthFilters.operator);
+        if (healthFilters.ward) data = data.filter(f => f.ward === healthFilters.ward);
+        if (healthFilters.subCounty) data = data.filter(f => f.sub_county === healthFilters.subCounty);
+        return data;
+    }
+
+    // ============================================================
+    // HEATMAP – with recency weighting (hotspot)
+    // ============================================================
+    function buildHeatmap(markerData, useRecency) {
+        if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
+        let pricesPerHa = markerData.map(m => m.pricePerHa).filter(v => v > 0);
+        const maxPricePerHa = Math.max(...pricesPerHa, 1);
+        const now = new Date();
+
+        const points = [];
+        markerData.forEach(m => {
+            if (m.lat && m.lng && m.pricePerHa && m.pricePerHa > 0 && !m.isUserContribution) {
+                let intensity = Math.min(m.pricePerHa / maxPricePerHa, 1);
+                if (useRecency && m.scraped_at) {
+                    const daysSince = (now - new Date(m.scraped_at)) / (1000 * 60 * 60 * 24);
+                    const recencyFactor = Math.exp(-daysSince / 30);
+                    intensity = intensity * recencyFactor;
+                }
+                points.push([m.lat, m.lng, intensity]);
+            }
+        });
+
+        if (points.length > 0) {
+            activeLayers.land.heat = L.heatLayer(points, {
+                radius: 50,
+                blur: 30,
+                maxZoom: 15,
+                gradient: {
+                    0.0: 'rgba(255,0,0,0.35)',
+                    0.33: 'rgba(255,165,0,0.35)',
+                    0.66: 'rgba(255,255,0,0.35)',
+                    1.0: 'rgba(0,255,0,0.35)'
+                }
+            });
+            if (currentTab === 'land') activeLayers.land.heat.addTo(map);
+        }
+    }
+
+    // ============================================================
+    // RENDER LAND LIST (with filters and user contributions)
     // ============================================================
     function renderLandList(data) {
         let html = '';
@@ -1481,7 +1565,7 @@
     }
 
     // ============================================================
-    // RENDER HEALTH LIST (with user contributions & delete button)
+    // RENDER HEALTH LIST (with filters and user contributions)
     // ============================================================
     function renderHealthList(data) {
         let html = '';
@@ -1535,7 +1619,7 @@
     }
 
     // ============================================================
-    // FILTER
+    // FILTER (search bar)
     // ============================================================
     function filterList() {
         const query = searchInput.value.toLowerCase().trim();
@@ -1794,7 +1878,7 @@
     }
 
     // ============================================================
-    // LOAD BOUNDARIES – with fillOpacity: 0
+    // LOAD BOUNDARIES
     // ============================================================
     async function loadBoundaries() {
         try {
@@ -1907,7 +1991,7 @@
     }
 
     // ============================================================
-    // SWITCH TAB – with analytics show/hide
+    // SWITCH TAB
     // ============================================================
     function switchTab(tab) {
         currentTab = tab;
@@ -1915,23 +1999,38 @@
 
         // Show/hide panels
         const analytics = document.getElementById('land-analytics');
+        const landFilters = document.getElementById('land-filters');
+        const healthFilters = document.getElementById('health-filters');
+        const predictor = document.getElementById('price-predictor');
+
         if (tab === 'land') {
             analytics.style.display = 'block';
-            // Build charts if data exists
+            if (filtersVisible) landFilters.style.display = 'flex'; else landFilters.style.display = 'none';
+            healthFilters.style.display = 'none';
+            if (predictorVisible) predictor.style.display = 'flex'; else predictor.style.display = 'none';
             if (allData.land && subCountyStats) {
                 buildLandAnalytics(allData.land, subCountyStats);
+                populateLandFilterDropdowns();
             }
             healthDashboard.style.display = 'none';
             defaultList.style.display = 'block';
             loadBoundaries();
         } else if (tab === 'health') {
             analytics.style.display = 'none';
+            landFilters.style.display = 'none';
+            if (filtersVisible) healthFilters.style.display = 'flex'; else healthFilters.style.display = 'none';
+            predictor.style.display = 'none';
             healthDashboard.style.display = 'flex';
             defaultList.style.display = 'none';
             if (healthMarkers.length > 0) { applyHealthFilter(); }
             else { loadHealthData(); }
+            // Populate health filter dropdowns
+            if (allData.health) populateHealthFilterDropdowns();
         } else {
             analytics.style.display = 'none';
+            landFilters.style.display = 'none';
+            healthFilters.style.display = 'none';
+            predictor.style.display = 'none';
             healthDashboard.style.display = 'none';
             defaultList.style.display = 'block';
             legendContainer.style.display = 'none';
@@ -2049,7 +2148,7 @@
     }
 
     // ============================================================
-    // REFRESH ALL DATA – builds land analytics
+    // REFRESH ALL DATA
     // ============================================================
     async function refreshMap() {
         if (isRunning) return;
@@ -2091,7 +2190,8 @@
                             source: item.source || '',
                             pricePerHa: pricePerHa,
                             id: item.id || 0,
-                            isUserContribution: false
+                            isUserContribution: false,
+                            scraped_at: item.scraped_at || null
                         });
                     }
                 });
@@ -2115,7 +2215,8 @@
                                 source: 'user_contribution',
                                 pricePerHa: pricePerHa,
                                 id: c.id,
-                                isUserContribution: true
+                                isUserContribution: true,
+                                scraped_at: c.created_at || null
                             });
                             const key = props.location ? props.location.replace(/ County$/i, '').trim() : 'Nakuru';
                             if (!stats[key]) stats[key] = { prices: [], count: 0 };
@@ -2145,43 +2246,10 @@
                 subCountyStats = computed;
                 console.log('Sub-county stats (price/ha):', computed);
 
-                // ---- Heatmap ----
-                let pricesPerHa = [];
-                markerData.forEach(m => {
-                    if (m.pricePerHa && m.pricePerHa > 0) pricesPerHa.push(m.pricePerHa);
-                });
-                pricesPerHa.sort((a,b) => a - b);
-                const percentile95 = pricesPerHa[Math.floor(pricesPerHa.length * 0.95)] || 1;
-                const maxIntensity = percentile95;
+                // ---- Build Heatmap (with hotspot if enabled) ----
+                buildHeatmap(markerData, hotspotEnabled);
 
-                const points = [];
-                markerData.forEach(m => {
-                    if (m.lat && m.lng && m.pricePerHa && m.pricePerHa > 0 && !m.isUserContribution) {
-                        const intensity = Math.min(m.pricePerHa / maxIntensity, 1);
-                        points.push([m.lat, m.lng, intensity]);
-                    }
-                });
-
-                console.log('Heatmap points (price/ha):', points.length);
-
-                if (activeLayers.land.heat) map.removeLayer(activeLayers.land.heat);
-                if (activeLayers.land.markers) map.removeLayer(activeLayers.land.markers);
-
-                if (points.length > 0) {
-                    activeLayers.land.heat = L.heatLayer(points, {
-                        radius: 50,
-                        blur: 30,
-                        maxZoom: 15,
-                        gradient: {
-                            0.0: 'rgba(255,0,0,0.35)',
-                            0.33: 'rgba(255,165,0,0.35)',
-                            0.66: 'rgba(255,255,0,0.35)',
-                            1.0: 'rgba(0,255,0,0.35)'
-                        }
-                    });
-                    activeLayers.land.heat.addTo(map);
-                }
-
+                // ---- Update land markers ----
                 updateLandMarkers(markerData);
                 allData.land = markerData;
                 await loadBoundaries();
@@ -2189,8 +2257,10 @@
                 // ---- Build Land Analytics Charts ----
                 buildLandAnalytics(markerData, computed);
 
+                // ---- Fit bounds ----
+                const points = markerData.filter(m => m.lat && m.lng).map(m => [m.lat, m.lng]);
                 if (points.length > 0) {
-                    const bounds = L.latLngBounds(points.map(p => [p[0], p[1]]));
+                    const bounds = L.latLngBounds(points);
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
                 renderLandList(markerData);
@@ -2308,7 +2378,205 @@
     }
 
     // ============================================================
-    // EXPORT FUNCTIONS
+    // FILTERED DATA (for exports)
+    // ============================================================
+    function getFilteredData() {
+        const tab = currentTab;
+        if (tab === 'land') {
+            const data = allData.land || [];
+            const query = searchInput.value.toLowerCase().trim();
+            if (!query) return data;
+            return data.filter(p => {
+                const title = (p.title || '').toLowerCase();
+                const loc = (p.location || '').toLowerCase();
+                return title.includes(query) || loc.includes(query);
+            });
+        } else if (tab === 'health') {
+            let data = allData.health || [];
+            if (healthFilter) {
+                const categories = ['public', 'private', 'faith', 'unknown'];
+                if (categories.includes(healthFilter)) {
+                    data = data.filter(f => getOwnershipCategory(f.operator) === healthFilter);
+                } else {
+                    data = data.filter(f => (f.facility_type || 'Unknown') === healthFilter);
+                }
+            }
+            const query = searchInput.value.toLowerCase().trim();
+            if (query) {
+                data = data.filter(f => {
+                    const name = (f.name || '').toLowerCase();
+                    const ward = (f.ward || '').toLowerCase();
+                    return name.includes(query) || ward.includes(query);
+                });
+            }
+            return data;
+        } else {
+            return allData[tab] || [];
+        }
+    }
+
+    // ============================================================
+    // EXPORT – FILTER-AWARE & CUSTOM COLUMNS
+    // ============================================================
+    function openExportModal() {
+        const filteredData = getFilteredData();
+        if (filteredData.length === 0) {
+            showToast('No data to export', 'info');
+            return;
+        }
+        const firstRow = filteredData[0];
+        const allKeys = Object.keys(firstRow).filter(k => k !== 'lat' && k !== 'lng' && k !== '_targetType' && k !== '_targetId');
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.id = 'exportModalOverlay';
+        let checkboxesHtml = allKeys.map(k => `
+            <label>
+                <input type="checkbox" class="export-col-checkbox" value="${k}" checked />
+                ${k}
+            </label>
+        `).join('');
+        overlay.innerHTML = `
+            <div class="modal-box" style="max-width:500px;">
+                <h3>Export Options</h3>
+                <p style="font-size:12px;color:var(--text-muted);">Select columns to export. ${filteredData.length} rows will be exported.</p>
+                <div style="display:flex;gap:6px;margin:6px 0;">
+                    <button onclick="selectAllExportColumns(true)" class="export-btn" style="font-size:11px;">Select All</button>
+                    <button onclick="selectAllExportColumns(false)" class="export-btn" style="font-size:11px;">Deselect All</button>
+                </div>
+                <div class="export-column-list" id="exportColumnList">
+                    ${checkboxesHtml}
+                </div>
+                <div class="btn-row">
+                    <button class="submit" onclick="exportFilteredCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                    <button class="submit" onclick="exportFilteredGeoJSON()"><i class="fas fa-globe"></i> GeoJSON</button>
+                    <button class="cancel" onclick="closeExportModal()">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    function closeExportModal() {
+        const overlay = document.getElementById('exportModalOverlay');
+        if (overlay) overlay.remove();
+    }
+
+    function selectAllExportColumns(selectAll) {
+        const checkboxes = document.querySelectorAll('.export-col-checkbox');
+        checkboxes.forEach(cb => cb.checked = selectAll);
+    }
+
+    function getSelectedColumns() {
+        const checkboxes = document.querySelectorAll('.export-col-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function exportFilteredCSV() {
+        const data = getFilteredData();
+        if (data.length === 0) { showToast('No data to export', 'info'); return; }
+        const columns = getSelectedColumns();
+        if (columns.length === 0) { showToast('Select at least one column', 'error'); return; }
+        let csv = columns.join(',') + '\n';
+        data.forEach(row => {
+            const values = columns.map(col => {
+                let val = row[col] || '';
+                if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
+                    val = '"' + val.replace(/"/g, '""') + '"';
+                }
+                return val;
+            });
+            csv += values.join(',') + '\n';
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.download = currentTab + '_filtered.csv';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        closeExportModal();
+        showToast('CSV exported', 'success');
+    }
+
+    function exportFilteredGeoJSON() {
+        const data = getFilteredData();
+        if (data.length === 0) { showToast('No data to export', 'info'); return; }
+        const columns = getSelectedColumns();
+        if (columns.length === 0) { showToast('Select at least one column', 'error'); return; }
+        const features = data.map(item => {
+            const lat = item.lat || item.latitude;
+            const lng = item.lng || item.longitude;
+            if (!lat || !lng) return null;
+            const props = {};
+            columns.forEach(col => {
+                props[col] = item[col];
+            });
+            return {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [lng, lat] },
+                properties: props
+            };
+        }).filter(f => f !== null);
+        const geojson = { type: 'FeatureCollection', features };
+        const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.download = currentTab + '_filtered.geojson';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        closeExportModal();
+        showToast('GeoJSON exported', 'success');
+    }
+
+    window.exportCSV = function() {
+        const data = getFilteredData();
+        if (data.length === 0) { showToast('No data to export', 'info'); return; }
+        const headers = Object.keys(data[0]).filter(k => k !== 'lat' && k !== 'lng' && k !== '_targetType' && k !== '_targetId');
+        let csv = headers.join(',') + '\n';
+        data.forEach(row => {
+            const values = headers.map(h => {
+                let val = row[h] || '';
+                if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
+                    val = '"' + val.replace(/"/g, '""') + '"';
+                }
+                return val;
+            });
+            csv += values.join(',') + '\n';
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.download = currentTab + '_data.csv';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        showToast('CSV exported', 'success');
+    };
+
+    window.exportGeoJSON = function() {
+        const data = getFilteredData();
+        if (data.length === 0) { showToast('No data to export', 'info'); return; }
+        const features = data.map(item => {
+            const lat = item.lat || item.latitude;
+            const lng = item.lng || item.longitude;
+            if (!lat || !lng) return null;
+            const props = { ...item };
+            delete props.lat;
+            delete props.lng;
+            delete props._targetType;
+            delete props._targetId;
+            return {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [lng, lat] },
+                properties: props
+            };
+        }).filter(f => f !== null);
+        const geojson = { type: 'FeatureCollection', features };
+        const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.download = currentTab + '_data.geojson';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        showToast('GeoJSON exported', 'success');
+    };
+
+    // ============================================================
+    // EXPORT – PNG, PDF
     // ============================================================
     function exportPNG() {
         leafletImage(map, function(err, canvas) {
@@ -2331,49 +2599,6 @@
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(currentTab + '_dashboard.pdf');
         }).catch(err => showToast('Error generating PDF', 'error'));
-    }
-
-    function exportCSV() {
-        const data = allData[currentTab] || [];
-        if (data.length === 0) { showToast('No data to export', 'info'); return; }
-        const headers = Object.keys(data[0]);
-        let csv = headers.join(',') + '\n';
-        data.forEach(row => {
-            const values = headers.map(h => {
-                let val = row[h] || '';
-                if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
-                    val = '"' + val.replace(/"/g, '""') + '"';
-                }
-                return val;
-            });
-            csv += values.join(',') + '\n';
-        });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const link = document.createElement('a');
-        link.download = currentTab + '_data.csv';
-        link.href = URL.createObjectURL(blob);
-        link.click();
-    }
-
-    function exportGeoJSON() {
-        const data = allData[currentTab] || [];
-        if (data.length === 0) { showToast('No data to export', 'info'); return; }
-        const features = data.map(item => {
-            const lat = item.lat || item.latitude;
-            const lng = item.lng || item.longitude;
-            if (!lat || !lng) return null;
-            return {
-                type: 'Feature',
-                geometry: { type: 'Point', coordinates: [lng, lat] },
-                properties: { ...item }
-            };
-        }).filter(f => f !== null);
-        const geojson = { type: 'FeatureCollection', features };
-        const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
-        const link = document.createElement('a');
-        link.download = currentTab + '_data.geojson';
-        link.href = URL.createObjectURL(blob);
-        link.click();
     }
 
     // ============================================================
