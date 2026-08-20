@@ -6,14 +6,17 @@ import os
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
 from db_utils import insert_listings
+from geocoder import geocode_location
 
 load_dotenv()
 
+# ---- Extraction helpers ----
 def extract_size(text):
     if not text:
         return None
     text = text.lower().strip()
 
+    # Common fractions
     if '1/8' in text or 'eighth' in text:
         return 0.0506
     if '1/4' in text or 'quarter' in text:
@@ -57,10 +60,7 @@ def extract_price(text):
         return None
 
 def clean_location(raw_text):
-    """
-    Extract the core estate/area name from raw text.
-    Removes price, size, filler words, phase suffixes, and roman numerals.
-    """
+    """Extract a clean location/estate name from raw text."""
     if not raw_text:
         return "Nakuru"
 
@@ -93,27 +93,23 @@ def clean_location(raw_text):
     return clean[:60].strip()
 
 def is_nakuru_location(text):
-    """Check if the text mentions Nakuru or nearby towns, ignore Nairobi."""
+    """Check if the text is likely in Nakuru County (reject Nairobi)."""
     if not text:
         return False
     text = text.lower()
-    # List of acceptable areas
     nakuru_keywords = [
         "nakuru", "naivasha", "gilgil", "molo", "njoro", "kinangop",
         "kaptembwo", "bondeni", "rhoda", "lakeview", "lanet", "milimani",
         "ngata", "mimwaita", "eveready", "kinungi", "garden estate",
         "nakuru east", "nakuru west", "nakuru town"
     ]
-    # If any keyword is found, it's Nakuru
     for kw in nakuru_keywords:
         if kw in text:
             return True
-    # Reject Nairobi, Westlands, etc.
     nairobi_keywords = ["nairobi", "westlands", "lavington", "peponi", "loresho", "kilimani", "kileleshwa", "parklands"]
     for kw in nairobi_keywords:
         if kw in text:
             return False
-    # If no keyword, assume it might be Nakuru (fallback)
     return True
 
 # ---- Site 1: BuyRentKenya ----
@@ -148,6 +144,8 @@ def scrape_buyrentkenya():
             size_text = size_el.text.strip() if size_el else raw_text
             price = extract_price(price_el.text)
             size_ha = extract_size(size_text)
+            desc_el = card.select_one('.description, .card-description')
+            description = desc_el.text.strip() if desc_el else raw_text
             if price and size_ha:
                 listings.append({
                     'source': 'buyrentkenya',
@@ -155,7 +153,10 @@ def scrape_buyrentkenya():
                     'raw_text': raw_text,
                     'title': raw_text,
                     'location': location,
-                    'size_ha': size_ha
+                    'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
         print(f"BuyRentKenya found {len(listings)} valid listings")
         return listings
@@ -163,7 +164,7 @@ def scrape_buyrentkenya():
         print(f"Error scraping BuyRentKenya: {e}")
         return []
 
-# ---- Site 2: Jiji (with fallback) ----
+# ---- Site 2: Jiji ----
 def scrape_jiji():
     print("Scraping Jiji (using browser)...")
     listings = []
@@ -221,6 +222,8 @@ def scrape_jiji():
             continue
         location = clean_location(raw_text)
         size_ha = extract_size(raw_text)
+        desc_el = item.select_one('.advert-description, .qa-advert-description')
+        description = desc_el.text.strip() if desc_el else raw_text
 
         if price and size_ha:
             listings.append({
@@ -229,7 +232,10 @@ def scrape_jiji():
                 'raw_text': raw_text,
                 'title': raw_text,
                 'location': location,
-                'size_ha': size_ha
+                'size_ha': size_ha,
+                'description': description,
+                'property_type': 'Land',
+                'full_address': location
             })
     print(f"Jiji found {len(listings)} valid listings")
     return listings
@@ -258,6 +264,8 @@ def scrape_propertypro():
                 continue
             location = clean_location(raw_text)
             size_ha = extract_size(raw_text)
+            desc_el = item.select_one('.pl-description, .property-description')
+            description = desc_el.text.strip() if desc_el else raw_text
             if price and size_ha:
                 listings.append({
                     'source': 'propertypro',
@@ -265,7 +273,10 @@ def scrape_propertypro():
                     'raw_text': raw_text,
                     'title': raw_text,
                     'location': location,
-                    'size_ha': size_ha
+                    'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
         print(f"PropertyPro found {len(listings)} valid listings")
         return listings
@@ -333,6 +344,8 @@ def scrape_usernameproperties():
             if not size_ha and price_col:
                 size_ha = extract_size(price_col.text)
 
+            description = desc_el.text.strip() if desc_el else raw_text
+
             if price and size_ha:
                 listings.append({
                     'source': 'usernameproperties',
@@ -340,7 +353,10 @@ def scrape_usernameproperties():
                     'raw_text': raw_text,
                     'title': raw_text,
                     'location': location,
-                    'size_ha': size_ha
+                    'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
                 print(f"  ✓ {raw_text[:40]}... - KSh {price} - {size_ha}ha")
 
@@ -411,6 +427,9 @@ def scrape_advancedvaluers():
             if not size_ha:
                 size_ha = extract_size(raw_text)
 
+            description = item.select_one('.mh-estate-vertical__excerpt')
+            description = description.text.strip() if description else raw_text
+
             if price and size_ha:
                 listings.append({
                     'source': 'advancedvaluers',
@@ -418,7 +437,10 @@ def scrape_advancedvaluers():
                     'raw_text': raw_text,
                     'title': raw_text,
                     'location': location,
-                    'size_ha': size_ha
+                    'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
                 print(f"  ✓ {raw_text[:40]}... - KSh {price} - {size_ha}ha")
 
@@ -494,6 +516,9 @@ def scrape_amgrealtors():
             if not size_ha:
                 size_ha = extract_size(raw_text)
 
+            description = item.select_one('.description, .property-description')
+            description = description.text.strip() if description else raw_text
+
             if price and size_ha:
                 listings.append({
                     'source': 'amgrealtors',
@@ -501,7 +526,10 @@ def scrape_amgrealtors():
                     'raw_text': raw_text,
                     'title': raw_text,
                     'location': location,
-                    'size_ha': size_ha
+                    'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
                 print(f"  ✓ {raw_text[:40]}... - KSh {price} - {size_ha}ha")
 
@@ -510,10 +538,6 @@ def scrape_amgrealtors():
     except Exception as e:
         print(f"Error scraping AMGRealtors: {e}")
         return []
-
-# ===========================
-# NEW SITES – WITH PLAYWRIGHT
-# ===========================
 
 # ---- Site 7: PigiaMe ----
 def scrape_pigiame():
@@ -549,6 +573,8 @@ def scrape_pigiame():
                 continue
 
             location = clean_location(location) or clean_location(raw_text)
+            description = card.select_one('.listing-card__description')
+            description = description.text.strip() if description else raw_text
 
             if price and size_ha:
                 listings.append({
@@ -558,6 +584,9 @@ def scrape_pigiame():
                     'title': raw_text,
                     'location': location,
                     'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
                 print(f"  ✓ {raw_text[:40]}... - KSh {price} - {size_ha}ha")
 
@@ -567,7 +596,7 @@ def scrape_pigiame():
         print(f"Error scraping PigiaMe: {e}")
         return []
 
-# ---- Site 8: Kenya Property Centre (NOW WITH PLAYWRIGHT) ----
+# ---- Site 8: Kenya Property Centre ----
 def scrape_kenyapropertycentre():
     print("Scraping Kenya Property Centre (using browser)...")
     listings = []
@@ -591,7 +620,6 @@ def scrape_kenyapropertycentre():
             if not title_tag:
                 continue
             raw_text = title_tag.get_text(strip=True)
-            # Check if Nakuru-related
             if not is_nakuru_location(raw_text):
                 continue
 
@@ -612,6 +640,7 @@ def scrape_kenyapropertycentre():
                 continue
 
             location = clean_location(location) or clean_location(raw_text)
+            description = desc_tag.get_text(strip=True) if 'desc_tag' in locals() and desc_tag else raw_text
 
             if price and size_ha:
                 listings.append({
@@ -621,6 +650,9 @@ def scrape_kenyapropertycentre():
                     'title': raw_text,
                     'location': location,
                     'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
                 print(f"  ✓ {raw_text[:40]}... - KSh {price} - {size_ha}ha")
 
@@ -630,7 +662,7 @@ def scrape_kenyapropertycentre():
         print(f"Error scraping Kenya Property Centre: {e}")
         return []
 
-# ---- Site 9: Property24 Kenya (NOW WITH PLAYWRIGHT & ROBUST SELECTORS) ----
+# ---- Site 9: Property24 Kenya ----
 def scrape_property24():
     print("Scraping Property24 Kenya (using browser)...")
     listings = []
@@ -651,22 +683,14 @@ def scrape_property24():
             html = page.content()
             browser.close()
 
-        # DEBUG: Save HTML for inspection if needed
-        # with open("property24_debug.html", "w", encoding="utf-8") as f:
-        #     f.write(html)
-
         soup = BeautifulSoup(html, 'html.parser')
-        # Try multiple selectors
         cards = soup.select('div.p24_regularTile, div.p24_listingTile, div.js_listingTile, div[data-listing-number], div.developmentTileContainer')
         if not cards:
-            # Fallback: look for any div with 'listing' in class
             cards = soup.select('div[class*="listing"]')
         print(f"Found {len(cards)} potential cards on Property24")
 
         for card in cards:
             is_development = 'developmentTileContainer' in card.get('class', [])
-
-            # Title – try multiple sources
             title_meta = card.select_one('meta[itemprop="name"]')
             if title_meta:
                 raw_text = title_meta.get('content', '').strip()
@@ -676,11 +700,9 @@ def scrape_property24():
             if not raw_text:
                 continue
 
-            # Filter out Nairobi
             if not is_nakuru_location(raw_text):
                 continue
 
-            # Price
             if is_development:
                 price_elem = card.select_one('.p24_price')
                 price_text = price_elem.get_text(strip=True) if price_elem else None
@@ -691,7 +713,6 @@ def scrape_property24():
                 continue
             price = extract_price(price_text)
 
-            # Location
             if is_development:
                 loc_elem = card.select_one('.p24_address')
                 location = loc_elem.get_text(strip=True) if loc_elem else "Nakuru"
@@ -699,7 +720,6 @@ def scrape_property24():
                 loc_elem = card.select_one('.p24_listingSummary .p24_bold, .p24_location, .p24_address')
                 location = loc_elem.get_text(strip=True) if loc_elem else "Nakuru"
 
-            # Size – try Erf/Floor size or raw_text
             size_ha = extract_size(raw_text)
             if not is_development:
                 erf_elem = card.select_one('li.p24_size[title="Erf Size"] span, .p24_size[title="Erf Size"] span')
@@ -716,6 +736,8 @@ def scrape_property24():
                 continue
 
             location = clean_location(location) or clean_location(raw_text)
+            description = card.select_one('.p24_description, .p24_listingSummary')
+            description = description.get_text(strip=True) if description else raw_text
 
             if price and size_ha:
                 listings.append({
@@ -725,6 +747,9 @@ def scrape_property24():
                     'title': raw_text,
                     'location': location,
                     'size_ha': size_ha,
+                    'description': description,
+                    'property_type': 'Land',
+                    'full_address': location
                 })
                 print(f"  ✓ {raw_text[:40]}... - KSh {price} - {size_ha}ha")
 
@@ -734,38 +759,52 @@ def scrape_property24():
         print(f"Error scraping Property24: {e}")
         return []
 
-# ---- MASTER FUNCTION ----
+# ---- Master function ----
 def run_all_scrapers():
     print("=" * 40)
     print("Starting Nakuru Land Scraper...")
     print("=" * 40)
 
-    all_data = []
-    # Existing sites
-    all_data.extend(scrape_buyrentkenya())
+    all_raw = []
+    all_raw.extend(scrape_buyrentkenya())
     time.sleep(2)
-    all_data.extend(scrape_jiji())
+    all_raw.extend(scrape_jiji())
     time.sleep(2)
-    all_data.extend(scrape_propertypro())
+    all_raw.extend(scrape_propertypro())
     time.sleep(2)
-    all_data.extend(scrape_usernameproperties())
+    all_raw.extend(scrape_usernameproperties())
     time.sleep(2)
-    all_data.extend(scrape_advancedvaluers())
+    all_raw.extend(scrape_advancedvaluers())
     time.sleep(2)
-    all_data.extend(scrape_amgrealtors())
+    all_raw.extend(scrape_amgrealtors())
     time.sleep(2)
+    all_raw.extend(scrape_pigiame())
+    time.sleep(2)
+    all_raw.extend(scrape_kenyapropertycentre())
+    time.sleep(2)
+    all_raw.extend(scrape_property24())
 
-    # New sites
-    all_data.extend(scrape_pigiame())
-    time.sleep(2)
-    all_data.extend(scrape_kenyapropertycentre())
-    time.sleep(2)
-    all_data.extend(scrape_property24())
+    print(f"Total raw listings: {len(all_raw)}")
 
-    print(f"Total raw listings scraped: {len(all_data)}")
-    return all_data
+    # ---- Geocode each listing ----
+    enriched = []
+    for listing in all_raw:
+        if not listing.get('location'):
+            listing['location'] = clean_location(listing.get('raw_text', ''))
+        # Build a geocoding query from location or title
+        query = listing.get('full_address') or listing.get('location') or listing.get('title') or "Nakuru"
+        lat, lng = geocode_location(query)
+        if lat is not None and lng is not None:
+            listing['latitude'] = lat
+            listing['longitude'] = lng
+            enriched.append(listing)
+        else:
+            print(f"Skipping listing (geocoding failed): {listing.get('title', '')[:40]}")
 
-# ---- MAIN ----
+    print(f"Enriched listings with coordinates: {len(enriched)}")
+    return enriched
+
+# ---- Main ----
 if __name__ == "__main__":
     supabase_url = os.environ.get("SUPABASE_URL")
     supabase_key = os.environ.get("SUPABASE_KEY")
